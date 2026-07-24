@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fluxus"
+version = "0.1.0"
+description = "Generic, plugin-based ETL & data sync engine."
+requires-python = ">=3.11"
+readme = "README.md"
+
+dependencies = [
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+sql = ["sqlalchemy>=2.0"]
+api = ["httpx>=0.27"]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
