@@ -9,7 +9,7 @@ class Selector:
     def get_fetch_strategy(source_type:FluxusIOType) -> FetchStrategyProtocol:
         smap = fetch.FETCH_STRATEGY_MAP
         try:
-            return smap[source_type.value]()
+            return smap[source_type.value]
         except KeyError as e:
             raise errors.StrategyNotFoundError(
                 f"No fetch strategy for '{source_type.value}' could be found."
@@ -20,7 +20,7 @@ class Selector:
         file_ext = source_address.suffix.lstrip(".")
         smap = decode.DECODE_STRATEGY_MAP
         try:
-            return smap[file_ext]()
+            return smap[file_ext]
         except KeyError as e:
             raise errors.StrategyNotFoundError(
                 f"No decode strategy for '{file_ext}' could be found."

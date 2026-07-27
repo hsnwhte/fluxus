@@ -2,7 +2,6 @@ import json
 from sqlalchemy import Table, MetaData, select, create_engine
 from sqlalchemy.exc import ArgumentError, OperationalError
 from sqlalchemy.orm import Session
-from fluxus.strategies.protocols import FetchStrategyProtocol
 from fluxus.exceptions import errors
 from fluxus.enums import ExtractableFormat
 from fluxus.models.dto import ExtractableData

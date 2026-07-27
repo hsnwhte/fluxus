@@ -7,6 +7,12 @@ class Phase(enum.Enum):
     TRANSFORM = "transform"
     LOAD = "load"
 
+class DecodableFormat(enum.Enum):
+    CSV="csv"
+    JSON="json"
+    XML="xml"
+    HTML="html"
+
 class ExtractableFormat(enum.Enum):
     CSV="csv"
     JSON="json"
