@@ -24,6 +24,11 @@ htmlcov/
 .env
 .env.local
 
+# Database
+*.db
+data/
+*.sqlite
+
 # IDE / editor
 .vscode/
 .idea/
