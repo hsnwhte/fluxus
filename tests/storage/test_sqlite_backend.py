@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from fluxus.helpers import generate_hash
 from fluxus.enums import Phase
 from fluxus.models.orm import FluxusORM
-from fluxus.storage.sqlite_backend import PipelineRunRecordsSQLite, RegistryStoreSQLite
+from fluxus.storage.sqlite_backend import PipelineRunRecordsSQLite, RegistryStoreSQLite, PayloadStoreSQLite
+
 
 
 @pytest.fixture
@@ -30,9 +31,18 @@ def registry_store(test_engine: Engine):
     return RegistryStoreSQLite(session=session)
 
 @pytest.fixture
-def saved_registry_entry(registry_store: RegistryStoreSQLite, registry_entry_kwargs: dict):
+def saved_registry_entry(
+        registry_store: RegistryStoreSQLite,
+        registry_entry_kwargs: dict)\
+        :
     entry_id = registry_store.save_entry(**registry_entry_kwargs)
     return entry_id, registry_entry_kwargs
+
+@pytest.fixture
+def payload_store(test_engine:Engine):
+    session=Session(bind=test_engine)
+    return PayloadStoreSQLite(session=session)
+
 
 
 def test_pipeline_run_records_register_run(test_engine:Engine):
@@ -111,3 +121,24 @@ def test_registry_store_get_entry_by_content_hash(
     assert data.strategy_name == kwargs["strategy_name"]
     assert data.content_hash == kwargs["content_hash"]
     assert data.address == kwargs["address"]
+
+
+def test_payload_store_save(test_engine:Engine, payload_store:PayloadStoreSQLite):
+    phase=Phase.FETCH
+    payload="test".encode()
+
+    record_id_str = payload_store.save(phase=phase, payload=payload)
+
+    assert isinstance(record_id_str, str)
+    assert record_id_str == "1"
+
+
+def test_payload_store_load(test_engine: Engine, payload_store: PayloadStoreSQLite):
+    phase = Phase.FETCH
+    payload = "test".encode()
+    payload_store.save(phase=phase, payload=payload)
+
+    payload = payload_store.load(address="1")
+
+    assert isinstance(payload, bytes)
+    assert payload == "test".encode()

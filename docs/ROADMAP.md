@@ -1,8 +1,8 @@
-v0.1 -- Project scaffolding complete. src layout, pyproject.toml,
+v0.1 -- [DONE] Project scaffolding complete. src layout, pyproject.toml,
         .gitignore, docs/ set up. Core Pydantic DTOs and exception
         hierarchy defined. No working logic yet.
 
-v0.2 -- Storage layer works. StorageBackend Protocol defined,
+v0.2 -- [DONE] Storage layer works. StorageBackend Protocol defined,
         SQLiteStorage reference implementation complete. Registry
         (hash-based lineage tracking) functional and tested.
 
