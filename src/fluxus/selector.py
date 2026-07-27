@@ -1,0 +1,35 @@
+from pathlib import Path
+from fluxus.strategies import fetch, decode, extract, transform
+from fluxus.strategies.protocols import FetchStrategyProtocol, DecodeStrategyProtocol
+from fluxus.exceptions import errors
+from fluxus.enums import FluxusIOType
+
+class Selector:
+    @staticmethod
+    def get_fetch_strategy(source_type:FluxusIOType) -> FetchStrategyProtocol:
+        smap = fetch.FETCH_STRATEGY_MAP
+        try:
+            return smap[source_type.value]()
+        except KeyError as e:
+            raise errors.StrategyNotFoundError(
+                f"No fetch strategy for '{source_type.value}' could be found."
+            ) from e
+
+    @staticmethod
+    def get_decode_strategy(source_address: Path) -> DecodeStrategyProtocol:
+        file_ext = source_address.suffix.lstrip(".")
+        smap = decode.DECODE_STRATEGY_MAP
+        try:
+            return smap[file_ext]()
+        except KeyError as e:
+            raise errors.StrategyNotFoundError(
+                f"No decode strategy for '{file_ext}' could be found."
+            ) from e
+
+    def get_extract_strategy(self):...
+
+    def get_transform_strategy(self):...
+
+
+selector = Selector()
+
