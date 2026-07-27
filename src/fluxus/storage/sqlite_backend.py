@@ -1,15 +1,15 @@
 from pydantic import ValidationError
 from sqlalchemy.sql import select
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 from fluxus.exceptions import errors
-from fluxus import db_session_factory
 from fluxus.enums import Phase
 from fluxus.models.orm import PayloadRecord, PipelineRunRecord, RegistryEntry
 from fluxus.models.dto import RegistryRecord
 
 class PipelineRunRecordsSQLite:
-    def __init__(self):
-        self.session  = db_session_factory.create_pipeline_store_session()
+    def __init__(self, session:Session):
+        self.session  = session
 
     def register_run(self) -> int:
         run = PipelineRunRecord()
@@ -19,8 +19,8 @@ class PipelineRunRecordsSQLite:
 
 
 class RegistryStoreSQLite:
-    def __init__(self):
-        self.session = db_session_factory.create_pipeline_store_session()
+    def __init__(self, session:Session):
+        self.session = session
 
     def save_entry(self, *, run_id:int, phase:Phase, strategy_name:str, content_hash:str, address:str) ->int:
         entry = RegistryEntry(
@@ -101,8 +101,8 @@ class RegistryStoreSQLite:
         return entry_obj
 
 class PayloadStoreSQLite:
-    def __init__(self):
-        self.session  = db_session_factory.create_pipeline_store_session()
+    def __init__(self, session:Session):
+        self.session  = session
         
     def save(self, *, phase:Phase, payload:bytes) -> str:
         record = PayloadRecord(phase=phase, payload=payload)

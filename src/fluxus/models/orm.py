@@ -16,7 +16,7 @@ class PipelineRunRecord(FluxusORM):
 class RegistryEntry(FluxusORM):
     __tablename__ = "registry"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    run_id: Mapped[int] = mapped_column
+    run_id: Mapped[int] = mapped_column(index=True)
     phase: Mapped[Phase] = mapped_column(SQLEnum(Phase))
     strategy_name:Mapped[str]=mapped_column(String(50))
     content_hash : Mapped[str] = mapped_column(CHAR(64), index=True)
