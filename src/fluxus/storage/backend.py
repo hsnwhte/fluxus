@@ -7,9 +7,6 @@ class PipelineRunRecordsProtocol(Protocol):
         """Persists content, returns an address referencing it."""
         ...
 
-    def get_run_id(self, *, run_id: str) -> int:
-        """Retrieves content previously stored at the given address."""
-        ...
 
 
 class RegistryStoreProtocol(Protocol):
@@ -17,7 +14,7 @@ class RegistryStoreProtocol(Protocol):
         """Persists info from pipeline processors at successive phases."""
         ...
 
-    def get_entry_by_id(self, *, id:int) -> RegistryRecord:
+    def get_entry_by_id(self, *, entry_id:int) -> RegistryRecord:
         """Retreives entry object by id"""
         ...
 

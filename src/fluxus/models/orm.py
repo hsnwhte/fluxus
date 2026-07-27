@@ -1,4 +1,4 @@
-from enums import Phase
+from fluxus.enums import Phase
 from datetime import datetime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import DateTime, CHAR, Enum as SQLEnum, LargeBinary, String, ForeignKey

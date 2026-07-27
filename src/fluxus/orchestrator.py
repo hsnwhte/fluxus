@@ -1,5 +1,4 @@
 from fluxus.models.dto import InputArgs
-from fluxus.models.orm import RegistryEntry, PayloadRecord
 from fluxus.selector import selector
 from fluxus.storage.backend import PayloadStoreProtocol, RegistryStoreProtocol, PipelineRunRecordsProtocol
 from fluxus.processors.fetcher import Fetcher
@@ -27,7 +26,7 @@ class Orchestrator:
         ### --- 1-A) FETCH PHASE
         if self.input_args.source_type.value in ("api", "db"):
             fetch_strategy = selector.get_fetch_strategy(self.input_args.source_type)
-            fetcher=Fetcher(source_address=self.input_args.source_address, strategy=fetch_strategy)
+            fetcher=Fetcher(source_address=self.input_args.source_address, strategy=fetch_strategy, table_name = self.input_args.source_table)
             data = fetcher.fetch()
             payload_address = self.payload_store.save(
                 phase=Phase.FETCH,

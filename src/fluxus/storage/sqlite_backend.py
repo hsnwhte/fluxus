@@ -17,6 +17,7 @@ class PipelineRunRecordsSQLite:
         self.session.commit()
         return run.run_id
 
+
 class RegistryStoreSQLite:
     def __init__(self):
         self.session = db_session_factory.create_pipeline_store_session()
