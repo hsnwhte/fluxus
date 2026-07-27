@@ -11,6 +11,7 @@ class APIFetchStrategy:
     def fetch(*, address:str, table_name:str | None = None) ->ExtractableData:
         try:
             response = httpx.get(address, timeout=10.0)
+            response.raise_for_status()
         except httpx.HTTPStatusError as e:
             status = e.response.status_code
             if status == 400:

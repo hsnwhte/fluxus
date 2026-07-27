@@ -1,4 +1,5 @@
 from typing import Protocol
+from pathlib import Path
 from fluxus.models.dto import ExtractableData
 
 class FetchStrategyProtocol(Protocol):
@@ -7,7 +8,9 @@ class FetchStrategyProtocol(Protocol):
         ...
 
 class DecodeStrategyProtocol(Protocol):
-    pass
+    @staticmethod
+    def decode(*, file_path:Path) ->ExtractableData:
+        ...
 
 class ExtractStrategyProtocol(Protocol):
     pass
