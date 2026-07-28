@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed
+        xmlns="http://www.w3.org/2005/Atom"
+        xmlns:leg="http://www.legislation.gov.uk/namespace/legislation"
+        xmlns:ukm="http://www.legislation.gov.uk/namespace/metadata"
+        xmlns:theme="http://www.legislation.gov.uk/namespace/theme"
+        xmlns:openSearch="http://a9.com/-/spec/opensearch/1.1/"
+        xmlns:parameters="http://a9.com/-/spec/opensearch/extensions/parameters/1.0/">
+			<id>http://www.legislation.gov.uk/new/uk/2026-07-07</id>
+			<link rel="self" type="application/atom+xml" href="http://www.legislation.gov.uk/new/uk/2026-07-07?sort=published"/>
+
+			<link rel="alternate" type="text/csv" href="http://www.legislation.gov.uk/new/uk/2026-07-07?sort=published"/>
+			<updated>2026-07-07T23:59:59Z</updated>
+			<title>Search Results</title>
+			<openSearch:Query role="request" leg:type="uk" leg:published="2026-07-07" leg:omit-silent="true"> </openSearch:Query>
+			<openSearch:itemsPerPage>20</openSearch:itemsPerPage>
+			<openSearch:startIndex>1</openSearch:startIndex>
+			<leg:page>1</leg:page>
+			<leg:morePages>1</leg:morePages>
+			<leg:facets>
+
+
+								<leg:facetTypes remove="http://www.legislation.gov.uk/new/2026-07-07?sort=published"><leg:facetType type="UnitedKingdomStatutoryInstrument" href="http://www.legislation.gov.uk/new/uksi/2026-07-07?sort=published" value="7"/></leg:facetTypes>
+								<leg:facetYears><leg:facetYear year="2026" href="http://www.legislation.gov.uk/search/data.feed?type=uk&amp;year=2026&amp;published=2026-07-07&amp;sort=published" total="7"/></leg:facetYears>
+								<leg:facetHundreds/>
+
+							</leg:facets>
+
+			<openSearch:totalResults>7</openSearch:totalResults>
+			<link rel="first" type="application/atom+xml" href="http://www.legislation.gov.uk/new/uk/2026-07-07?sort=published"/>
+
+			<entry>
+			<id>http://www.legislation.gov.uk/id/uksi/2026/760</id>
+			<title>The Criminal Justice (Sentencing) (Licence Conditions) (Amendment) Order 2026</title>
+			<link rel="self" href="http://www.legislation.gov.uk/id/uksi/2026/760"/>
+			<link href="http://www.legislation.gov.uk/uksi/2026/760/made"/>
+			<link rel="alternate" type="application/xml" href="http://www.legislation.gov.uk/uksi/2026/760/made/data.xml" title="XML"/><link rel="alternate" type="application/rdf+xml" href="http://www.legislation.gov.uk/uksi/2026/760/made/data.rdf" title="RDF/XML"/><link rel="alternate" type="application/akn+xml" href="http://www.legislation.gov.uk/uksi/2026/760/made/data.akn" title="AKN"/><link rel="alternate" type="application/xhtml+xml" href="http://www.legislation.gov.uk/uksi/2026/760/made/data.xht" title="HTML snippet"/><link rel="alternate" type="application/akn+xhtml" href="http://www.legislation.gov.uk/uksi/2026/760/made/data.html" title="HTML5"/><link rel="alternate" type="text/html" href="http://www.legislation.gov.uk/uksi/2026/760/made/data.htm" title="Website (XHTML) Default View"/><link rel="alternate" type="text/csv" href="http://www.legislation.gov.uk/uksi/2026/760/made/data.csv" title="CSV"/><link rel="alternate" type="application/pdf" href="http://www.legislation.gov.uk/uksi/2026/760/made/data.pdf" title="PDF"/>
+			<link rel="http://purl.org/dc/terms/tableOfContents" type="application/xml" href="http://www.legislation.gov.uk/uksi/2026/760/contents/made" title="Table of Contents"/>
+			<author><name/></author>
+			<updated>2026-07-07T16:48:15+01:00</updated>
+			<published>2026-07-07T16:43:19.296297+01:00</published>
+			<ukm:DocumentMainType Value="UnitedKingdomStatutoryInstrument"/><ukm:Year Value="2026"/><ukm:Number Value="760"/><ukm:ISBN Value="9780348285444"/><ukm:CreationDate Date="2026-07-07"/><ukm:Subject Value="CRIMINAL LAW, ENGLAND AND WALES"/>
+
+
+			<category term="CRIMINAL LAW, ENGLAND AND WALES"/>
+			<summary>This Order amends the standard conditions that apply to offenders sentenced to a determinate sentence of imprisonment and released on licence. Those conditions are set out in the Criminal Justice (Sentencing) (Licence Conditions) Order 2015, which specifies the licence conditions, and the types of licence conditions, to which an offender must be subject.</summary>
+			</entry>
+
+			<entry>
+			<id>http://www.legislation.gov.uk/id/uksi/2026/761</id>
+			<title>The Compulsory Electronic Monitoring Licence Condition (Amendment) Order 2026</title>
+			<link rel="self" href="http://www.legislation.gov.uk/id/uksi/2026/761"/>
+			<link href="http://www.legislation.gov.uk/uksi/2026/761/made"/>
+			<link rel="alternate" type="application/xml" href="http://www.legislation.gov.uk/uksi/2026/761/made/data.xml" title="XML"/><link rel="alternate" type="application/rdf+xml" href="http://www.legislation.gov.uk/uksi/2026/761/made/data.rdf" title="RDF/XML"/><link rel="alternate" type="application/akn+xml" href="http://www.legislation.gov.uk/uksi/2026/761/made/data.akn" title="AKN"/><link rel="alternate" type="application/xhtml+xml" href="http://www.legislation.gov.uk/uksi/2026/761/made/data.xht" title="HTML snippet"/><link rel="alternate" type="application/akn+xhtml" href="http://www.legislation.gov.uk/uksi/2026/761/made/data.html" title="HTML5"/><link rel="alternate" type="text/html" href="http://www.legislation.gov.uk/uksi/2026/761/made/data.htm" title="Website (XHTML) Default View"/><link rel="alternate" type="text/csv" href="http://www.legislation.gov.uk/uksi/2026/761/made/data.csv" title="CSV"/><link rel="alternate" type="application/pdf" href="http://www.legislation.gov.uk/uksi/2026/761/made/data.pdf" title="PDF"/>
+			<link rel="http://purl.org/dc/terms/tableOfContents" type="application/xml" href="http://www.legislation.gov.uk/uksi/2026/761/contents/made" title="Table of Contents"/>
+			<author><name/></author>
+			<updated>2026-07-07T16:38:12+01:00</updated>
+			<published>2026-07-07T16:33:04.187659+01:00</published>
+			<ukm:DocumentMainType Value="UnitedKingdomStatutoryInstrument"/><ukm:Year Value="2026"/><ukm:Number Value="761"/><ukm:ISBN Value="9780348285451"/><ukm:CreationDate Date="2026-07-07"/><ukm:Subject Value="CRIMINAL LAW, ENGLAND AND WALES"/>
+
+
+			<category term="CRIMINAL LAW, ENGLAND AND WALES"/>
+			<summary>Article 4(b) of the Compulsory Electronic Monitoring Licence Condition Order 2021 (S.I. 2021/330) defines the end point of the specified period for which an electronic monitoring condition must be included, as the earliest point at which one of three conditions is met. This Order amends sub-paragraph (ii) so that the specified period will end when probation supervision ends following an offender’s release on licence rather than at the end of the offender's sentence. As a result, offenders whose supervision ends before their sentence expires will no longer be subject to an electronic monitoring condition after supervision has ceased.</summary>
+		</entry><entry>
+			<id>http://www.legislation.gov.uk/id/uksi/2026/733</id>
+			<title>The Automated Vehicles (Marketing Restrictions) Regulations 2026</title>
+			<link rel="self" href="http://www.legislation.gov.uk/id/uksi/2026/733"/>
+			<link href="http://www.legislation.gov.uk/uksi/2026/733/made"/>
+			<link rel="alternate" type="application/xml" href="http://www.legislation.gov.uk/uksi/2026/733/made/data.xml" title="XML"/><link rel="alternate" type="application/rdf+xml" href="http://www.legislation.gov.uk/uksi/2026/733/made/data.rdf" title="RDF/XML"/><link rel="alternate" type="application/akn+xml" href="http://www.legislation.gov.uk/uksi/2026/733/made/data.akn" title="AKN"/><link rel="alternate" type="application/xhtml+xml" href="http://www.legislation.gov.uk/uksi/2026/733/made/data.xht" title="HTML snippet"/><link rel="alternate" type="application/akn+xhtml" href="http://www.legislation.gov.uk/uksi/2026/733/made/data.html" title="HTML5"/><link rel="alternate" type="text/html" href="http://www.legislation.gov.uk/uksi/2026/733/made/data.htm" title="Website (XHTML) Default View"/><link rel="alternate" type="text/csv" href="http://www.legislation.gov.uk/uksi/2026/733/made/data.csv" title="CSV"/><link rel="alternate" type="application/pdf" href="http://www.legislation.gov.uk/uksi/2026/733/made/data.pdf" title="PDF"/>
+			<link rel="http://purl.org/dc/terms/tableOfContents" type="application/xml" href="http://www.legislation.gov.uk/uksi/2026/733/contents/made" title="Table of Contents"/>
+			<author><name/></author>
+			<updated>2026-07-07T13:01:16+01:00</updated>
+			<published>2026-07-07T12:56:05.860499+01:00</published>
+			<ukm:DocumentMainType Value="UnitedKingdomStatutoryInstrument"/><ukm:Year Value="2026"/><ukm:Number Value="733"/><ukm:ISBN Value="9780348285192"/><ukm:CreationDate Date="2026-07-01"/><ukm:Subject Value="MARKET STANDARDS"/>
+
+
+			<category term="MARKET STANDARDS"/>
+			<summary>These Regulations set out a list of restricted terms for the purposes of section 78 of the Automated Vehicles Act 2024 (c. 10) (“the Act”). That section provides that restricted terms may be used in connection with road vehicles only if used in connection with authorised automated vehicles. Subject to potential defences provided for by section 78 of the Act, a person commits an offence by using a restricted term in connection with the promotion or supply of a road vehicle, or of a product intended for use as equipment of a road vehicle, if the road vehicle is not an authorised automated vehicle. An authorised automated vehicle is a road vehicle authorised under section 3 of the Act for use as an automated vehicle.</summary>
+		</entry><entry>
+			<id>http://www.legislation.gov.uk/id/uksi/2026/747</id>
+			<title>The Air Navigation (Restriction of Flying) (Builth Wells, Powys) Regulations 2026</title>
+			<link rel="self" href="http://www.legislation.gov.uk/id/uksi/2026/747"/>
+			<link href="http://www.legislation.gov.uk/uksi/2026/747/made"/>
+			<link rel="alternate" type="application/pdf" href="http://www.legislation.gov.uk/uksi/2026/747/pdfs/uksi_20260747_en.pdf" title="PDF"/>
+			<link rel="http://purl.org/dc/terms/tableOfContents" type="application/xml" href="http://www.legislation.gov.uk/uksi/2026/747/contents/made" title="Table of Contents"/>
+			<author><name/></author>
+			<updated>2026-07-07T03:05:38.368827+01:00</updated>
+			<published>2026-07-07T03:05:38.368827+01:00</published>
+			<ukm:DocumentMainType Value="UnitedKingdomStatutoryInstrument"/><ukm:Year Value="2026"/><ukm:Number Value="747"/>
+
+
+
+			<summary/>
+		</entry><entry>
+			<id>http://www.legislation.gov.uk/id/uksi/2026/749</id>
+			<title>The Air Navigation (Restriction of Flying) (Odiham) Regulations 2026</title>
+			<link rel="self" href="http://www.legislation.gov.uk/id/uksi/2026/749"/>
+			<link href="http://www.legislation.gov.uk/uksi/2026/749/made"/>
+			<link rel="alternate" type="application/pdf" href="http://www.legislation.gov.uk/uksi/2026/749/pdfs/uksi_20260749_en.pdf" title="PDF"/>
+			<link rel="http://purl.org/dc/terms/tableOfContents" type="application/xml" href="http://www.legislation.gov.uk/uksi/2026/749/contents/made" title="Table of Contents"/>
+			<author><name/></author>
+			<updated>2026-07-07T03:05:28.101606+01:00</updated>
+			<published>2026-07-07T03:05:28.101606+01:00</published>
+			<ukm:DocumentMainType Value="UnitedKingdomStatutoryInstrument"/><ukm:Year Value="2026"/><ukm:Number Value="749"/>
+
+
+
+			<summary/>
+		</entry><entry>
+			<id>http://www.legislation.gov.uk/id/uksi/2026/748</id>
+			<title>The Air Navigation (Restriction of Flying) (Lowther, Cumbria) Regulations 2026</title>
+			<link rel="self" href="http://www.legislation.gov.uk/id/uksi/2026/748"/>
+			<link href="http://www.legislation.gov.uk/uksi/2026/748/made"/>
+			<link rel="alternate" type="application/pdf" href="http://www.legislation.gov.uk/uksi/2026/748/pdfs/uksi_20260748_en.pdf" title="PDF"/>
+			<link rel="http://purl.org/dc/terms/tableOfContents" type="application/xml" href="http://www.legislation.gov.uk/uksi/2026/748/contents/made" title="Table of Contents"/>
+			<author><name/></author>
+			<updated>2026-07-07T03:05:26.659533+01:00</updated>
+			<published>2026-07-07T03:05:26.659533+01:00</published>
+			<ukm:DocumentMainType Value="UnitedKingdomStatutoryInstrument"/>
+	<ukm:Year Value="2026"/>
+	<ukm:Number Value="748"/>
+
+
+
+			<summary/>
+		</entry><entry>
+			<id>http://www.legislation.gov.uk/id/uksi/2026/751</id>
+			<title>The Listed Events (Coverage) Regulations 2026</title>
+			<link rel="self" href="http://www.legislation.gov.uk/id/uksi/2026/751"/>
+			<link href="http://www.legislation.gov.uk/uksi/2026/751/made"/>
+			<link rel="alternate" type="application/xml" href="http://www.legislation.gov.uk/uksi/2026/751/made/data.xml" title="XML"/><link rel="alternate" type="application/rdf+xml" href="http://www.legislation.gov.uk/uksi/2026/751/made/data.rdf" title="RDF/XML"/><link rel="alternate" type="application/akn+xml" href="http://www.legislation.gov.uk/uksi/2026/751/made/data.akn" title="AKN"/><link rel="alternate" type="application/xhtml+xml" href="http://www.legislation.gov.uk/uksi/2026/751/made/data.xht" title="HTML snippet"/><link rel="alternate" type="application/akn+xhtml" href="http://www.legislation.gov.uk/uksi/2026/751/made/data.html" title="HTML5"/><link rel="alternate" type="text/html" href="http://www.legislation.gov.uk/uksi/2026/751/made/data.htm" title="Website (XHTML) Default View"/><link rel="alternate" type="text/csv" href="http://www.legislation.gov.uk/uksi/2026/751/made/data.csv" title="CSV"/><link rel="alternate" type="application/pdf" href="http://www.legislation.gov.uk/uksi/2026/751/made/data.pdf" title="PDF"/>
+			<link rel="http://purl.org/dc/terms/tableOfContents" type="application/xml" href="http://www.legislation.gov.uk/uksi/2026/751/contents/made" title="Table of Contents"/>
+			<author><name/></author>
+			<updated>2026-07-07T03:05:18+01:00</updated>
+			<published>2026-07-07T03:05:11.521768+01:00</published>
+			<ukm:DocumentMainType Value="UnitedKingdomStatutoryInstrument"/>
+	<ukm:Year Value="2026"/><ukm:Number Value="751"/>
+	<ukm:ISBN Value="9780348285352"/>
+	<ukm:CreationDate Date="2026-07-02"/>
+	<ukm:Subject Value="BROADCASTING"/>
+
+
+			<category term="BROADCASTING"/>
+			<summary>These Regulations make provision in connection with the listed events regime set out in Part 4 of the Broadcasting Act 1996 (“the Act”) (as amended by the Media Act 2024). Listed events are sporting and other events of national interest designated by the Secretary of State in accordance with section 97 of the Act.</summary>
+		</entry>
+		</feed>

@@ -1,7 +1,7 @@
 from pathlib import Path
 from fluxus.strategies.protocols import FetchStrategyProtocol
 from fluxus.models.dto import ExtractableData
-from fluxus.enums import ExtractableFormat
+from fluxus.enums import ContentFormat
 
 class Fetcher:
     def __init__(self, *, source_address: str, strategy:FetchStrategyProtocol, table_name: str|None=None):

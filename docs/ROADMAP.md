@@ -10,7 +10,7 @@ v0.3 -- [DONE] First vertical slice, fetch side: API source strategy
         implemented. Fetcher processor calls it, writes to
         phase-1 storage via registry. Unit tests pass.
 
-v0.4 -- First vertical slice, decode/extract side: XML decode +
+v0.4 -- [DONE] First vertical slice, decode/extract side: XML decode +
         extract strategy implemented. Data reaches phase-2 storage
         in canonical format. Unit tests pass.
 

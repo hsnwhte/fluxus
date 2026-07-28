@@ -2,7 +2,7 @@ from pathlib import Path
 from fluxus.strategies import fetch, decode, extract, transform
 from fluxus.strategies.protocols import FetchStrategyProtocol, DecodeStrategyProtocol
 from fluxus.exceptions import errors
-from fluxus.enums import FluxusIOType
+from fluxus.enums import FluxusIOType, ContentFormat
 
 class Selector:
     @staticmethod
@@ -26,7 +26,16 @@ class Selector:
                 f"No decode strategy for '{file_ext}' could be found."
             ) from e
 
-    def get_extract_strategy(self):...
+    @staticmethod
+    def get_extract_strategy(source_format:ContentFormat):
+        smap = extract.EXTRACT_STRATEGY_MAP
+        try:
+            return smap[source_format.value]
+        except KeyError as e:
+            raise errors.StrategyNotFoundError(
+                f"No fetch strategy for '{source_format.value}' could be found."
+            ) from e
+
 
     def get_transform_strategy(self):...
 

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, computed_field, model_validator
 from pathlib import Path
 from datetime import datetime
-from fluxus.enums import FluxusIOType, ExtractableFormat, Phase
+from fluxus.enums import FluxusIOType, ContentFormat, Phase
 
 class InputArgs(BaseModel):
     model_config = {"frozen":True}
@@ -42,6 +42,7 @@ class RegistryRecord(BaseModel):
     id: int
     run_id: int
     phase: Phase
+    content_format: ContentFormat
     strategy_name: str
     content_hash: str
     address: str
@@ -51,4 +52,9 @@ class RegistryRecord(BaseModel):
 class ExtractableData(BaseModel):
     model_config={"frozen":True}
     content: bytes
-    format: ExtractableFormat
+    source_format: ContentFormat
+
+class TransformableData(BaseModel):
+    model_config={"frozen":True}
+    content: bytes
+    origin_format: ContentFormat
