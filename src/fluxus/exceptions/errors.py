@@ -89,20 +89,63 @@ class TransformError(FluxusError):
 class LoadError(FluxusError):
     """Errors occurring while writing to the target."""
 
-class LoadTableNameNotProvidedError(LoadError):
+class LoadDbError(LoadError):
+    """Errors occurring while loading to a database."""
+
+class LoadTableNameNotProvidedError(LoadDbError):
     def __init__(self):
         message = "No table name provided as argument for inserting into the target database."
         super().__init__(message)
 
-class LoadDbUrlNotFoundError(LoadError):
+class LoadDbUrlNotFoundError(LoadDbError):
     def __init__(self, db_url: str):
         message = f"Target url '{db_url}' not found."
         super().__init__(message)
 
-class LoadTableNotFoundError(LoadError):
+class LoadTableNotFoundError(LoadDbError):
     def __init__(self, table_name: str):
         message = f"Table '{table_name}' not found in the target database."
         super().__init__(message)
+
+class LoadApiError(LoadError):
+    """Errors occurring when loading data to an API endpoint."""
+
+class LoadBadRequestError(LoadApiError):
+    """The request to the target was malformed (HTTP 400)."""
+    def __init__(self, address: str):
+        message = f"Bad request to target '{address}' (HTTP 400)."
+        super().__init__(message)
+
+class LoadNotAuthorizedError(LoadApiError):
+    """Access to the specified target/address is unauthorized or forbidden (HTTP 401/403)."""
+    def __init__(self, address: str, status_code: int):
+        message = f"Not authorized to access target '{address}' (HTTP {status_code})."
+        super().__init__(message)
+
+class LoadNotFoundError(LoadApiError):
+    """The specified target/address could not be found (HTTP 404)."""
+    def __init__(self, address: str):
+        message = f"Target '{address}' could not be found (HTTP 404)."
+        super().__init__(message)
+
+class LoadPayloadTooLargeError(LoadApiError):
+    """The target rejected the request because the payload was too large (HTTP 413)."""
+    def __init__(self, address: str):
+        message = f"Payload too large when loading to target '{address}' (HTTP 413)."
+        super().__init__(message)
+
+class LoadRateLimitError(LoadApiError):
+    """The target rejected the request due to rate limiting (HTTP 429)."""
+    def __init__(self, address: str):
+        message = f"Rate limit exceeded when accessing target '{address}' (HTTP 429)."
+        super().__init__(message)
+
+class LoadServerError(LoadApiError):
+    """The target's server encountered an error (HTTP 5xx)."""
+    def __init__(self, address: str, status_code: int):
+        message = f"Target '{address}' returned a server error (HTTP {status_code})."
+        super().__init__(message)
+
 
 # --- Synchronic axis: organized by layer/technology, phase-independent ---
 

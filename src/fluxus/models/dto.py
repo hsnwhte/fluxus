@@ -11,6 +11,7 @@ class InputArgs(BaseModel):
     target_type: FluxusIOType
     target_address: str
     target_table: str | None
+    target_format: ContentFormat
 
     @computed_field
     @property
@@ -36,6 +37,13 @@ class InputArgs(BaseModel):
             raise ValueError("target_table is required when target_type is 'db'")
         return self
 
+    @model_validator(mode="after")
+    def check_target_format(self):
+        if self.target_type == FluxusIOType.DB and self.target_format is not None:
+            raise ValueError("target_format must be None when target_type is 'db'")
+        if self.target_type in (FluxusIOType.API, FluxusIOType.FILE) and self.target_format is None:
+            raise ValueError("target_format is required when target_type is 'api' or 'file'")
+        return self
 
 class RegistryRecord(BaseModel):
     model_config = {"frozen": True}

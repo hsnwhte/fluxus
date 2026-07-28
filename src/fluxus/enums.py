@@ -13,6 +13,12 @@ class ContentFormat(enum.Enum):
     XML="xml"
     HTML="html"
 
+class MimeType(enum.Enum):
+    JSON = "application/json"
+    XML = "application/xml"
+    CSV = "text/csv"
+    HTML = "text/html"
+
 class FluxusIOType(enum.Enum):
     API="api"
     DB= "db"
