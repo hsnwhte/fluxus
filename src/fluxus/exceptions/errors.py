@@ -89,6 +89,20 @@ class TransformError(FluxusError):
 class LoadError(FluxusError):
     """Errors occurring while writing to the target."""
 
+class LoadTableNameNotProvidedError(LoadError):
+    def __init__(self):
+        message = "No table name provided as argument for inserting into the target database."
+        super().__init__(message)
+
+class LoadDbUrlNotFoundError(LoadError):
+    def __init__(self, db_url: str):
+        message = f"Target url '{db_url}' not found."
+        super().__init__(message)
+
+class LoadTableNotFoundError(LoadError):
+    def __init__(self, table_name: str):
+        message = f"Table '{table_name}' not found in the target database."
+        super().__init__(message)
 
 # --- Synchronic axis: organized by layer/technology, phase-independent ---
 

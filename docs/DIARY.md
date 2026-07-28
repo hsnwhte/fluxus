@@ -151,3 +151,39 @@ canonical (JSON) transform-ready data.
 **Status**
 Fetch, Decode, and Extract phases are now implemented and tested.
 Transform and Load remain before the full pipeline (v0.5) is complete.
+
+
+**14:34** | *[FUTURE IDEA]* 
+**Transform strategy installer & registry system**
+
+Currently (and for the rest of v1), Transform strategies follow the
+same pattern as all other strategies: a simple `TRANSFORM_STRATEGY_MAP`
+dict in `strategies/transform/__init__.py`, selected explicitly via a
+`transform_strategy` argument (no auto-detection, since Transform
+strategies encode business logic, not just format handling).
+
+This works fine for a single or small number of hand-written
+strategies. It won't scale once Transform strategies start being
+authored by third parties and "installed" into the project, because:
+
+- Name collisions become possible once strategies aren't all written
+  by the same person in the same session
+- There's no way to distinguish "built-in" (shipped with Fluxus) from
+  "installed" (added later, possibly by someone else) strategies
+- There's no tracking of what's actually installed, so `RegistryEntry`
+  can't reliably reference *which* strategy (beyond its name string)
+  produced a given payload
+
+Deferred design sketch, to revisit in v1.x:
+- A `strategy_installer.py` devtool that registers a strategy (name,
+  source — built-in vs. installed, maybe file path or package origin)
+  into a small catalog (a dedicated table or a structured config file)
+- A `settings`/`.env` distinction between built-in and installed
+  strategy locations
+- Only becomes necessary once there's a real second author of Transform
+  strategies — not needed for the v1 single-author, single-strategy
+  case.
+
+Deliberately not building this now — v1's priority is a complete,
+working pipeline (see ROADMAP.md v0.5) over anticipatory infrastructure
+for a scenario that doesn't exist yet.

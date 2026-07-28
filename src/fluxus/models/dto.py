@@ -58,3 +58,7 @@ class TransformableData(BaseModel):
     model_config={"frozen":True}
     content: bytes
     origin_format: ContentFormat
+
+class TransformedData(BaseModel):
+    model_config = {"frozen": True}
+    content: bytes
