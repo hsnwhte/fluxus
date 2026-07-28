@@ -1,6 +1,6 @@
 from typing import Protocol
 from pathlib import Path
-from fluxus.models.dto import ExtractableData
+from fluxus.models.dto import ExtractableData, TransformableData
 
 class FetchStrategyProtocol(Protocol):
     @staticmethod
@@ -13,7 +13,9 @@ class DecodeStrategyProtocol(Protocol):
         ...
 
 class ExtractStrategyProtocol(Protocol):
-    pass
+    @staticmethod
+    def extract(*, content: bytes) ->TransformableData:
+        ...
 
 class TransformStrategyProtocol(Protocol):
     pass

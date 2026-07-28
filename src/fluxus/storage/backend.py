@@ -1,5 +1,5 @@
 from typing import Protocol
-from fluxus.enums import Phase
+from fluxus.enums import Phase, ContentFormat
 from fluxus.models.dto import RegistryRecord
 
 class PipelineRunRecordsProtocol(Protocol):
@@ -10,7 +10,7 @@ class PipelineRunRecordsProtocol(Protocol):
 
 
 class RegistryStoreProtocol(Protocol):
-    def save_entry(self, *, run_id:int, phase:Phase, strategy_name:str, content_hash:str, address:str) ->int:
+    def save_entry(self, *, run_id:int, phase:Phase, content_format:ContentFormat, strategy_name:str, content_hash:str, address:str) ->int:
         """Persists info from pipeline processors at successive phases."""
         ...
 

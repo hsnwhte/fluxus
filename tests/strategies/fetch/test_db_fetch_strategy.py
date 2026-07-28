@@ -4,7 +4,7 @@ from pathlib import Path
 from sqlalchemy import create_engine, Engine, text
 
 from fluxus.exceptions import errors
-from fluxus.enums import ExtractableFormat
+from fluxus.enums import ContentFormat
 from fluxus.strategies.fetch.db_fetch_strategy import DBFetchStrategy
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def test_db_fetch_strategy_success(temp_address:str, test_kwargs:list, test_sour
 
     parsed = json.loads(fetched_data.content)
     assert parsed == test_kwargs
-    assert fetched_data.format == ExtractableFormat.JSON
+    assert fetched_data.source_format == ContentFormat.JSON
 
 def test_db_fetch_strategy_invalid_url(temp_address:str):
     temp_address:str = "wrong_address"

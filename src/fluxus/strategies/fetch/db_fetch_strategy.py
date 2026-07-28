@@ -3,7 +3,7 @@ from sqlalchemy import Table, MetaData, select, create_engine
 from sqlalchemy.exc import ArgumentError, OperationalError, NoSuchTableError
 from sqlalchemy.orm import Session
 from fluxus.exceptions import errors
-from fluxus.enums import ExtractableFormat
+from fluxus.enums import ContentFormat
 from fluxus.models.dto import ExtractableData
 
 class DBFetchStrategy:
@@ -24,7 +24,7 @@ class DBFetchStrategy:
 
         try:
             content = json.dumps([dict(row) for row in rows]).encode()
-            return ExtractableData(content=content, format=ExtractableFormat.JSON)
+            return ExtractableData(content=content, source_format=ContentFormat.JSON)
 
         except TypeError as e:
             raise errors.FetchTableSerializationError(table_name) from e

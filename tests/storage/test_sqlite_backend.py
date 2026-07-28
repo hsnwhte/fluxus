@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import Session
 
 from fluxus.helpers import generate_hash
-from fluxus.enums import Phase
+from fluxus.enums import Phase, ContentFormat
 from fluxus.models.orm import FluxusORM
 from fluxus.storage.sqlite_backend import PipelineRunRecordsSQLite, RegistryStoreSQLite, PayloadStoreSQLite
 
@@ -20,6 +20,7 @@ def registry_entry_kwargs():
     return {
         "run_id": 1,
         "phase": Phase.FETCH,
+        "content_format": ContentFormat.JSON,
         "strategy_name": "db_fetch_strategy",
         "content_hash": generate_hash(content="test".encode()),
         "address": "1",
@@ -32,9 +33,8 @@ def registry_store(test_engine: Engine):
 
 @pytest.fixture
 def saved_registry_entry(
-        registry_store: RegistryStoreSQLite,
-        registry_entry_kwargs: dict)\
-        :
+    registry_store: RegistryStoreSQLite,
+    registry_entry_kwargs: dict):
     entry_id = registry_store.save_entry(**registry_entry_kwargs)
     return entry_id, registry_entry_kwargs
 
@@ -42,7 +42,6 @@ def saved_registry_entry(
 def payload_store(test_engine:Engine):
     session=Session(bind=test_engine)
     return PayloadStoreSQLite(session=session)
-
 
 
 def test_pipeline_run_records_register_run(test_engine:Engine):
@@ -54,18 +53,11 @@ def test_pipeline_run_records_register_run(test_engine:Engine):
     assert isinstance(run_id, int)
     assert run_id == 1
 
-def test_registry_store_save_entry(test_engine:Engine):
+def test_registry_store_save_entry(test_engine:Engine, registry_entry_kwargs:dict):
     session = Session(bind=test_engine)
     store = RegistryStoreSQLite(session=session)
 
-    kwargs={
-        "run_id":1,
-        "phase":Phase.FETCH,
-        "strategy_name":"db_fetch_strategy",
-        "content_hash": generate_hash(content="test".encode()),
-        "address":"1"
-    }
-    entry_id = store.save_entry(**kwargs)
+    entry_id = store.save_entry(**registry_entry_kwargs)
 
     assert isinstance(entry_id, int)
     assert entry_id == 1
@@ -83,6 +75,7 @@ def test_registry_store_get_entry_by_id(
     assert data.id == 1
     assert data.run_id == kwargs["run_id"]
     assert data.phase == kwargs["phase"]
+    assert data.content_format == kwargs["content_format"]
     assert data.strategy_name == kwargs["strategy_name"]
     assert data.content_hash == kwargs["content_hash"]
     assert data.address == kwargs["address"]

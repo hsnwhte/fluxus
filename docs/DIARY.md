@@ -94,3 +94,60 @@ unit test coverage for both source types (API and DB).
 Both Fetch strategies are now implemented and verified at the unit
 level. Decode strategy tests (XmlDecodeStrategy) remain for a future
 iteration before the Extract phase begins.
+
+
+**12:21** | *[FUTURE IDEA]* 
+**Configurable canonical/normalized format for Extract phase**
+Currently `Extract` strategies hardcode their output to JSON
+(`json.dumps(...)`). A `settings.NORMALIZED_FORMAT` constant could
+name this choice explicitly, but doesn't yet decouple the actual
+serialization logic — every Extract strategy still calls `json.dumps`
+directly. Making the format genuinely swappable (e.g. to support a
+different canonical structure) would require a serializer injection
+layer: something like `settings.NORMALIZED_SERIALIZER` mapping to a
+callable (`json.dumps`, or an alternative), which each Extract
+strategy would call instead of hardcoding `json`. Not needed now —
+noting it as a deferred architectural idea, not a current requirement.
+
+
+**13:07** | *[MILESTONE]*
+Completed v0.4: Decode and Extract phases implemented and fully unit
+tested, completing the XML vertical slice from raw source through to
+canonical (JSON) transform-ready data.
+
+**Decode phase**
+- `XmlDecodeStrategy` (lxml-based) tested: successful parse, and
+  malformed XML correctly raising `DecodeMalformedError`.
+
+**Extract phase**
+- Clarified the architectural boundary between Extract and Transform:
+  Extract performs structural, domain-agnostic conversion only (source
+  format → canonical dict, no field selection or business logic).
+  Target-format awareness and BLL injection are reserved for Transform,
+  which will require an explicit `transform_strategy` with no default
+  implementation.
+- `XmlExtractStrategy` built on `xmltodict`, converting parsed XML into
+  a canonical JSON structure (`TransformableData`). Chose to keep
+  `lxml` (syntax validation in Decode) and add `xmltodict` (structural
+  conversion in Extract) as separate, purpose-fit dependencies rather
+  than forcing one library to do both jobs.
+- Renamed `ExtractableFormat` to `ContentFormat` (now shared across
+  Decode/Extract/Fetch/Transform, no longer scoped to one phase) and
+  added `RegistryEntry.content_format` so Selector and Registry never
+  need to infer format by inspecting payload content.
+- `ExtractableData.format` renamed to `source_format`; new
+  `TransformableData.origin_format` tracks what the canonical JSON was
+  originally converted from.
+- `XmlExtractStrategy` tested: successful conversion against a real
+  sample file. Testing caught a real bug — `xmltodict.parse()` requires
+  `str` input, not `bytes`; the strategy was passing raw bytes directly.
+
+**Process**
+- `settings.NORMALIZED_FORMAT` introduced as the single source of truth
+  for Extract's canonical output format (currently JSON). Noted as a
+  deferred idea: true format flexibility would need a serializer
+  injection layer, not just a named constant — not needed yet.
+
+**Status**
+Fetch, Decode, and Extract phases are now implemented and tested.
+Transform and Load remain before the full pipeline (v0.5) is complete.

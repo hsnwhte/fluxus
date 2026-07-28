@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 from fluxus.exceptions import errors
-from fluxus.enums import ExtractableFormat
+from fluxus.enums import ContentFormat
 from fluxus.strategies.fetch.api_fetch_strategy import ApiFetchStrategy
 
 
@@ -80,7 +80,7 @@ def test_api_fetch_strategy_success(mock_response_200:MagicMock):
         result = ApiFetchStrategy.fetch(address="https://mock-url.com")
 
     assert result.content == b'{"test_key":"test_value"}'
-    assert result.format == ExtractableFormat.JSON
+    assert result.source_format == ContentFormat.JSON
 
 def test_api_fetch_strategy_status_400(mock_response_400:MagicMock):
     with patch("fluxus.strategies.fetch.api_fetch_strategy.httpx.get", return_value=mock_response_400):

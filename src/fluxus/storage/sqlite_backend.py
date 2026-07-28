@@ -3,7 +3,7 @@ from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 from fluxus.exceptions import errors
-from fluxus.enums import Phase
+from fluxus.enums import Phase, ContentFormat
 from fluxus.models.orm import PayloadRecord, PipelineRunRecord, RegistryEntry
 from fluxus.models.dto import RegistryRecord
 
@@ -22,10 +22,11 @@ class RegistryStoreSQLite:
     def __init__(self, session:Session):
         self.session = session
 
-    def save_entry(self, *, run_id:int, phase:Phase, strategy_name:str, content_hash:str, address:str) ->int:
+    def save_entry(self, *, run_id:int, phase:Phase, content_format:ContentFormat, strategy_name:str, content_hash:str, address:str) ->int:
         entry = RegistryEntry(
             run_id=run_id,
             phase=phase,
+            content_format=content_format,
             strategy_name=strategy_name,
             content_hash=content_hash,
             address=address,
@@ -44,6 +45,7 @@ class RegistryStoreSQLite:
                 id = db_entry.id,
                 run_id = db_entry.run_id,
                 phase=db_entry.phase,
+                content_format=db_entry.content_format,
                 strategy_name=db_entry.strategy_name,
                 content_hash=db_entry.content_hash,
                 address=db_entry.address,
@@ -67,6 +69,7 @@ class RegistryStoreSQLite:
                 id = db_entry.id,
                 run_id = db_entry.run_id,
                 phase=db_entry.phase,
+                content_format=db_entry.content_format,
                 strategy_name=db_entry.strategy_name,
                 content_hash=db_entry.content_hash,
                 address=db_entry.address,
@@ -90,6 +93,7 @@ class RegistryStoreSQLite:
                 id = db_entry.id,
                 run_id = db_entry.run_id,
                 phase=db_entry.phase,
+                content_format=db_entry.content_format,
                 strategy_name=db_entry.strategy_name,
                 content_hash=db_entry.content_hash,
                 address=db_entry.address,

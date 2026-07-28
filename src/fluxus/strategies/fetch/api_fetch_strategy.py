@@ -1,6 +1,6 @@
 import httpx
 
-from fluxus.enums import ExtractableFormat
+from fluxus.enums import ContentFormat
 from fluxus.models.dto import ExtractableData
 from fluxus.exceptions import errors
 
@@ -27,6 +27,6 @@ class ApiFetchStrategy:
 
         return ExtractableData(
             content=response.content,
-            format=ExtractableFormat.JSON,
+            source_format=ContentFormat.JSON,
             # assumed for now; see note on Content-Type detection
         )
