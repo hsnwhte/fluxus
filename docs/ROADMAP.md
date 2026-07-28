@@ -6,7 +6,7 @@ v0.2 -- [DONE] Storage layer works. StorageBackend Protocol defined,
         SQLiteStorage reference implementation complete. Registry
         (hash-based lineage tracking) functional and tested.
 
-v0.3 -- First vertical slice, fetch side: API source strategy
+v0.3 -- [DONE] First vertical slice, fetch side: API source strategy
         implemented. Fetcher processor calls it, writes to
         phase-1 storage via registry. Unit tests pass.
 

@@ -58,3 +58,39 @@ end-to-end, plus full unit test coverage for the storage layer.
   breakdown; commit messages stay short.
 - Confirmed roadmap definition for v0.2 ("Storage layer works... Registry
   functional and tested") is now fully met.
+
+
+### 📅 2026-07-28, Tuesday (v0.2.0 → v0.3.0)
+**09:12** | *[MILESTONE]* 
+Completed v0.3: Fetch phase vertical slice, with full strategy-level
+unit test coverage for both source types (API and DB).
+
+**Fetch strategy tests**
+- `DBFetchStrategy`: covered successful multi-row fetch, table-not-found,
+  invalid connection URL, and missing table name. Testing surfaced a real
+  gap — `NoSuchTableError` was not being caught alongside
+  `OperationalError`, allowing a raw SQLAlchemy exception to leak past
+  the strategy's error boundary. Fixed by catching both.
+- `ApiFetchStrategy`: covered success plus all mapped HTTP status codes
+  (400/401/403/404/429/5xx) using `unittest.mock` to simulate `httpx`
+  responses without making real network calls.
+
+**Testing infrastructure**
+- Adopted fixture composition as the standard pattern for storage and
+  strategy tests: shared setup (engine, session, mock responses) is
+  defined once per fixture and requested by name where needed.
+- Introduced `tmp_path` (file-backed SQLite) for `DBFetchStrategy` tests,
+  since the strategy creates its own engine internally and cannot share
+  an in-memory (`:memory:`) database with the test's own connection.
+- Introduced `unittest.mock` (`patch`, `MagicMock`, `side_effect`) for
+  isolating `ApiFetchStrategy` from real HTTP calls.
+
+**Process**
+- Continued the feature-branch + PR workflow. DBFetchStrategy and
+  ApiFetchStrategy tests were committed separately to keep history
+  readable.
+
+**Status**
+Both Fetch strategies are now implemented and verified at the unit
+level. Decode strategy tests (XmlDecodeStrategy) remain for a future
+iteration before the Extract phase begins.
