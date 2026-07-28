@@ -2,11 +2,10 @@ import httpx
 
 from fluxus.enums import ExtractableFormat
 from fluxus.models.dto import ExtractableData
-from fluxus.strategies.protocols import FetchStrategyProtocol
 from fluxus.exceptions import errors
 
 
-class APIFetchStrategy:
+class ApiFetchStrategy:
     @staticmethod
     def fetch(*, address:str, table_name:str | None = None) ->ExtractableData:
         try:

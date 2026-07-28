@@ -1,6 +1,6 @@
 import json
 from sqlalchemy import Table, MetaData, select, create_engine
-from sqlalchemy.exc import ArgumentError, OperationalError
+from sqlalchemy.exc import ArgumentError, OperationalError, NoSuchTableError
 from sqlalchemy.orm import Session
 from fluxus.exceptions import errors
 from fluxus.enums import ExtractableFormat
@@ -19,7 +19,7 @@ class DBFetchStrategy:
             rows = session.execute(select(table)).mappings().all()
         except ArgumentError as e:
             raise errors.FetchDbUrlNotFoundError(address) from e
-        except OperationalError as e:
+        except (OperationalError, NoSuchTableError) as e:
             raise errors.FetchTableNotFoundError(table_name) from e
 
         try:
