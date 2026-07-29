@@ -4,10 +4,11 @@ from sqlalchemy.exc import ArgumentError, OperationalError, NoSuchTableError
 from sqlalchemy.orm import Session
 from fluxus.exceptions import errors
 from fluxus.models.dto import TransformedData
+from fluxus.enums import ContentFormat
 
 class DBLoadStrategy:
     @staticmethod
-    def load(*, data:TransformedData, address:str, table_name:str|None=None) -> None:
+    def load(*, data:TransformedData, address:str,  target_format: ContentFormat, table_name:str|None=None) -> None:
         if table_name is None:
             raise errors.LoadTableNameNotProvidedError()
 

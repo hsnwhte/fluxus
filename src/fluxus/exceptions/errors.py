@@ -83,6 +83,9 @@ class DecodeMalformedError(DecodeError):
 class ExtractError(FluxusError):
     """Errors occurring while extracting decoded data into canonical form."""
 
+class ExtractMalformedError(ExtractError):
+    """Errors occurring if the extracted data is malformed"""
+
 class TransformError(FluxusError):
     """Errors occurring while transforming canonical data into the target format."""
 
