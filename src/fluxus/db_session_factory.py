@@ -1,6 +1,6 @@
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import Session
-from settings import PIPELINE_STORE_ADDRESS
+from fluxus.settings import PIPELINE_STORE_ADDRESS
 
 
 
