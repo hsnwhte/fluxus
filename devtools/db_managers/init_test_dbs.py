@@ -15,9 +15,20 @@ TARGET_STORE_ADDRESS = f"sqlite:///{_TARGET_DB_PATH}"
 source_engine = create_engine(SOURCE_STORE_ADDRESS)
 target_engine = create_engine(TARGET_STORE_ADDRESS)
 
-if __name__ == "__main__":
-    from sqlalchemy import text
 
+def _init_target_db():
+    from sqlalchemy import text
+    with target_engine.connect() as conn:
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS test_table (
+                id INTEGER PRIMARY KEY,
+                test_data TEXT
+            )
+        """))
+        conn.commit()
+
+def _init_source_db():
+    from sqlalchemy import text
     with source_engine.connect() as conn:
         conn.execute(text("""CREATE TABLE IF NOT EXISTS test_table
                           (
@@ -34,3 +45,8 @@ if __name__ == "__main__":
                           VALUES (1, 'This is a test sentence.')
                           """))
         conn.commit()
+
+if __name__ == "__main__":
+    _init_target_db()
+
+

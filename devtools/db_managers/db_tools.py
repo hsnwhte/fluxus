@@ -23,6 +23,10 @@ if __name__ == "__main__":
     from fluxus.settings import PIPELINE_STORE_ADDRESS
     from init_test_dbs import SOURCE_STORE_ADDRESS, TARGET_STORE_ADDRESS
 
-    engine = create_engine(SOURCE_STORE_ADDRESS)
+    pipeline_engine = create_engine(PIPELINE_STORE_ADDRESS)
+    drop_table(pipeline_engine, "registry")
+    drop_table(pipeline_engine, "payloads")
+    drop_table(pipeline_engine, "pipeline_runs")
 
-    drop_table(engine, "test_table")
+    source_engine = create_engine(SOURCE_STORE_ADDRESS)
+    drop_table(source_engine, "test_table")

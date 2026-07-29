@@ -151,3 +151,139 @@ canonical (JSON) transform-ready data.
 **Status**
 Fetch, Decode, and Extract phases are now implemented and tested.
 Transform and Load remain before the full pipeline (v0.5) is complete.
+
+
+**14:34** | *[FUTURE IDEA]* 
+**Transform strategy installer & registry system**
+
+Currently (and for the rest of v1), Transform strategies follow the
+same pattern as all other strategies: a simple `TRANSFORM_STRATEGY_MAP`
+dict in `strategies/transform/__init__.py`, selected explicitly via a
+`transform_strategy` argument (no auto-detection, since Transform
+strategies encode business logic, not just format handling).
+
+This works fine for a single or small number of hand-written
+strategies. It won't scale once Transform strategies start being
+authored by third parties and "installed" into the project, because:
+
+- Name collisions become possible once strategies aren't all written
+  by the same person in the same session
+- There's no way to distinguish "built-in" (shipped with Fluxus) from
+  "installed" (added later, possibly by someone else) strategies
+- There's no tracking of what's actually installed, so `RegistryEntry`
+  can't reliably reference *which* strategy (beyond its name string)
+  produced a given payload
+
+Deferred design sketch, to revisit in v1.x:
+- A `strategy_installer.py` devtool that registers a strategy (name,
+  source — built-in vs. installed, maybe file path or package origin)
+  into a small catalog (a dedicated table or a structured config file)
+- A `settings`/`.env` distinction between built-in and installed
+  strategy locations
+- Only becomes necessary once there's a real second author of Transform
+  strategies — not needed for the v1 single-author, single-strategy
+  case.
+
+Deliberately not building this now — v1's priority is a complete,
+working pipeline (see ROADMAP.md v0.5) over anticipatory infrastructure
+for a scenario that doesn't exist yet.
+
+
+**19:58** | *[STATUS TRACKER]* 
+### Fluxus capability matrix (source_format × target_format)
+
+Source codes: db_json, api_json, api_xml, api_csv, api_html, file_xml, file_json, file_csv, file_html
+(db_xml/db_csv/db_html don't exist — DB fetch has no format choice)
+
+Target codes: db, api_json, api_xml, api_csv, api_html, file_json, file_xml, file_csv, file_html
+
+| Src\Trg | db     | a_json | a_xml | a_csv | a_html | f_json | f_xml | f_csv | f_html |
+|---------|--------|--------|-------|-------|--------|--------|-------|-------|--------|
+| db      | [DONE] | [ ]    | [ ]   | [ ]   | [ ]    | [DONE] | LTD** | LTD** | LTD**  |
+| a_json  | LTD**  | [ ]    | [ ]   | [ ]   | [ ]    | [DONE] | LTD** | LTD** | LTD**  |
+| a_xml   | [DONE] | LTD**  | LTD** | LTD** | LTD**  | LTD**  | LTD** | LTD** | LTD**  |
+| a_csv   | LTD**  | LTD**  | LTD** | LTD** | LTD**  | LTD**  | LTD** | LTD** | LTD**  |
+| a_html  | LTD**  | LTD**  | LTD** | LTD** | LTD**  | LTD**  | LTD** | LTD** | LTD**  |
+| f_xml   | [ ]    | [ ]    | [ ]   | [ ]   | [ ]    | [ ]    | [ ]   | [ ]   | [ ]    |
+| f_json  | TODO*  | TODO*  | TODO* | TODO* | TODO*  | TODO*  | TODO* | TODO* | TODO*  |
+| f_csv   | TODO*  | TODO*  | TODO* | TODO* | TODO*  | TODO*  | TODO* | TODO* | TODO*  |
+| f_html  | TODO*  | TODO*  | TODO* | TODO* | TODO*  | TODO*  | TODO* | TODO* | TODO*  |
+
+TODO: CsvDecodeStrategy, JsonDecodeStrategy, HtmlDecodeStrategy are
+stubbed, not implemented (planned v0.7). file_json specifically needs
+a DecodeStrategy for JSON files (distinct from JsonExtractStrategy,
+which handles already-decoded JSON content, not raw file reading).
+
+LTD: ApiFetchStrategy always labels source_format as JSON regardless
+of actual Content-Type. Real XML/CSV/HTML API responses will fail at
+Extract (JsonExtractStrategy chokes on non-JSON content) unless/until
+Content-Type-based detection is implemented (see earlier diary note).
+
+Note: db_xml / db_csv / db_html do not exist as source combinations —
+DBFetchStrategy has no format selection; it always produces real JSON
+from table rows (not a limitation, just a different mechanism).
+
+**Note on Transform testing:** All LTD results above used
+`SamplePassthroughTransformStrategy`, which does not perform real
+format conversion — content passes through unchanged regardless of
+`target_format`. This means only target_format=JSON combinations
+represent a true end-to-end validation; XML/CSV/HTML targets marked
+OK only confirm the pipeline *mechanism* works, not that real format
+conversion happens (no Transform strategy implements that yet).
+
+Extract side: JsonExtractStrategy and XmlExtractStrategy are implemented.
+CsvExtractStrategy and HtmlExtractStrategy remain stubbed (v0.7).
+
+
+### 📅 2026-07-29, Wednesday (v0.4 → v0.5)
+**07:51** | *[FUTURE IDEA - for Beta version]*
+**Input/output consistency checks (file extension vs. target_format)**
+
+Currently, Fluxus does not validate that a user-provided `target_address`
+file extension matches the chosen `target_format`. For example, a user
+can set `target_format=JSON` while `target_address` ends in `.xml` —
+the file will be written with the correct (JSON) content, but a
+misleading extension. This is a deliberate v1 choice (the user is
+expected to provide the full, correct path — no auto-inference), but
+it's a real usability gap: nothing warns the user their file naming
+doesn't match the actual content.
+
+Similarly worth revisiting together: broader input/output sanity checks
+in general — e.g. confirming `source_address` actually points to
+something reachable before running the full pipeline, or surfacing a
+clear warning (not necessarily an error) when address/format mismatches
+like this are detected.
+
+Deferred to Beta: this is a UX/safety-net improvement, not a core
+pipeline correctness issue — the pipeline itself works correctly
+regardless of the misleading filename.
+
+**14:48** | *[MILESTONE]*
+**v0.5 complete: full pipeline, Fetch through Export/Load, tested end-to-end**
+
+**New implementations**
+- `JsonExtractStrategy`, `JsonDecodeStrategy` — completed the JSON leg
+  of the pipeline (validation-only, content passed through unchanged,
+  consistent with the "Extract stays lossless" principle)
+- `TransformStrategyProtocol` — deliberately broken from the static-method
+  pattern used everywhere else: takes `__init__(target_format, data)`,
+  parameterless `transform()`. Rationale: Transform carries business logic
+  (target-format-aware conversion, injected by the user via
+  `transform_strategy_name`), unlike Fetch/Decode/Extract/Load/Export,
+  which are pure format/protocol handlers with no default implementation
+  needed. Documented as an intentional protocol asymmetry.
+- `SamplePassthroughTransformStrategy` — a demo strategy proving the
+  mechanism works end-to-end; does not perform real format conversion.
+  Included in `TRANSFORM_STRATEGY_MAP` under an explicitly named
+  `sample_` key so it can never be mistaken for a production default.
+- `LoadStrategyProtocol` / `ExportStrategyProtocol`, `DBLoadStrategy`,
+  `ApiLoadStrategy`, `ExportStrategy` — Load is the mirror of Fetch
+  (API/DB, target-aware), Export is the mirror of Decode (file-based).
+  Export ended up format-independent (single strategy handles all
+  formats, since it never interprets content) once `target_format`
+  was scoped out of its responsibility.
+- `MimeType` enum (HTTP `Content-Type` values) kept deliberately separate
+  from `ContentFormat` (internal format representation) — different
+  concerns, mapped via a small dict inside `ApiLoadStrategy` rather than
+  merged
+

@@ -1,8 +1,16 @@
-from fluxus.strategies.protocols import ExtractStrategyProtocol
+import json
+from fluxus.models.dto import TransformableData
+from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 
-class JsonExtractStrategy(ExtractStrategyProtocol):
-    """Extracts canonical data from Json-decoded sources.
+class JsonExtractStrategy:
+    @staticmethod
+    def extract(*, content: bytes) -> TransformableData:
+        try:
+            parsed = json.loads(content)
+        except json.JSONDecodeError as e:
+            raise errors.ExtractMalformedError(f"Malformed JSON: {e}") from e
 
-    TODO: not yet implemented — planned for v0.7 (see docs/ROADMAP.md).
-    """
-    pass
+        normalized = json.dumps(parsed, ensure_ascii=False).encode()
+
+        return TransformableData(content=normalized, origin_format=ContentFormat.JSON)

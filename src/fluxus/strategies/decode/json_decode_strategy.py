@@ -1,8 +1,16 @@
-from fluxus.strategies.protocols import DecodeStrategyProtocol
+import json
+from pathlib import Path
+from fluxus.exceptions import errors
+from fluxus.enums import ContentFormat
+from fluxus.models.dto import ExtractableData
 
-class JsonDecodeStrategy(DecodeStrategyProtocol):
-    """Decodes JSON sources into canonical form.
 
-    TODO: not yet implemented — planned for v0.7 (see docs/ROADMAP.md).
-    """
-    pass
+class JsonDecodeStrategy:
+    @staticmethod
+    def decode(*, file_path: Path) -> ExtractableData:
+        try:
+            content = file_path.read_bytes()
+            json.loads(content)  # sadece geçerliliği doğrula
+        except json.JSONDecodeError as e:
+            raise errors.DecodeMalformedError(f"Malformed JSON at {file_path}") from e
+        return ExtractableData(content=content, source_format=ContentFormat.JSON)

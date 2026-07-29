@@ -14,7 +14,7 @@ v0.4 -- [DONE] First vertical slice, decode/extract side: XML decode +
         extract strategy implemented. Data reaches phase-2 storage
         in canonical format. Unit tests pass.
 
-v0.5 -- First vertical slice, transform + load side: Transformer
+v0.5 -- [DONE] First vertical slice, transform + load side: Transformer
         + Database (SQLAlchemy-based) load strategy implemented.
         End-to-end pipeline runs: API source -> DB target,
         fully working, fully tested.

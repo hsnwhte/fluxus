@@ -5,13 +5,20 @@ class Phase(enum.Enum):
     DECODE = "decode"
     EXTRACT = "extract"
     TRANSFORM = "transform"
+    EXPORT = "export"
     LOAD = "load"
 
 class ContentFormat(enum.Enum):
-    CSV="csv"
     JSON="json"
     XML="xml"
+    CSV="csv"
     HTML="html"
+
+class MimeType(enum.Enum):
+    JSON = "application/json"
+    XML = "application/xml"
+    CSV = "text/csv"
+    HTML = "text/html"
 
 class FluxusIOType(enum.Enum):
     API="api"

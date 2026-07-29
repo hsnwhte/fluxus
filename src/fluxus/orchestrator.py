@@ -1,5 +1,5 @@
 from fluxus import settings
-from fluxus.models.dto import InputArgs, ExtractableData, TransformableData
+from fluxus.models.dto import InputArgs, TransformableData, TransformedData
 from fluxus.selector import selector
 from fluxus.storage.backend import PayloadStoreProtocol, RegistryStoreProtocol, PipelineRunRecordsProtocol
 from fluxus.processors.fetcher import Fetcher
@@ -7,9 +7,10 @@ from fluxus.processors.decoder import Decoder
 from fluxus.processors.extractor import Extractor
 from fluxus.processors.transformer import Transformer
 from fluxus.processors.loader import Loader
-from fluxus.enums import Phase, ContentFormat
+from fluxus.processors.exporter import Exporter
+from fluxus.enums import Phase
 from fluxus import helpers
-
+from fluxus.exceptions import errors
 
 class Orchestrator:
     def __init__(
@@ -24,34 +25,130 @@ class Orchestrator:
         self.payload_store=payload_store
         self.registry_store=registry_store
 
-    def run(self):
+    def run(self) -> int:
         run_id: int = self.run_records_store.register_run()
 
         if self.input_args.source_type.value in ("api", "db"):
             entry_id = self._fetch(run_id)
-        if self.input_args.source_type.value == "file":
+        elif self.input_args.source_type.value == "file":
             entry_id = self._decode(run_id)
-        self._extract(entry_id)
+        else:
+            raise errors.InvalidInputError()
+        extr_entry_id = self._extract(run_id, entry_id)
+        trns_entry_id = self._transform(run_id, extr_entry_id)
+
+        if self.input_args.target_type.value in ("api", "db"):
+            return self._load(run_id, trns_entry_id)
+        elif self.input_args.target_type.value == "file":
+            return self._export(run_id, trns_entry_id)
+        else:
+            raise errors.InvalidInputError()
 
 
-    def _fetch(self, run_id:int) -> int:
-        fetch_strategy = selector.get_fetch_strategy(self.input_args.source_type)
-        fetcher=Fetcher(source_address=self.input_args.source_address, strategy=fetch_strategy, table_name = self.input_args.source_table)
-        data = fetcher.fetch()
+    def _export(self, run_id:int, entry_id:int) -> int:
+        entry = self.registry_store.get_entry_by_id(entry_id = entry_id)
+        content_bytes = self.payload_store.load(address=entry.address)
+        transformed_content=TransformedData(content=content_bytes)
+
+        export_strategy = selector.get_export_strategy()
+        exporter = Exporter(
+            file_path=self.input_args.target_as_path,
+            strategy=export_strategy
+        )
+        exporter.export(data=transformed_content)
+
+        export_entry_id = self.registry_store.save_entry(
+            run_id=run_id,
+            phase=Phase.EXPORT,
+            content_format=self.input_args.target_format,
+            strategy_name=export_strategy.__name__,
+            content_hash=helpers.generate_hash(content=content_bytes),
+            address=str(self.input_args.target_address)
+        )
+        return export_entry_id
+
+
+    def _load(self, run_id:int, entry_id:int) -> int:
+        entry = self.registry_store.get_entry_by_id(entry_id = entry_id)
+        content_bytes = self.payload_store.load(address=entry.address)
+        transformed_content=TransformedData(content=content_bytes)
+
+        load_strategy = selector.get_load_strategy(self.input_args.target_type)
+        loader = Loader(
+            address=self.input_args.target_address,
+            strategy=load_strategy,
+            target_format=self.input_args.target_format,
+            table_name=self.input_args.target_table
+        )
+        loader.load(data=transformed_content)
+
+        load_entry_id = self.registry_store.save_entry(
+            run_id=run_id,
+            phase=Phase.LOAD,
+            content_format=self.input_args.target_format,
+            strategy_name=load_strategy.__name__,
+            content_hash=helpers.generate_hash(content=content_bytes),
+            address=str(self.input_args.target_address)
+        )
+        return load_entry_id
+
+
+    def _transform(self, run_id:int, entry_id:int) -> int:
+        entry = self.registry_store.get_entry_by_id(entry_id =entry_id)
+        content_bytes = self.payload_store.load(address=entry.address)
+        transformable_content=TransformableData(
+            content=content_bytes,
+            origin_format=entry.content_format
+        )
+
+        transform_strategy_class = selector.get_transform_strategy(
+            self.input_args.transform_strategy_name,
+        )
+        transform_strategy=transform_strategy_class(
+            target_format=self.input_args.target_format,
+            data=transformable_content
+        )
+        transformer = Transformer(strategy=transform_strategy)
+        data = transformer.transform()
+
+
         payload_address = self.payload_store.save(
-            phase=Phase.FETCH,
+            phase=Phase.TRANSFORM,
             payload=data.content
         )
 
-        entry_id = self.registry_store.save_entry(
+        trns_entry_id = self.registry_store.save_entry(
             run_id=run_id,
-            phase=Phase.FETCH,
-            content_format=data.source_format,
-            strategy_name=fetch_strategy.__name__,
+            phase=Phase.TRANSFORM,
+            content_format=self.input_args.target_format,
+            strategy_name=transform_strategy.__class__.__name__,
             content_hash=helpers.generate_hash(content=data.content),
-            address=str(payload_address),
+            address=str(payload_address)
         )
-        return entry_id
+        return trns_entry_id
+
+    def _extract(self, run_id:int, entry_id:int) -> int:
+        entry = self.registry_store.get_entry_by_id(entry_id=entry_id)
+        extract_strategy = selector.get_extract_strategy(entry.content_format)
+        content_bytes=self.payload_store.load(address=entry.address)
+        extractor=Extractor(content=content_bytes, strategy=extract_strategy)
+        data = extractor.extract()
+
+        payload_address = self.payload_store.save(
+            phase=Phase.EXTRACT,
+            payload=data.content
+        )
+
+        extr_entry_id = self.registry_store.save_entry(
+            run_id=run_id,
+            phase=Phase.EXTRACT,
+            content_format=settings.NORMALIZED_FORMAT,
+            strategy_name=extract_strategy.__name__,
+            content_hash=helpers.generate_hash(content=data.content),
+            address=str(payload_address)
+        )
+        return extr_entry_id
+
 
     def _decode(self, run_id:int) -> int:
         decode_strategy = selector.get_decode_strategy(self.input_args.source_as_path)
@@ -72,24 +169,21 @@ class Orchestrator:
         )
         return entry_id
 
-    def _extract(self, run_id:int, entry_id:int) -> int:
-        entry = self.registry_store.get_entry_by_id(entry_id=entry_id)
-        extract_strategy = selector.get_extract_strategy(entry.content_format)
-        content_bytes=self.payload_store.load(address=entry.address)
-        extractor=Extractor(content=content_bytes, strategy=extract_strategy)
-        data = extractor.extract()
-
+    def _fetch(self, run_id:int) -> int:
+        fetch_strategy = selector.get_fetch_strategy(self.input_args.source_type)
+        fetcher=Fetcher(source_address=self.input_args.source_address, strategy=fetch_strategy, table_name = self.input_args.source_table)
+        data = fetcher.fetch()
         payload_address = self.payload_store.save(
-            phase=Phase.EXTRACT,
+            phase=Phase.FETCH,
             payload=data.content
         )
 
         entry_id = self.registry_store.save_entry(
             run_id=run_id,
-            phase=Phase.EXTRACT,
-            content_format=settings.NORMALIZED_FORMAT,
-            strategy_name=extract_strategy.__name__,
+            phase=Phase.FETCH,
+            content_format=data.source_format,
+            strategy_name=fetch_strategy.__name__,
             content_hash=helpers.generate_hash(content=data.content),
-            address=str(payload_address)
+            address=str(payload_address),
         )
         return entry_id
