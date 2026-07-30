@@ -2,14 +2,15 @@ from fluxus.enums import Phase
 from datetime import datetime
 from fluxus.enums import ContentFormat
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import DateTime, CHAR, Enum as SQLEnum, LargeBinary, String, ForeignKey
+from sqlalchemy import DateTime, CHAR, Enum as SQLEnum, LargeBinary, String
 
 
 class FluxusORM(DeclarativeBase):
     pass
 
+
 class PipelineRunRecord(FluxusORM):
-    __tablename__="pipeline_runs"
+    __tablename__ = "pipeline_runs"
     run_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
@@ -20,14 +21,15 @@ class RegistryEntry(FluxusORM):
     run_id: Mapped[int] = mapped_column(index=True)
     phase: Mapped[Phase] = mapped_column(SQLEnum(Phase))
     content_format: Mapped[ContentFormat] = mapped_column(SQLEnum(ContentFormat))
-    strategy_name:Mapped[str]=mapped_column(String(50))
-    content_hash : Mapped[str] = mapped_column(CHAR(64), index=True)
+    strategy_name: Mapped[str] = mapped_column(String(50))
+    content_hash: Mapped[str] = mapped_column(CHAR(64), index=True)
     address: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     is_active: Mapped[bool] = mapped_column(default=True)
 
+
 class FetchCache(FluxusORM):
-    __tablename__="fetch_cache"
+    __tablename__ = "fetch_cache"
     content_hash: Mapped[str] = mapped_column(CHAR(64), primary_key=True)
     address: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)

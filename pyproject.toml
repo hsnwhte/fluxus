@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fluxus"
-version = "0.4.0"
+version = "0.6.0"
 description = "Generic, plugin-based ETL & data sync engine."
 requires-python = ">=3.11"
 readme = "README.md"
@@ -20,6 +20,7 @@ fluxus = "fluxus.interfaces.cli.main:app"
 sql = ["sqlalchemy>=2.0"]
 api = ["httpx>=0.27"]
 xml = ["lxml>=5.0", "xmltodict>0.15.0"]
+cli = ["typer>=0.27"]
 dev = [
     "pytest>=8.0",
     "pytest-cov",

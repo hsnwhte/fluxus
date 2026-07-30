@@ -19,7 +19,7 @@ v0.5 -- [DONE] First vertical slice, transform + load side: Transformer
         End-to-end pipeline runs: API source -> DB target,
         fully working, fully tested.
 
-v0.6 -- ALPHA release: CLI interface complete (interfaces/cli).
+v0.6 -- [DONE] ALPHA release: CLI interface complete (interfaces/cli).
         Selector/Factory mechanism generalized (not hardcoded to
         the v0.5 path). Devtools inspect tool functional.
 

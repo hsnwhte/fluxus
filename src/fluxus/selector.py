@@ -1,14 +1,20 @@
 from pathlib import Path
 from fluxus.strategies import fetch, decode, extract, transform, load, export
-from fluxus.strategies.protocols import FetchStrategyProtocol, DecodeStrategyProtocol, ExtractStrategyProtocol, TransformStrategyProtocol, LoadStrategyProtocol, ExportStrategyProtocol
+from fluxus.strategies.protocols import (
+    FetchStrategyProtocol,
+    DecodeStrategyProtocol,
+    ExtractStrategyProtocol,
+    TransformStrategyProtocol,
+    LoadStrategyProtocol,
+    ExportStrategyProtocol,
+)
 from fluxus.exceptions import errors
 from fluxus.enums import FluxusIOType, ContentFormat
 
 
-
 class Selector:
     @staticmethod
-    def get_fetch_strategy(source_type:FluxusIOType) -> FetchStrategyProtocol:
+    def get_fetch_strategy(source_type: FluxusIOType) -> FetchStrategyProtocol:
         smap = fetch.FETCH_STRATEGY_MAP
         try:
             return smap[source_type.value]
@@ -29,7 +35,7 @@ class Selector:
             ) from e
 
     @staticmethod
-    def get_extract_strategy(source_format:ContentFormat) -> ExtractStrategyProtocol:
+    def get_extract_strategy(source_format: ContentFormat) -> ExtractStrategyProtocol:
         smap = extract.EXTRACT_STRATEGY_MAP
         try:
             return smap[source_format.value]
@@ -39,13 +45,13 @@ class Selector:
             ) from e
 
     @staticmethod
-    def get_transform_strategy(strategy_name:str)->TransformStrategyProtocol:
+    def get_transform_strategy(strategy_id: int) -> type[TransformStrategyProtocol]:
         smap = transform.TRANSFORM_STRATEGY_MAP
         try:
-            return smap[strategy_name]
+            return smap[strategy_id]
         except KeyError as e:
             raise errors.StrategyNotFoundError(
-                f"No transform strategy for '{strategy_name}' could be found."
+                f"No transform strategy with id {strategy_id} could be found."
             ) from e
 
     @staticmethod
@@ -69,7 +75,4 @@ class Selector:
             ) from e
 
 
-
-
 selector = Selector()
-
