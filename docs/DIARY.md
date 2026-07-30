@@ -354,3 +354,87 @@ proliferation.
 **Status:** devtools CLI, TestPackage injection, and the full
 combination matrix are now a reliable foundation for regression-testing
 future changes to the pipeline.
+
+
+**11:09** | *[FUTURE IDEA]*
+**Third-party strategy dependency management**
+
+Installed Transform strategies may import libraries not part of
+Fluxus's own dependency set (e.g. `pandas`). `install_strategy()`
+copies the file but does not manage its dependencies — if the
+strategy's own imports aren't already installed in the environment,
+loading it will fail with a standard `ImportError`/`ModuleNotFoundError`.
+
+Deliberate v1 choice: the strategy author is responsible for
+documenting and the user for installing any extra dependencies their
+custom strategy needs. No `requirements.txt`-per-strategy mechanism,
+no automatic pip install. Revisit only if this becomes a real friction
+point once third-party strategies actually exist.
+
+**11:50** | *[MILESTONE] (v0.5.0 → v0.6.0)* 
+**v0.6 complete: CLI, logging, generalized Selector, and a real
+Transform strategy installer**
+
+**CLI (`fluxus`)**
+- `run` command wired to full pipeline, Typer-based, tip-annotated
+  parameters with short flags
+- Callback-based shared setup (`--debug` now applies to every command,
+  not duplicated per-command)
+- `ValidationError`/`FluxusError` caught at the CLI boundary, clean
+  user-facing messages instead of raw tracebacks
+
+**Logging**
+- `logging_config.py`: console handler (INFO+) always on, file handler
+  (DEBUG+, UTF-8) added when `--debug` is passed
+- Orchestrator now logs phase-level progress (start/success per phase,
+  strategy used, exceptions logged before re-raising)
+- Deliberately stopped at Orchestrator-level logging — deeper,
+  per-strategy logging remains scoped to v0.8
+
+**Selector/Factory generalization**
+- Confirmed: all six `get_*_strategy` methods already follow the same
+  map-lookup + `StrategyNotFoundError` pattern. This roadmap item was
+  effectively already satisfied by consistently applying the same
+  pattern each time a new phase (Transform, Load, Export) was added.
+
+**Devtools**
+- `fluxus-dev` CLI mirrors `run`, plus `setup-test-env`,
+  `reset-test-env`, `inspect` (pretty-prints a payload's JSON content —
+  DB Browser shows raw BLOBs, this decodes them)
+- `TestPackage` catalog + `--test-pack` injection: all 9 source×target
+  combinations replayable by number
+- Two real edge-case bugs found and fixed: empty `rows` list caused
+  `DBLoadStrategy` to attempt `INSERT ... DEFAULT VALUES` (now skipped
+  with a `WARNING` log); API sources returning a bare JSON object
+  instead of a list broke the `list[dict]` canonical assumption (now
+  wrapped)
+
+**Transform strategy installer (originally scoped to v1.x, completed
+early)**
+- Transform strategies are now referenced by **numeric id**, not name.
+  Id `0` is the built-in passthrough — permanent, cannot be
+  uninstalled.
+- `fluxus install-strategy --path <file>`: validates the file (exactly
+  one class named `TransformStrategy*`, and — via a newly
+  `@runtime_checkable` `TransformStrategyProtocol` — an `isinstance`
+  check that it actually implements the required methods), then copies
+  it into `strategies/transform/installed/` under a standardized name
+  and assigns the next available id.
+- `fluxus uninstall-strategy --id <n>`: removes the file from disk.
+  `TRANSFORM_STRATEGY_MAP` is rebuilt from the `installed/` folder on
+  every process start, so there's no separate registry to keep in
+  sync — the filesystem *is* the source of truth.
+- `fluxus show-strategies`: lists all currently installed ids.
+- Scoped out (see earlier diary note, still valid): no dependency
+  management for what an installed strategy itself imports.
+
+**Documentation**
+- `README.md`: minimal Alpha-stage version — install, usage, how to
+  write and install a Transform strategy, honest known-limitations list
+- `LICENSE`: MIT
+
+**Status**
+v0.6 fully complete. Alpha release conditions (per original roadmap)
+met: CLI, generalized Selector, functional devtools inspect tool — plus
+a working plugin-style installer well ahead of its original v1.x
+schedule.

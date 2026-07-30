@@ -1,16 +1,22 @@
 import pytest
 from fluxus.enums import ContentFormat
 from fluxus.models.dto import TransformableData, TransformedData
-from fluxus.strategies.transform.sample_passthrough_transform_strategy import SamplePassthroughTransformStrategy
+from fluxus.strategies.transform.transform_strategy_sample_passthrough import (
+    TransformStrategySamplePassthrough,
+)
 
 
 @pytest.fixture
 def sample_transformable_data():
-    return TransformableData(content=b'{"key": "value"}', origin_format=ContentFormat.JSON)
+    return TransformableData(
+        content=b'{"key": "value"}', origin_format=ContentFormat.JSON
+    )
 
 
-def test_passthrough_transform_returns_unchanged_content(sample_transformable_data:TransformableData):
-    strategy = SamplePassthroughTransformStrategy(
+def test_passthrough_transform_returns_unchanged_content(
+    sample_transformable_data: TransformableData,
+):
+    strategy = TransformStrategySamplePassthrough(
         target_format=ContentFormat.JSON,
         data=sample_transformable_data,
     )

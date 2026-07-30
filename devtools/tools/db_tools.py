@@ -84,4 +84,11 @@ def reset_table(*, engine: Engine, table_name: str) -> None:
 def drop_table(*, engine: Engine, table_name: str) -> None:
     with engine.connect() as conn:
         conn.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
+        try:
+            conn.execute(
+                text("DELETE FROM sqlite_sequence WHERE name = :table_name"),
+                {"table_name": table_name},
+            )
+        except OperationalError:
+            pass
         conn.commit()
