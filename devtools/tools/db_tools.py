@@ -1,4 +1,5 @@
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.orm import Session
 from fluxus.models.orm import FluxusORM
@@ -70,10 +71,13 @@ def command_database(
 def reset_table(*, engine: Engine, table_name: str) -> None:
     with engine.connect() as conn:
         conn.execute(text(f"DELETE FROM {table_name}"))
-        conn.execute(
-            text("DELETE FROM sqlite_sequence WHERE name = :table_name"),
-            {"table_name": table_name},
-        )
+        try:
+            conn.execute(
+                text("DELETE FROM sqlite_sequence WHERE name = :table_name"),
+                {"table_name": table_name},
+            )
+        except OperationalError:
+            pass
         conn.commit()
 
 

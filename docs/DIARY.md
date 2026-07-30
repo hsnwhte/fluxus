@@ -287,3 +287,70 @@ regardless of the misleading filename.
   concerns, mapped via a small dict inside `ApiLoadStrategy` rather than
   merged
 
+### 📅 2026-07-30, Thursday | *[MILESTONE / KNOWN LIMITATION]*
+**Devtools CLI and manual test infrastructure built**
+**06:55** | *[MILESTONE]* 
+Built out the devtools CLI (`fluxus-dev`, via `python -m devtools.main`)
+mirroring the production `fluxus` CLI's `run` command, plus supporting
+tooling:
+- `db_tools.py`: engine/session helpers, `reset_table`
+- `setup-test-env` / `reset-test-env` commands to bootstrap and tear
+  down dev pipeline/source/target databases
+- `TestPackage` dataclass + `TEST_PACKAGES` catalog (`test_packages.py`),
+  injectable via `test --test-pack <key>`, so full InputArgs
+  combinations can be replayed with a single number instead of
+  re-typing 8 CLI flags each time
+- Real test data downloaded (jsonplaceholder.typicode.com/comments —
+  500 nested records) for realistic-scale manual testing
+
+**Test 1 (file→file, comments.json→output.json) passed.**
+
+**Test 2 (file→db, comments.json→dev_target_data_text) surfaced a
+known/expected limitation:** `DBLoadStrategy` uses source JSON keys
+directly as target column names. Since `SamplePassthroughTransformStrategy`
+performs no field mapping, the source's field names (`postId`, `id`,
+`name`, `email`, `body`) don't match the target table's schema (`id`,
+`data`) — result: `IntegrityError: NOT NULL constraint failed:
+dev_target_data_text.data`.
+
+This is not a bug — it's confirmation that Transform must own field
+mapping/schema adaptation, exactly as designed. A real Transform
+strategy (not passthrough) is required whenever source and target
+schemas differ. Serves as a concrete demonstration of why Transform
+carries business logic and has no default implementation.
+
+**08:59** | *[MILESTONE]* 
+**All 9 source × target type combinations manually verified end-to-end**
+
+Completed the full manual test matrix (FILE/DB/API × FILE/DB/API) via
+the devtools CLI's injectable TestPackage catalog. All 9 combinations
+now pass.
+
+**Real bugs found and fixed along the way:**
+
+- `DBLoadStrategy` produced `INSERT ... DEFAULT VALUES` (and a
+  resulting `IntegrityError`) when given an empty `rows` list —
+  SQLAlchemy interprets an empty parameter list for `executemany` as
+  "insert one row with no values" rather than "insert nothing." Fixed
+  with an explicit empty check; logs a `WARNING` (not an error) since
+  an empty source is a valid, if noteworthy, condition — not a failure.
+- `JsonExtractStrategy` assumed all JSON sources are lists. API sources
+  that return a single resource (e.g. `GET /todos/1`) return a bare
+  JSON object instead. Since the internal canonical format is always
+  `list[dict]`, added a wrap-into-single-element-list step for bare
+  objects.
+- Confirmed (again, via a fresh source/target combination) that
+  `SamplePassthroughTransformStrategy` fails whenever source and target
+  field names don't match — this is expected, not a bug, and is exactly
+  why Transform requires real business logic per use case. Wrote a
+  second devtools-only sample strategy (field mapping for the
+  `comments` shape) to demonstrate a working non-passthrough Transform.
+
+**Process note:** chose to reuse a compatible source (`/comments/1`
+instead of `/todos/1`) rather than write a third mapping strategy for
+a single test case — pragmatic reuse over unnecessary strategy
+proliferation.
+
+**Status:** devtools CLI, TestPackage injection, and the full
+combination matrix are now a reliable foundation for regression-testing
+future changes to the pipeline.
