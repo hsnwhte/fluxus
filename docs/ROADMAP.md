@@ -23,10 +23,15 @@ v0.6 -- [DONE] ALPHA release: CLI interface complete (interfaces/cli).
         Selector/Factory mechanism generalized (not hardcoded to
         the v0.5 path). Devtools inspect tool functional.
 
-v0.7 -- Second and third strategies added per stage (CSV, JSON
-        sources; DB-side fetch strategy), proving the
-        "new strategy = new file, not new architecture" claim.
-        Test coverage extended for each.
+v0.7 -- Extended content format strategies: CSV, HTML, XLSX, OCR sources,
+        and DB-side fetch strategy added, proving the "new strategy =
+        new file, not new architecture" claim. Test coverage extended
+        for each.
+
+        Attachment support: new AttachmentRef registry entity for
+        binary/file references (images, scans) linked to any record via
+        hash-based FK — content-addressable, dedupes identical uploads
+        automatically. Core registry capability, not domain-specific.
 
 v0.8 -- CI pipeline (GitHub Actions) set up: tests run on push.
         Error handling audited (no bare Exception/ValueError
