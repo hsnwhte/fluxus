@@ -1,4 +1,4 @@
-# Fluxus
+# Fluxus v0.6 - alpha
 
 Generic, plugin-based ETL & data sync engine. Fetches from a source
 transforms it, and loads it to a target — with the transform step designed
