@@ -1,5 +1,6 @@
 import enum
 
+
 class Phase(enum.Enum):
     FETCH = "fetch"
     DECODE = "decode"
@@ -8,19 +9,27 @@ class Phase(enum.Enum):
     EXPORT = "export"
     LOAD = "load"
 
+
 class ContentFormat(enum.Enum):
-    JSON="json"
-    XML="xml"
-    CSV="csv"
-    HTML="html"
+    JSON = "json"
+    XML = "xml"
+    CSV = "csv"
+    HTML = "html"
+
 
 class MimeType(enum.Enum):
     JSON = "application/json"
     XML = "application/xml"
     CSV = "text/csv"
     HTML = "text/html"
+    PNG = "image/png"
+    JPEG = "image/jpeg"
+    PDF = "application/pdf"
+    XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
 
 class FluxusIOType(enum.Enum):
-    API="api"
-    DB= "db"
-    FILE="file"
+    API = "api"
+    DB = "db"
+    FILE = "file"

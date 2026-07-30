@@ -33,14 +33,36 @@ v0.7 -- Extended content format strategies: CSV, HTML, XLSX, OCR sources,
         hash-based FK — content-addressable, dedupes identical uploads
         automatically. Core registry capability, not domain-specific.
 
-v0.8 -- CI pipeline (GitHub Actions) set up: tests run on push.
-        Error handling audited (no bare Exception/ValueError
-        anywhere). Logging finalized across all processors.
+v0.8  -- CI pipeline (GitHub Actions) set up: tests run on push.
+         Error handling audited (no bare Exception/ValueError
+         anywhere). Logging finalized across all processors.
 
-v0.9 -- BETA release: README complete (setup, architecture,
-        rationale). Code review pass for consistency. Optional
-        dependency groups (sql, api, dev) verified to work in
-        isolation.
+v0.85 -- PostgreSQL storage backend added alongside SQLite (new
+         StorageBackend implementation via SQLAlchemy). Proves
+         storage layer is swappable, not just extensible on the
+         strategy side. Separate, isolated practice repo
+         (postgres-playground) for PL/pgSQL triggers, RPC
+         functions, and RLS policies — documented, not part of
+         Fluxus's core codebase.
+
+v0.9  -- BETA release: README complete (setup, architecture,
+         rationale). Optional dependency groups (sql, api, dev)
+         verified to work in isolation.
+
+         Real-consumer validation: fluxus-ncr's first TransformStrategy
+         (Excel source) implemented and run end-to-end against Fluxus
+         as an external dependency (pip install, not copy-pasted code).
+         Any friction/gaps found this way get fixed in Fluxus core,
+         not worked around in fluxus-ncr.
+
+         Consistency review, concrete checklist:
+         [ ] Every public function/class has a docstring
+         [ ] Every raised exception uses the custom hierarchy (grep for
+           bare "raise Exception" / "raise ValueError" returns nothing)
+         [ ] Every strategy file follows the same internal structure
+           (same method names/order as the reference strategy)
+         [ ] Error messages follow a consistent format (what failed,
+           what value, what was expected)
 
 v1.0 -- Full release: portfolio-ready. Documented, tested,
         demonstrably extensible. Public-facing polish complete.
