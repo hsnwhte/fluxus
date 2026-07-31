@@ -1,4 +1,4 @@
-from pydantic import BaseModel, computed_field, model_validator
+from pydantic import BaseModel, computed_field, model_validator, Field
 from pathlib import Path
 from datetime import datetime
 from fluxus.enums import FluxusIOType, ContentFormat, Phase, MimeType
@@ -84,11 +84,3 @@ class TransformableData(BaseModel):
 class TransformedData(BaseModel):
     model_config = {"frozen": True}
     content: bytes
-
-
-class Attachment(BaseModel):
-    model_config = {"frozen": True}
-    hash: str
-    filename: str
-    mime_type: MimeType
-    description: str | None

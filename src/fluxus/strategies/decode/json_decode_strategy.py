@@ -10,7 +10,7 @@ class JsonDecodeStrategy:
     def decode(*, file_path: Path) -> ExtractableData:
         try:
             content = file_path.read_bytes()
-            json.loads(content)  # sadece geçerliliği doğrula
+            json.loads(content)
         except json.JSONDecodeError as e:
             raise errors.DecodeMalformedError(f"Malformed JSON at {file_path}") from e
         return ExtractableData(content=content, source_format=ContentFormat.JSON)

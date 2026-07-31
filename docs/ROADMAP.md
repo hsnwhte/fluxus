@@ -28,14 +28,14 @@ v0.7 -- Extended content format strategies: CSV, HTML, XLSX, OCR sources,
         new file, not new architecture" claim. Test coverage extended
         for each.
 
-        Attachment support: new AttachmentRef registry entity for
+        Attachment support: new AttachmentRef registry entity for 
         binary/file references (images, scans) linked to any record via
         hash-based FK — content-addressable, dedupes identical uploads
         automatically. Core registry capability, not domain-specific.
 
-v0.8  -- CI pipeline (GitHub Actions) set up: tests run on push.
-         Error handling audited (no bare Exception/ValueError
-         anywhere). Logging finalized across all processors.
+v0.8 -- CI pipeline (GitHub Actions) set up: tests run on push.
+        Error handling audited (no bare Exception/ValueErroranywhere). 
+        Logging finalized across all processors.
 
 v0.85 -- PostgreSQL storage backend added alongside SQLite (new
          StorageBackend implementation via SQLAlchemy). Proves

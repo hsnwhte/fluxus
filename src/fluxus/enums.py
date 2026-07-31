@@ -15,6 +15,9 @@ class ContentFormat(enum.Enum):
     XML = "xml"
     CSV = "csv"
     HTML = "html"
+    DOCX = "docx"
+    XLSX = "xlsx"
+    PDF = "pdf"
 
 
 class MimeType(enum.Enum):

@@ -1,13 +1,13 @@
 import httpx
 
-from fluxus.enums import ContentFormat
 from fluxus.models.dto import ExtractableData
 from fluxus.exceptions import errors
+from fluxus.helpers import mime_to_content_format
 
 
 class ApiFetchStrategy:
     @staticmethod
-    def fetch(*, address:str, table_name:str | None = None) ->ExtractableData:
+    def fetch(*, address: str, table_name: str | None = None) -> ExtractableData:
         try:
             response = httpx.get(address, timeout=10.0)
             response.raise_for_status()
@@ -25,8 +25,9 @@ class ApiFetchStrategy:
                 raise errors.FetchServerError(address, status)
             raise
 
-        return ExtractableData(
-            content=response.content,
-            source_format=ContentFormat.JSON,
-            # assumed for now; see note on Content-Type detection
-        )
+        content = response.content
+        mime = response.headers.get("Content-Type")
+        if mime is None:
+            raise errors.FetchContentTypeMissingError(address=address)
+        content_type = mime_to_content_format(mime)
+        return ExtractableData(content=content, source_format=content_type)

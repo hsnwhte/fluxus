@@ -1,8 +1,15 @@
-from fluxus.strategies.protocols import ExtractStrategyProtocol
+import json
+import xmltodict
+from fluxus.enums import ContentFormat
+from fluxus.models.dto import TransformableData
 
-class HtmlExtractStrategy(ExtractStrategyProtocol):
-    """Extracts canonical data from Html-decoded sources.
 
-    TODO: not yet implemented — planned for v0.7 (see docs/ROADMAP.md).
-    """
-    pass
+class HtmlExtractStrategy:
+    @staticmethod
+    def extract(*, content: bytes) -> TransformableData:
+        parsed = xmltodict.parse(content.decode(encoding="utf-8"))
+        content_bytes = json.dumps(parsed).encode()
+        result = TransformableData(
+            content=content_bytes, origin_format=ContentFormat.HTML
+        )
+        return result
