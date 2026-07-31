@@ -10,6 +10,12 @@ class Phase(enum.Enum):
     LOAD = "load"
 
 
+class RunStatus(enum.Enum):
+    RUNNING = "running"
+    COMPLETE = "complete"
+    INTERRUPTED = "interrupted"
+
+
 class ContentFormat(enum.Enum):
     JSON = "json"
     XML = "xml"

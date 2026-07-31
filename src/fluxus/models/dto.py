@@ -1,7 +1,7 @@
-from pydantic import BaseModel, computed_field, model_validator, Field
+from pydantic import BaseModel, computed_field, model_validator
 from pathlib import Path
 from datetime import datetime
-from fluxus.enums import FluxusIOType, ContentFormat, Phase, MimeType
+from fluxus.enums import FluxusIOType, ContentFormat, Phase
 
 
 class InputArgs(BaseModel):
@@ -54,6 +54,15 @@ class InputArgs(BaseModel):
         if self.target_type == FluxusIOType.DB and self.target_table is None:
             raise ValueError("target_table is required when target_type is 'db'")
         return self
+
+
+class FetchCacheData(BaseModel):
+    model_config = {"frozen": True}
+    api_url: str
+    registry_address: int
+    payload_address: str
+    created_at: datetime
+    is_active: bool
 
 
 class RegistryRecord(BaseModel):

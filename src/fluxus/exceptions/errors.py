@@ -80,6 +80,10 @@ class FetchContentTypeMissingError(FetchApiError):
         super().__init__(message)
 
 
+class FetchCacheNotFoundError(FetchApiError):
+    """Fetch cache does not exist or was deleted"""
+
+
 class FetchTableNameNotProvidedError(FetchDbError):
     def __init__(self):
         message = "No table name provided as argument for fetching from db."

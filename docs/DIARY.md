@@ -438,3 +438,52 @@ v0.6 fully complete. Alpha release conditions (per original roadmap)
 met: CLI, generalized Selector, functional devtools inspect tool — plus
 a working plugin-style installer well ahead of its original v1.x
 schedule.
+
+
+### 📅 2026-07-31, Friday (v0.6 -> v0.7) 
+**13:54** | *[RESOLVE]*
+**v0.7 scope progress — new format strategies, API Content-Type
+detection, Attachment/OCR dropped**
+
+Decode + Extract implemented for CSV, HTML, DOCX, XLSX, PDF. Each
+Decode strategy stays minimal (validate + carry raw bytes); each
+Extract strategy converts to a canonical structure — `list[dict]` for
+CSV/PDF, raw `xmltodict`-parsed nested dict for XML/HTML, and (after
+reconsidering `python-docx`/`openpyxl` vs. raw-XML-via-zipfile) a full
+`{filename.xml: <parsed>}` dict per internal ZIP member for DOCX/XLSX.
+Deliberately chose the "lossless but raw" approach over
+library-mediated output for DOCX/XLSX — reasoning: Fluxus is a young
+engine, Transform strategies are still few, but each one written adds
+a reference example that makes the next easier. The library-mediated
+route would have been easier short-term but hides structure Transform
+might need.
+
+`ApiFetchStrategy` now reads the actual `Content-Type` response header
+instead of assuming JSON. Added `content_format_to_mime` /
+`mime_to_content_format` in `helpers.py`, mapping by enum member name
+(both enums share member names for shared formats) rather than a
+hand-maintained dict — image mime types (PNG/JPEG) intentionally have
+no `ContentFormat` counterpart and raise cleanly if looked up. Missing
+or unrecognized Content-Type headers raise explicitly rather than
+silently defaulting to JSON — deliberate choice, may revisit if this
+proves too strict in practice.
+
+Confirmed DB-side dialect support requires no new strategy code —
+SQLAlchemy's dialect abstraction already handles it, same principle
+established back when SQLite was first chosen. Only verification
+against a real non-SQLite dialect remains open.
+
+**Dropped: Attachment/AttachmentRef and OCR.** Both were explored in
+some depth (DTO/ORM drafts for Attachment, considered as `v0.7`/`v0.75`
+scope) before recognizing they're domain-specific business logic, not
+engine responsibilities — a parser/sync engine doesn't need to
+"understand" attachments as a first-class concept when it can already
+carry arbitrary binary content through the existing pipeline. Belongs
+in a downstream Transform strategy or a domain-specific framework
+(e.g. a future QMS layer), not Fluxus core. Good instance of catching
+scope creep mid-design rather than after building it.
+
+**Remaining before v0.7 is done:** devtools extension for new formats,
+Selector-side fixes, pytest coverage for all new strategies, full
+manual end-to-end verification. Not detailing further here — tracked
+in progress, not this entry.

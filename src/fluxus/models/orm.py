@@ -1,8 +1,8 @@
 from fluxus.enums import Phase
 from datetime import datetime
-from fluxus.enums import ContentFormat, MimeType
+from fluxus.enums import ContentFormat, RunStatus
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import DateTime, CHAR, Enum as SQLEnum, LargeBinary, String, Text
+from sqlalchemy import DateTime, CHAR, Enum as SQLEnum, LargeBinary, String
 
 
 class FluxusORM(DeclarativeBase):
@@ -13,6 +13,15 @@ class PipelineRunRecord(FluxusORM):
     __tablename__ = "pipeline_runs"
     run_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    status: Mapped[RunStatus] = mapped_column(
+        SQLEnum(RunStatus), default=RunStatus.RUNNING
+    )
+    interrupted_phase: Mapped[Phase | None] = mapped_column(
+        SQLEnum(Phase), nullable=True, default=None
+    )
+    interrupted_after_entry_id: Mapped[int | None] = mapped_column(
+        nullable=True, default=None
+    )
 
 
 class RegistryEntry(FluxusORM):
@@ -30,8 +39,9 @@ class RegistryEntry(FluxusORM):
 
 class FetchCache(FluxusORM):
     __tablename__ = "fetch_cache"
-    content_hash: Mapped[str] = mapped_column(CHAR(64), primary_key=True)
-    address: Mapped[str]
+    api_url: Mapped[str] = mapped_column(primary_key=True)
+    registry_address: Mapped[int]
+    payload_address: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     is_active: Mapped[bool] = mapped_column(default=True)
 

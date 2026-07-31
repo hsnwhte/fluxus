@@ -23,31 +23,49 @@ v0.6 -- [DONE] ALPHA release: CLI interface complete (interfaces/cli).
         Selector/Factory mechanism generalized (not hardcoded to
         the v0.5 path). Devtools inspect tool functional.
 
-v0.7 -- Extended content format strategies: CSV, HTML, XLSX, OCR sources,
-        and DB-side fetch strategy added, proving the "new strategy =
-        new file, not new architecture" claim. Test coverage extended
-        for each.
+v0.7 -- Extended content format strategies: CSV, HTML, DOCX,
+        XLSX, and PDF sources added (Decode + Extract), proving the
+        "new strategy = new file, not new architecture" claim.
+        API Content-Type detection implemented (ApiFetchStrategy now
+        reads the real Content-Type header instead of assuming JSON;
+        raises explicitly if the header is missing/unrecognized).
+        DB-side dialect support confirmed via SQLAlchemy's own
+        abstraction — no new strategy code required, only verification
+        against a non-SQLite dialect.
+        Test coverage extended for each new format. Manual end-to-end
+        verification via devtools.
+        PipelineRunRecord is extended to include status.        
 
-        Attachment support: new AttachmentRef registry entity for 
-        binary/file references (images, scans) linked to any record via
-        hash-based FK — content-addressable, dedupes identical uploads
-        automatically. Core registry capability, not domain-specific.
+        FetchCache implemented: Fetch strategies check FetchCache 
+        by content hash before hitting the source, and write to it 
+        after a successful fetch.
 
-v0.8 -- CI pipeline (GitHub Actions) set up: tests run on push.
-        Error handling audited (no bare Exception/ValueErroranywhere). 
-        Logging finalized across all processors.
+        OCR and Attachment support considered and deliberately dropped:
+        both are domain-specific business logic (image-to-text,
+        file-reference tracking), not engine-level concerns. Belongs
+        in downstream Transform strategies or domain frameworks
+        (e.g. a QMS layer), not in Fluxus core. See DIARY.md.
 
-v0.85 -- PostgreSQL storage backend added alongside SQLite (new
-         StorageBackend implementation via SQLAlchemy). Proves
+v0.75 -- PostgreSQL storage backend added alongside SQLite (new
+         StorageBackend implementation via SQLAlchemy): Proves
          storage layer is swappable, not just extensible on the
          strategy side. Separate, isolated practice repo
          (postgres-playground) for PL/pgSQL triggers, RPC
          functions, and RLS policies — documented, not part of
          Fluxus's core codebase.
+         DB rollback safety across a run added.
+        
+
+v0.8 -- CI pipeline (GitHub Actions) set up: tests run on push.
+        Optional dependency groups (sql, api, dev) verified to 
+        work in isolation. Error handling audited (no bare 
+        Exception/ValueError anywhere). Logging finalized across 
+        all processors. 
+
 
 v0.9  -- BETA release: README complete (setup, architecture,
-         rationale). Optional dependency groups (sql, api, dev)
-         verified to work in isolation.
+         rationale). 
+         Published to PyPI (pip install fluxus becomes real).
 
          Real-consumer validation: fluxus-ncr's first TransformStrategy
          (Excel source) implemented and run end-to-end against Fluxus
