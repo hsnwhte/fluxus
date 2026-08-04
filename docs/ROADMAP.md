@@ -37,8 +37,8 @@ v0.7 -- Extended content format strategies: CSV, HTML, DOCX,
         PipelineRunRecord is extended to include status.
 
         FetchCache implemented: Fetch strategies check FetchCache
-        by content hash before hitting the source, and write to it
-        after a successful fetch.
+        by api_url before hitting the source, and write to fetch_cache
+        table in Runtime Database after a successful fetch.
 
         OCR and Attachment support considered and deliberately dropped:
         both are domain-specific business logic (image-to-text,
