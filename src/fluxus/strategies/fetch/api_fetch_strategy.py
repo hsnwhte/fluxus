@@ -1,5 +1,6 @@
 import httpx
 
+from fluxus.enums import MimeType
 from fluxus.models.dto import ExtractableData
 from fluxus.exceptions import errors
 from fluxus.helpers import mime_to_content_format
@@ -29,5 +30,13 @@ class ApiFetchStrategy:
         mime = response.headers.get("Content-Type")
         if mime is None:
             raise errors.FetchContentTypeMissingError(address=address)
-        content_type = mime_to_content_format(mime)
+        clean_mime = mime.split(";")[0].strip()
+        try:
+            mime_type = MimeType(clean_mime)
+        except ValueError as e:
+            raise errors.FetchApiError(
+                f"Unrecognized Content-Type: {clean_mime}"
+            ) from e
+
+        content_type = mime_to_content_format(mime_type)
         return ExtractableData(content=content, source_format=content_type)

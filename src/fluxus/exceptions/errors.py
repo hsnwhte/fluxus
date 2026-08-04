@@ -124,6 +124,10 @@ class DecodeEmptyFileError(DecodeError):
     """The file is empty"""
 
 
+class DecodeSourceFileNotFoundError(DecodeError):
+    """Source file could not be found"""
+
+
 class ExtractError(FluxusError):
     """Errors occurring while extracting decoded data into canonical form."""
 

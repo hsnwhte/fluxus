@@ -17,6 +17,7 @@ from fluxus.storage.sqlite_backend import (
     PipelineRunRecordsSQLite,
     PayloadStoreSQLite,
     RegistryStoreSQLite,
+    FetchCacheStoreSQLite,
 )
 
 logger = logging.getLogger(__name__)
@@ -73,7 +74,7 @@ def test(
             typer.echo(f"Invalid input: {e}", err=True)
             raise typer.Exit(code=1)
 
-    eng_pipe = db_tools.get_engine(url=DEV_PIPELINE_DB_URL, echo=True)
+    eng_pipe = db_tools.get_engine(url=DEV_RUNTIME_DB_URL, echo=True)
     sess_pipe = db_tools.get_session(engine=eng_pipe)
     logger.debug("Pipeline db session created.")
 
@@ -82,6 +83,7 @@ def test(
         run_records_store=PipelineRunRecordsSQLite(session=sess_pipe),
         payload_store=PayloadStoreSQLite(session=sess_pipe),
         registry_store=RegistryStoreSQLite(session=sess_pipe),
+        fetch_cache_store=FetchCacheStoreSQLite(session=sess_pipe),
     )
 
     logger.info("Pipeline starting...")
@@ -100,7 +102,7 @@ def test(
 def inspect(
     payload_id: int = typer.Option(..., "--payload-id", "-p"),
 ):
-    eng_pipe = db_tools.get_engine(url=DEV_PIPELINE_DB_URL, echo=False)
+    eng_pipe = db_tools.get_engine(url=DEV_RUNTIME_DB_URL, echo=False)
     sess_pipe = db_tools.get_session(engine=eng_pipe)
     payload_store = PayloadStoreSQLite(session=sess_pipe)
 
@@ -121,8 +123,8 @@ def inspect(
 
 @dev.command(name="setup-test-env")
 def setup_test_env():
-    eng_pipe = db_tools.get_engine(url=DEV_PIPELINE_DB_URL, echo=True)
-    db_tools.create_all_pipeline_tables(engine=eng_pipe)
+    eng_pipe = db_tools.get_engine(url=DEV_RUNTIME_DB_URL, echo=True)
+    db_tools.create_all_runtime_tables(engine=eng_pipe)
     eng_src = db_tools.get_engine(url=DEV_SOURCE_DB_URL, echo=True)
     db_tools.create_all_source_tables(engine=eng_src)
     eng_trg = db_tools.get_engine(url=DEV_TARGET_DB_URL, echo=True)
@@ -131,8 +133,8 @@ def setup_test_env():
 
 @dev.command(name="reset-test-env")
 def reset_test_env():
-    eng_pipe = db_tools.get_engine(url=DEV_PIPELINE_DB_URL, echo=True)
-    db_tools.reset_all_pipeline_tables(engine=eng_pipe)
+    eng_pipe = db_tools.get_engine(url=DEV_RUNTIME_DB_URL, echo=True)
+    db_tools.reset_all_runtime_tables(engine=eng_pipe)
     eng_src = db_tools.get_engine(url=DEV_SOURCE_DB_URL, echo=True)
     db_tools.reset_all_source_tables(engine=eng_src)
     eng_trg = db_tools.get_engine(url=DEV_TARGET_DB_URL, echo=True)
@@ -141,8 +143,8 @@ def reset_test_env():
 
 @dev.command(name="hard-reset-test-env")
 def hard_reset_test_env():
-    eng_pipe = db_tools.get_engine(url=DEV_PIPELINE_DB_URL, echo=True)
-    db_tools.drop_all_pipeline_tables(engine=eng_pipe)
+    eng_pipe = db_tools.get_engine(url=DEV_RUNTIME_DB_URL, echo=True)
+    db_tools.drop_all_runtime_tables(engine=eng_pipe)
     eng_src = db_tools.get_engine(url=DEV_SOURCE_DB_URL, echo=True)
     db_tools.drop_all_source_tables(engine=eng_src)
     eng_trg = db_tools.get_engine(url=DEV_TARGET_DB_URL, echo=True)
@@ -154,7 +156,7 @@ def reset_runtime_db():
     eng_runtime = db_tools.get_engine(
         url=runtime_settings.PIPELINE_STORE_ADDRESS, echo=True
     )
-    db_tools.reset_all_pipeline_tables(engine=eng_runtime)
+    db_tools.reset_all_runtime_tables(engine=eng_runtime)
 
 
 if __name__ == "__main__":

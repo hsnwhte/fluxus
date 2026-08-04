@@ -487,3 +487,82 @@ scope creep mid-design rather than after building it.
 Selector-side fixes, pytest coverage for all new strategies, full
 manual end-to-end verification. Not detailing further here — tracked
 in progress, not this entry.
+
+### 📅 2026-08-03, Monday
+**15:12** | *[FUTURE IDEA — post-v1.0]*
+**fluxus-llm: a lightweight LLM API tool for Transform strategies**
+
+Idea: a separate, small companion package (not part of Fluxus core)
+that gives Transform strategy authors an easy way to call LLM APIs
+(OpenAI, Anthropic, etc.) from within a strategy — e.g. summarizing,
+classifying, or enriching data mid-transform.
+
+Scope stays deliberately narrow: this is a *tool* a Transform strategy
+can call, not a new pipeline capability. Fetch/Decode/Extract/Load/
+Export stay untouched; Transform still only talks to the runtime DB,
+nothing changes architecturally. The tool would expose a small set of
+convenience methods so a Transform strategy just passes kwargs and
+gets a result back, without the strategy author needing to hand-roll
+HTTP requests, retries, or provider-specific request shapes.
+
+Two motivations: (1) learning how to properly manage LLM API requests
+(rate limiting, retries, provider differences) in a small, isolated
+scope rather than a large one; (2) keeping it a genuinely light,
+optional companion — not a dependency Fluxus core ever needs.
+
+Not scoped into any current roadmap version — revisit after v1.0.
+
+
+**17:09** | *[RESOLVE]*
+**Transform strategy identity — class name isn't a reliable enough
+lineage record**
+
+While manually testing v0.7, noticed `RegistryEntry.strategy_name`
+stores the Transform strategy's class name. Realized this isn't a
+strong enough identifier long-term: numeric strategy ids (used to
+select a strategy at runtime) can shift across install/uninstall, and
+class names aren't guaranteed unique between strategy authors. Neither
+is a stable, unique reference for lineage purposes.
+
+Idea: assign each installed strategy a persistent unique identifier
+(UUID7 — time-sortable, so ids remain roughly ordered by install time)
+at install time, store it alongside the class name in the registry.
+Deferred to v0.75, not urgent for v0.7's own scope.
+
+**17:56** | *[TODO v0.8]* 
+**Transform failures need a generic hint, even without knowing the cause**
+
+Manually testing a mismatched strategy (csv source, comments-shaped
+Transform strategy) produced a bare `KeyError: 'id'` traceback — correct
+behavior, but not helpful to a user seeing it for the first time.
+Fluxus can't know why a Transform strategy failed (it's entirely
+user-authored), but it can wrap Transform exceptions with a generic,
+non-specific hint — e.g. "Transform strategy raised an error; check
+that the strategy matches the shape of the data it receives" — without
+pretending to diagnose the actual cause. Add during v0.8's error
+handling audit.
+
+**18:24** | *[RESOLVE]*
+**DevTargetDataBlob left untested — no current strategy produces bytes**
+
+All manual test packages so far load into `dev_target_data_text`
+(TEXT column). `dev_target_data_blob` (BLOB) has never been exercised,
+because every Transform strategy written so far (passthrough, and the
+comments-shaped mapper) produces `str` values, not `bytes`. Not adding
+a test for it now — would require writing a Transform strategy purely
+to exercise an untested table, not because of a real need. Revisit if
+a real use case for binary output through DB Load ever comes up.
+
+
+### 📅 2026-08-04, Tuesday
+**06:34** | *[RESOLVE]*
+**Canonical format definition corrected**
+
+Found a stale comment (in JsonExtractStrategy) claiming the internal
+canonical format is always `list[dict]`. That was only ever true for
+CSV/JSON/PDF. XML/HTML (xmltodict-parsed) produce a nested dict; DOCX/
+XLSX produce a dict keyed by internal zip member filename. The correct
+definition: canonical format is any JSON-serializable `list` or
+`dict` — the outer shape follows the source format's own natural
+structure, not a fixed list-of-records shape. Corrected the misleading
+comment.

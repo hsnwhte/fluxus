@@ -14,16 +14,16 @@ def get_session(*, engine: Engine) -> Session:
     return Session(bind=engine)
 
 
-def create_all_pipeline_tables(*, engine: Engine) -> None:
+def create_all_runtime_tables(*, engine: Engine) -> None:
     FluxusORM.metadata.create_all(engine)
 
 
-def reset_all_pipeline_tables(*, engine: Engine) -> None:
+def reset_all_runtime_tables(*, engine: Engine) -> None:
     for table_name in FluxusORM.metadata.tables.keys():
         reset_table(engine=engine, table_name=table_name)
 
 
-def drop_all_pipeline_tables(*, engine: Engine) -> None:
+def drop_all_runtime_tables(*, engine: Engine) -> None:
     for table_name in FluxusORM.metadata.tables.keys():
         drop_table(engine=engine, table_name=table_name)
 

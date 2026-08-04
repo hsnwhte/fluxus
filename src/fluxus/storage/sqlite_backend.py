@@ -114,7 +114,7 @@ class RegistryStoreSQLite:
                 content_format=db_entry.content_format,
                 strategy_name=db_entry.strategy_name,
                 content_hash=db_entry.content_hash,
-                address=db_entry.payload_address,
+                address=db_entry.address,
                 created_at=db_entry.created_at,
                 is_active=db_entry.is_active,
             )
@@ -146,7 +146,7 @@ class RegistryStoreSQLite:
                 content_format=db_entry.content_format,
                 strategy_name=db_entry.strategy_name,
                 content_hash=db_entry.content_hash,
-                address=db_entry.payload_address,
+                address=db_entry.address,
                 created_at=db_entry.created_at,
                 is_active=db_entry.is_active,
             )
@@ -178,7 +178,7 @@ class RegistryStoreSQLite:
                 content_format=db_entry.content_format,
                 strategy_name=db_entry.strategy_name,
                 content_hash=db_entry.content_hash,
-                address=db_entry.payload_address,
+                address=db_entry.address,
                 created_at=db_entry.created_at,
                 is_active=db_entry.is_active,
             )

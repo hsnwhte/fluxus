@@ -85,8 +85,7 @@ class Orchestrator:
 
             current_phase = Phase.EXTRACT
             logger.info("Extracting data...")
-            extr_entry_id = self._extract(run_id, last_entry_id)
-            last_entry_id = extr_entry_id
+            last_entry_id = self._extract(run_id, last_entry_id)
             logger.info(
                 f"{current_phase} successful, registry entry id: {last_entry_id}"
             )
@@ -95,7 +94,7 @@ class Orchestrator:
             logger.info(
                 f"Transforming data based on strategy: '{self.input_args.transform_strategy_id}'"
             )
-            last_entry_id = self._transform(run_id, extr_entry_id)
+            last_entry_id = self._transform(run_id, last_entry_id)
             logger.info(
                 f"{current_phase} successful, registry entry id: {last_entry_id}"
             )
@@ -129,14 +128,14 @@ class Orchestrator:
             else:
                 logger.error(f"Failed to load/export to the source - invalid args.")
                 raise errors.InvalidInputError()
-        except errors.FluxusError as e:
+        except Exception as e:
             self.run_records_store.update_record(
                 run_id=run_id,
                 status=RunStatus.INTERRUPTED,
                 phase=current_phase,
                 entry_id=last_entry_id,
             )
-            raise
+            raise e
 
     def _export(self, run_id: int, entry_id: int) -> int:
         entry = self.registry_store.get_entry_by_id(entry_id=entry_id)

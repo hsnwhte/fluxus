@@ -2,7 +2,7 @@ from pathlib import Path
 
 DEV_ROOT_DIR = Path(__file__).resolve().parent
 
-DEV_PIPELINE_DB_URL = f"sqlite:///{DEV_ROOT_DIR / 'databases' / 'dev_pipeline.sqlite'}"
+DEV_RUNTIME_DB_URL = f"sqlite:///{DEV_ROOT_DIR / 'databases' / 'dev_runtime.sqlite'}"
 
 DEV_SOURCE_API_URL = "https://jsonplaceholder.typicode.com/comments/1"
 DEV_SOURCE_DB_URL = f"sqlite:///{DEV_ROOT_DIR / 'databases' / 'dev_source.sqlite'}"

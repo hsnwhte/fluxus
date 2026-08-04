@@ -10,6 +10,10 @@ class PdfDecodeStrategy:
     def decode(*, file_path: Path) -> ExtractableData:
         try:
             _ = pypdf.PdfReader(file_path)
+        except FileNotFoundError as e:
+            raise errors.DecodeSourceFileNotFoundError(
+                f"Could not find or read file at {file_path}"
+            ) from e
         except pypdf.errors.EmptyFileError as e:
             raise errors.DecodeEmptyFileError(f"Empty PDF file at {file_path}") from e
         except pypdf.errors.FileNotDecryptedError as e:

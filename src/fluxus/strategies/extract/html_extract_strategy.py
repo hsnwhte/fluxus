@@ -1,15 +1,19 @@
 import json
 import xmltodict
+from pyexpat import ExpatError
 from fluxus.enums import ContentFormat
 from fluxus.models.dto import TransformableData
+from fluxus.exceptions import errors
 
 
 class HtmlExtractStrategy:
     @staticmethod
     def extract(*, content: bytes) -> TransformableData:
-        parsed = xmltodict.parse(content.decode(encoding="utf-8"))
+        try:
+            parsed = xmltodict.parse(content.decode(encoding="utf-8"))
+        except (UnicodeDecodeError, ExpatError) as e:
+            raise errors.ExtractMalformedError(f"Malformed HTML content: {e}") from e
         content_bytes = json.dumps(parsed).encode()
-        result = TransformableData(
+        return TransformableData(
             content=content_bytes, origin_format=ContentFormat.HTML
         )
-        return result
