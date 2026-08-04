@@ -17,6 +17,7 @@ section.
 ## v0.7
 
 ### Automated (pytest)
+**Summary (as of 2026-08-04):**
 - Total: 77 tests passing
 - Coverage by category: storage (11), fetch (7), decode (27), extract (19),
   transform (1), load (11), export (1)
@@ -47,15 +48,17 @@ section.
  - Fluxus App Bugs: 0
  - Test Design Shortcomings: FIXED
 
-
-
 ### Manual verification
-**Summary (as of 2026-08-03):** 24 manual test packages run.
-19 passed as expected, 5 failed as expected (deliberate strategy/target
-schema mismatch, not bugs). 2 real bugs found and fixed along the way
-(`.htm` extension not recognized; `HtmlDecodeStrategy` missed catching
-`OSError`). `DevTargetDataBlob` (binary DB target) not yet exercised —
-no current Transform strategy produces bytes output.
+**Summary (as of 2026-08-04):** 
+ - Total manual test packages run: 31
+ - Valid results: 31 (26 passed as expected, 5 failed as expected)
+ - Fluxus App Bugs: 6 
+  `.htm` extension, OSError handling in HTML/XML Decode, empty-rows
+  DB insert, bare-JSON-object wrapping, `+xml` mime type variants,
+  HtmlExtractStrategy's xmltodict→lxml.html rewrite for real-world HTML
+  tolerance. 
+ - Note: `DevTargetDataBlob` (binary DB target) not yet exercised —
+  no current Transform strategy produces bytes output.
 
 #### Test 1 — file(json)→file(json)
 - **Input:** `comments.json` (500 records, jsonplaceholder sample)
@@ -222,4 +225,69 @@ no current Transform strategy produces bytes output.
 - **Input:** `Free_Test_Data_100KB_XLSX.xlsx`
 - **Command:** `python -m devtools.main test --test-pack 24`
 - **Verifies:** Decode(XLSX)→Extract(XLSX)→Transform(passthrough)→Load(API)
+- **Result:** PASS
+
+#### Test 25 — api(csv)→file(json)
+- **Input:** Federal Register API, `.csv` format
+  (`https://www.federalregister.gov/api/v1/documents.csv?per_page=5`)
+- **Command:** `python -m devtools.main test --test-pack 25`
+- **Verifies:** ApiFetchStrategy's Content-Type detection correctly
+  identifies a genuinely CSV-returning API source (not just JSON) →
+  Decode/Extract(CSV)→Transform(passthrough)→Export
+- **Result:** PASS
+
+#### Test 26 — db(postgresql)→file(json)
+- **Input:** Docker-hosted PostgreSQL container, `dialect_check` table
+- **Command:** `python -m devtools.main test --test-pack 26`
+- **Verifies:** Full pipeline (Fetch→Extract→Transform→Export) against
+  a non-SQLite dialect, replacing the standalone
+  `postgres_dialect_check.py` script with a proper TestPackage entry
+- **Result:** PASS
+
+#### Test 27 — api(csv)→api(json)
+- **Input:** Federal Register API, `.csv` format
+- **Command:** `python -m devtools.main test --test-pack 27`
+- **Verifies:** CSV-returning API source → API target (json), closing
+  the a_csv × a_json matrix gap
+- **Result:** PASS
+
+#### Test 28 — api(xml/rss)→api(json)
+- **Input:** NASA RSS feed (`https://www.nasa.gov/feed/`)
+- **Command:** `python -m devtools.main test --test-pack 28`
+- **Verifies:** Content-Type detection for XML variants
+- **Result:** Initially FAILED — `Content-Type: application/rss+xml`
+  wasn't recognized (MimeType only had bare `application/xml`). Fixed
+  by normalizing any `+xml`-suffixed mime type to `application/xml`
+  before lookup, rather than adding every XML variant as a separate
+  MimeType member. Currently investigating a second failure at the
+  Extract phase (xmltodict parsing the RSS content) — see next entry
+  once resolved.
+- 
+#### Test 29 — api(html)→api(json)
+- **Input:** `https://www.example.org/` (IANA example domain)
+- **Command:** `python -m devtools.main test --test-pack 29`
+- **Verifies:** HTML-returning API source → API target (json), closing
+  the a_html × a_json matrix gap
+- **Result:** PASS (after a fix) — `info.cern.ch` (original candidate)
+  failed to connect (likely outdated TLS on that historic server),
+  switched to `example.org`. That surfaced a real limitation:
+  `HtmlExtractStrategy` used `xmltodict`, which rejects standard,
+  valid HTML with unclosed tags (`<meta>`, `<br>`) because it expects
+  strict XML. Rewrote `HtmlExtractStrategy` to use `lxml.html` with a
+  small recursive element-to-dict helper instead — genuinely tolerant
+  of real-world HTML, not just XML-shaped HTML. Noted for a full
+  strategy consistency pass in v0.9 (this strategy now deviates
+  slightly from the shared static-method pattern with a
+  module-level helper function).
+
+#### Test 30 — api(xml/rss)→file(json)
+- **Input:** NASA RSS feed (`https://www.nasa.gov/feed/`)
+- **Command:** `python -m devtools.main test --test-pack 30`
+- **Verifies:** a_xml × f_json matrix gap
+- **Result:** PASS
+
+#### Test 31 — api(html)→file(json)
+- **Input:** `https://www.example.org/`
+- **Command:** `python -m devtools.main test --test-pack 31`
+- **Verifies:** a_html × f_json matrix gap
 - **Result:** PASS

@@ -566,3 +566,106 @@ definition: canonical format is any JSON-serializable `list` or
 `dict` — the outer shape follows the source format's own natural
 structure, not a fixed list-of-records shape. Corrected the misleading
 comment.
+
+**10:14** | *[MILESTONE v0.7 COMPLETE]*
+**v0.7 complete: format strategies, FetchCache, RunStatus, dialect
+verified, 102 tests passing**
+
+**Format strategies** — Decode + Extract implemented and tested for
+CSV, HTML, DOCX, XLSX, PDF (JSON and XML already existed, extended
+with consistent error handling). Confirmed the "new strategy = new
+file, not new architecture" claim holds across five new formats.
+Canonical Extract output redefined mid-session: not always
+`list[dict]` as an earlier comment claimed, but any JSON-serializable
+`list` or `dict` — the outer shape follows the source format's own
+structure (CSV/JSON/PDF produce lists of records, XML/HTML produce
+nested dicts, DOCX/XLSX produce a dict per internal zip member).
+
+**API Content-Type detection** — `ApiFetchStrategy` now reads the real
+`Content-Type` header instead of assuming JSON; raises explicitly if
+missing or unrecognized. `helpers.py` gained
+`content_format_to_mime`/`mime_to_content_format`, mapped by shared
+enum member names rather than a hand-maintained dict.
+
+**FetchCache implemented** — keyed by `api_url` (not content hash,
+which isn't known before a fetch happens), scoped to API sources only.
+Checked before fetching, written after a successful fetch.
+
+**RunStatus tracking** — `PipelineRunRecord` extended with `status`
+(RUNNING/COMPLETE/INTERRUPTED), `interrupted_phase`,
+`interrupted_after_entry_id`. `Orchestrator.run()` wrapped in try/except,
+updates status on both success and failure paths.
+
+**OCR and Attachment support dropped** — both explored in some depth
+(DTO/ORM drafts for Attachment) before recognizing they're
+domain-specific business logic, not engine responsibilities. A good
+catch of scope creep mid-design.
+
+**Real bugs found and fixed:**
+- `RegistryStoreSQLite.get_entry_by_run_id`/`get_entry_by_hash`
+  referenced a non-existent `payload_address` attribute (should be
+  `address`) — would have raised AttributeError on any real call
+- `.htm` extension wasn't recognized by Selector's decode map
+- `HtmlDecodeStrategy`/`XmlDecodeStrategy` didn't catch `OSError`,
+  so missing files raised raw lxml errors instead of
+  `DecodeSourceFileNotFoundError`
+- `DBLoadStrategy` empty-rows edge case (INSERT DEFAULT VALUES) —
+  found during v0.7's own manual testing, fixed with an explicit
+  empty check + WARNING log
+
+**DB dialect support confirmed for real** — installed Docker Desktop,
+ran a PostgreSQL container, verified `DBFetchStrategy` works completely
+unmodified against it. Closes the one roadmap item that had been
+sitting on a theoretical claim ("SQLAlchemy handles this") rather than
+actual verification.
+
+**Testing:** 77 automated (pytest) + 25 manual (devtools) = 102 tests
+passing. New `docs/TEST_REPORT.md` created as a standalone,
+externally-reviewable verification log, separate from ROADMAP/DIARY.
+
+**Deferred to v0.75:** Transform strategy identity (UUID7 per
+installed strategy), DB rollback safety across a run, Docker Compose
+setup for reproducible PostgreSQL dev environment.
+
+**Status:** v0.7 fully complete, all consistency-review checklist
+items confirmed.
+
+**10:31** | *[NOTE]* 
+### Capability matrix v2 (2026-08-03) — DONE / TODO only
+
+Superseded the earlier DONE/LTD/TODO matrix. Since API Content-Type
+detection now works correctly, no source/target combination is
+architecturally blocked anymore — everything remaining is either
+untested or requires a Transform strategy that doesn't exist yet
+(e.g. one producing XML/CSV/HTML instead of JSON). Both are TODO,
+not a hard limitation.
+
+| Src\Trg | db     | a_json | a_xml | a_csv  | a_html | f_json | f_xml | f_csv | f_html |
+|---------|--------|--------|-------|--------|--------|--------|-------|-------|--------|
+| db      | DONE   | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| a_json  | DONE   | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| a_xml   | DONE*  | DONE   | TODO* | TODO*  | TODO*  | TODO   | TODO* | TODO* | TODO*  |
+| a_csv   | DONE*  | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| a_html  | DONE*  | DONE   | TODO* | TODO*  | TODO*  | TODO   | TODO* | TODO* | TODO*  |
+| f_xml   | DONE*  | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| f_json  | DONE   | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| f_csv   | DONE*  | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| f_html  | DONE*  | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+
+\* DONE means the combination was tested and its behavior was
+confirmed as expected. This includes cases where the pipeline
+correctly failed due to a known Transform/target schema mismatch
+(see Tests 11/14/17/20/23), not just cases where data successfully
+reached the target. TODO means not yet tested.
+
+\* TODO All non-JSON target format columns (a_xml, a_csv, a_html, f_xml,
+f_csv, f_html) remain TODO, not because of any architectural
+limitation — `target_format` and `Content-Type` header handling are
+already fully implemented on the Load/Export side. What's missing is
+a concrete Transform strategy that actually converts canonical JSON
+into XML/CSV/HTML output; every strategy written so far (passthrough,
+comments-mapper) only produces JSON. Writing and validating a
+non-JSON-producing Transform strategy is deferred to v0.9's
+real-consumer validation phase (fluxus-ncr), where a genuine use case
+will drive what gets built, rather than writing one now just to
+close a matrix cell.

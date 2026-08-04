@@ -23,7 +23,7 @@ v0.6 -- [DONE] ALPHA release: CLI interface complete (interfaces/cli).
         Selector/Factory mechanism generalized (not hardcoded to
         the v0.5 path). Devtools inspect tool functional.
 
-v0.7 -- Extended content format strategies: CSV, HTML, DOCX,
+v0.7 -- [DONE] Extended content format strategies: CSV, HTML, DOCX,
         XLSX, and PDF sources added (Decode + Extract), proving the
         "new strategy = new file, not new architecture" claim.
         API Content-Type detection implemented (ApiFetchStrategy now

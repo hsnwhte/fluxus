@@ -31,6 +31,8 @@ class ApiFetchStrategy:
         if mime is None:
             raise errors.FetchContentTypeMissingError(address=address)
         clean_mime = mime.split(";")[0].strip()
+        if clean_mime.endswith("+xml"):
+            clean_mime = "application/xml"
         try:
             mime_type = MimeType(clean_mime)
         except ValueError as e:
