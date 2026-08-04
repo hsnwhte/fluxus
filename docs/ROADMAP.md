@@ -1,5 +1,5 @@
-v0.1 -- [DONE] Project scaffolding complete. src layout, pyproject.toml,
-        .gitignore, docs/ set up. Core Pydantic DTOs and exception
+v0.1 -- [DONE] Project scaffolding complete. src layout, pyproject.toml, 
+        .gitignore, docs/ set up. Core Pydantic DTOs and exception 
         hierarchy defined. No working logic yet.
 
 v0.2 -- [DONE] Storage layer works. StorageBackend Protocol defined,
@@ -23,31 +23,91 @@ v0.6 -- [DONE] ALPHA release: CLI interface complete (interfaces/cli).
         Selector/Factory mechanism generalized (not hardcoded to
         the v0.5 path). Devtools inspect tool functional.
 
-v0.7 -- Extended content format strategies: CSV, HTML, XLSX, OCR sources,
-        and DB-side fetch strategy added, proving the "new strategy =
-        new file, not new architecture" claim. Test coverage extended
-        for each.
+v0.7 -- [DONE] Extended content format strategies: CSV, HTML, DOCX,
+        XLSX, and PDF sources added (Decode + Extract), proving the
+        "new strategy = new file, not new architecture" claim.
+        API Content-Type detection implemented (ApiFetchStrategy now
+        reads the real Content-Type header instead of assuming JSON;
+        raises explicitly if the header is missing/unrecognized).
+        DB-side dialect support confirmed via SQLAlchemy's own
+        abstraction — no new strategy code required, only verification
+        against a non-SQLite dialect.
+        Test coverage extended for each new format. Manual end-to-end
+        verification via devtools.
+        PipelineRunRecord is extended to include status.
 
-        Attachment support: new AttachmentRef registry entity for
-        binary/file references (images, scans) linked to any record via
-        hash-based FK — content-addressable, dedupes identical uploads
-        automatically. Core registry capability, not domain-specific.
+        FetchCache implemented: Fetch strategies check FetchCache
+        by api_url before hitting the source, and write to fetch_cache
+        table in Runtime Database after a successful fetch.
 
-v0.8  -- CI pipeline (GitHub Actions) set up: tests run on push.
-         Error handling audited (no bare Exception/ValueError
-         anywhere). Logging finalized across all processors.
+        OCR and Attachment support considered and deliberately dropped:
+        both are domain-specific business logic (image-to-text,
+        file-reference tracking), not engine-level concerns. Belongs
+        in downstream Transform strategies or domain frameworks
+        (e.g. a QMS layer), not in Fluxus core. See DIARY.md.
 
-v0.85 -- PostgreSQL storage backend added alongside SQLite (new
-         StorageBackend implementation via SQLAlchemy). Proves
+        Consistency review, concrete checklist:
+        [x] Every new strategy file (CSV/HTML/DOCX/XLSX/PDF Decode and
+          Extract) follows the same internal structure as the
+          reference strategy
+        [x] RunStatus is never left at RUNNING after a completed
+          process, including unexpected/non-FluxusError exceptions
+        [x] FetchCache is only written to and read from for API
+          sources, never DB or FILE
+        [x] TEST_REPORT.md entries exist for every new format
+          combination added this milestone
+
+v0.75 -- PostgreSQL storage backend added alongside SQLite (new
+         StorageBackend implementation via SQLAlchemy): Proves
          storage layer is swappable, not just extensible on the
          strategy side. Separate, isolated practice repo
          (postgres-playground) for PL/pgSQL triggers, RPC
          functions, and RLS policies — documented, not part of
          Fluxus's core codebase.
+         DB rollback safety across a run added.
+         Transform strategy identity: assign a persistent unique id (UUID7) to
+         each installed strategy at install time, stored in the registry
+         alongside strategy_name. Numeric strategy ids can shift across
+         install/uninstall and class names aren't guaranteed unique — neither
+         is a reliable lineage record on its own.
 
-v0.9  -- BETA release: README complete (setup, architecture,
-         rationale). Optional dependency groups (sql, api, dev)
-         verified to work in isolation.
+         Consistency review, concrete checklist:
+         [ ] PostgreSQL backend passes the same test suite as SQLite,
+           unmodified (proves the Protocol abstraction actually holds)
+         [ ] A run interrupted mid-phase leaves no orphaned/partial
+           rows once rollback safety is in place
+         [ ] Every RegistryEntry produced by an installed Transform
+           strategy carries a resolvable strategy UUID
+         [ ] postgres-playground remains fully isolated — no imports
+           from or into Fluxus core
+        
+
+v0.8 -- CI pipeline (GitHub Actions) set up: tests run on push.
+        Optional dependency groups (sql, api, dev) verified to
+        work in isolation. Error handling audited (no bare
+        Exception/ValueError anywhere). Logging finalized across
+        all processors.
+        Transform failures wrapped with a generic troubleshooting hint (not a
+        diagnosis) pointing users to check their strategy against the
+        source data shape.
+
+        Consistency review, concrete checklist:
+        [ ] CI runs the full test suite on every push and blocks
+          merge on failure
+        [ ] Installing only one optional dependency group (e.g.
+          fluxus[api]) and invoking an unrelated feature (e.g. DB
+          fetch) fails with a clear, actionable error — not a raw
+          ImportError/ModuleNotFoundError
+        [ ] grep for "raise Exception" / "raise ValueError" across
+          src/fluxus returns nothing
+        [ ] Every processor (Fetcher, Decoder, Extractor, Transformer,
+          Loader, Exporter) logs at least start/success/failure at a
+          consistent level, not just the Orchestrator
+
+
+v0.9  -- BETA release: README complete (setup, summary) complete.
+         DEVELOPER_MANUAL.md (architecture, rationale) complete.
+         Published to PyPI (pip install fluxus becomes real).
 
          Real-consumer validation: fluxus-ncr's first TransformStrategy
          (Excel source) implemented and run end-to-end against Fluxus

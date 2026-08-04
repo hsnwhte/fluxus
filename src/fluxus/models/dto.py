@@ -1,7 +1,7 @@
 from pydantic import BaseModel, computed_field, model_validator
 from pathlib import Path
 from datetime import datetime
-from fluxus.enums import FluxusIOType, ContentFormat, Phase, MimeType
+from fluxus.enums import FluxusIOType, ContentFormat, Phase
 
 
 class InputArgs(BaseModel):
@@ -56,6 +56,15 @@ class InputArgs(BaseModel):
         return self
 
 
+class FetchCacheData(BaseModel):
+    model_config = {"frozen": True}
+    api_url: str
+    registry_address: int
+    payload_address: str
+    created_at: datetime
+    is_active: bool
+
+
 class RegistryRecord(BaseModel):
     model_config = {"frozen": True}
     id: int
@@ -84,11 +93,3 @@ class TransformableData(BaseModel):
 class TransformedData(BaseModel):
     model_config = {"frozen": True}
     content: bytes
-
-
-class Attachment(BaseModel):
-    model_config = {"frozen": True}
-    hash: str
-    filename: str
-    mime_type: MimeType
-    description: str | None

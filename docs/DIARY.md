@@ -438,3 +438,234 @@ v0.6 fully complete. Alpha release conditions (per original roadmap)
 met: CLI, generalized Selector, functional devtools inspect tool — plus
 a working plugin-style installer well ahead of its original v1.x
 schedule.
+
+
+### 📅 2026-07-31, Friday (v0.6 -> v0.7) 
+**13:54** | *[RESOLVE]*
+**v0.7 scope progress — new format strategies, API Content-Type
+detection, Attachment/OCR dropped**
+
+Decode + Extract implemented for CSV, HTML, DOCX, XLSX, PDF. Each
+Decode strategy stays minimal (validate + carry raw bytes); each
+Extract strategy converts to a canonical structure — `list[dict]` for
+CSV/PDF, raw `xmltodict`-parsed nested dict for XML/HTML, and (after
+reconsidering `python-docx`/`openpyxl` vs. raw-XML-via-zipfile) a full
+`{filename.xml: <parsed>}` dict per internal ZIP member for DOCX/XLSX.
+Deliberately chose the "lossless but raw" approach over
+library-mediated output for DOCX/XLSX — reasoning: Fluxus is a young
+engine, Transform strategies are still few, but each one written adds
+a reference example that makes the next easier. The library-mediated
+route would have been easier short-term but hides structure Transform
+might need.
+
+`ApiFetchStrategy` now reads the actual `Content-Type` response header
+instead of assuming JSON. Added `content_format_to_mime` /
+`mime_to_content_format` in `helpers.py`, mapping by enum member name
+(both enums share member names for shared formats) rather than a
+hand-maintained dict — image mime types (PNG/JPEG) intentionally have
+no `ContentFormat` counterpart and raise cleanly if looked up. Missing
+or unrecognized Content-Type headers raise explicitly rather than
+silently defaulting to JSON — deliberate choice, may revisit if this
+proves too strict in practice.
+
+Confirmed DB-side dialect support requires no new strategy code —
+SQLAlchemy's dialect abstraction already handles it, same principle
+established back when SQLite was first chosen. Only verification
+against a real non-SQLite dialect remains open.
+
+**Dropped: Attachment/AttachmentRef and OCR.** Both were explored in
+some depth (DTO/ORM drafts for Attachment, considered as `v0.7`/`v0.75`
+scope) before recognizing they're domain-specific business logic, not
+engine responsibilities — a parser/sync engine doesn't need to
+"understand" attachments as a first-class concept when it can already
+carry arbitrary binary content through the existing pipeline. Belongs
+in a downstream Transform strategy or a domain-specific framework
+(e.g. a future QMS layer), not Fluxus core. Good instance of catching
+scope creep mid-design rather than after building it.
+
+**Remaining before v0.7 is done:** devtools extension for new formats,
+Selector-side fixes, pytest coverage for all new strategies, full
+manual end-to-end verification. Not detailing further here — tracked
+in progress, not this entry.
+
+### 📅 2026-08-03, Monday
+**15:12** | *[FUTURE IDEA — post-v1.0]*
+**fluxus-llm: a lightweight LLM API tool for Transform strategies**
+
+Idea: a separate, small companion package (not part of Fluxus core)
+that gives Transform strategy authors an easy way to call LLM APIs
+(OpenAI, Anthropic, etc.) from within a strategy — e.g. summarizing,
+classifying, or enriching data mid-transform.
+
+Scope stays deliberately narrow: this is a *tool* a Transform strategy
+can call, not a new pipeline capability. Fetch/Decode/Extract/Load/
+Export stay untouched; Transform still only talks to the runtime DB,
+nothing changes architecturally. The tool would expose a small set of
+convenience methods so a Transform strategy just passes kwargs and
+gets a result back, without the strategy author needing to hand-roll
+HTTP requests, retries, or provider-specific request shapes.
+
+Two motivations: (1) learning how to properly manage LLM API requests
+(rate limiting, retries, provider differences) in a small, isolated
+scope rather than a large one; (2) keeping it a genuinely light,
+optional companion — not a dependency Fluxus core ever needs.
+
+Not scoped into any current roadmap version — revisit after v1.0.
+
+
+**17:09** | *[RESOLVE]*
+**Transform strategy identity — class name isn't a reliable enough
+lineage record**
+
+While manually testing v0.7, noticed `RegistryEntry.strategy_name`
+stores the Transform strategy's class name. Realized this isn't a
+strong enough identifier long-term: numeric strategy ids (used to
+select a strategy at runtime) can shift across install/uninstall, and
+class names aren't guaranteed unique between strategy authors. Neither
+is a stable, unique reference for lineage purposes.
+
+Idea: assign each installed strategy a persistent unique identifier
+(UUID7 — time-sortable, so ids remain roughly ordered by install time)
+at install time, store it alongside the class name in the registry.
+Deferred to v0.75, not urgent for v0.7's own scope.
+
+**17:56** | *[TODO v0.8]* 
+**Transform failures need a generic hint, even without knowing the cause**
+
+Manually testing a mismatched strategy (csv source, comments-shaped
+Transform strategy) produced a bare `KeyError: 'id'` traceback — correct
+behavior, but not helpful to a user seeing it for the first time.
+Fluxus can't know why a Transform strategy failed (it's entirely
+user-authored), but it can wrap Transform exceptions with a generic,
+non-specific hint — e.g. "Transform strategy raised an error; check
+that the strategy matches the shape of the data it receives" — without
+pretending to diagnose the actual cause. Add during v0.8's error
+handling audit.
+
+**18:24** | *[RESOLVE]*
+**DevTargetDataBlob left untested — no current strategy produces bytes**
+
+All manual test packages so far load into `dev_target_data_text`
+(TEXT column). `dev_target_data_blob` (BLOB) has never been exercised,
+because every Transform strategy written so far (passthrough, and the
+comments-shaped mapper) produces `str` values, not `bytes`. Not adding
+a test for it now — would require writing a Transform strategy purely
+to exercise an untested table, not because of a real need. Revisit if
+a real use case for binary output through DB Load ever comes up.
+
+
+### 📅 2026-08-04, Tuesday
+**06:34** | *[RESOLVE]*
+**Canonical format definition corrected**
+
+Found a stale comment (in JsonExtractStrategy) claiming the internal
+canonical format is always `list[dict]`. That was only ever true for
+CSV/JSON/PDF. XML/HTML (xmltodict-parsed) produce a nested dict; DOCX/
+XLSX produce a dict keyed by internal zip member filename. The correct
+definition: canonical format is any JSON-serializable `list` or
+`dict` — the outer shape follows the source format's own natural
+structure, not a fixed list-of-records shape. Corrected the misleading
+comment.
+
+**10:14** | *[MILESTONE v0.7 COMPLETE]*
+**v0.7 complete: format strategies, FetchCache, RunStatus, dialect
+verified, 102 tests passing**
+
+**Format strategies** — Decode + Extract implemented and tested for
+CSV, HTML, DOCX, XLSX, PDF (JSON and XML already existed, extended
+with consistent error handling). Confirmed the "new strategy = new
+file, not new architecture" claim holds across five new formats.
+Canonical Extract output redefined mid-session: not always
+`list[dict]` as an earlier comment claimed, but any JSON-serializable
+`list` or `dict` — the outer shape follows the source format's own
+structure (CSV/JSON/PDF produce lists of records, XML/HTML produce
+nested dicts, DOCX/XLSX produce a dict per internal zip member).
+
+**API Content-Type detection** — `ApiFetchStrategy` now reads the real
+`Content-Type` header instead of assuming JSON; raises explicitly if
+missing or unrecognized. `helpers.py` gained
+`content_format_to_mime`/`mime_to_content_format`, mapped by shared
+enum member names rather than a hand-maintained dict.
+
+**FetchCache implemented** — keyed by `api_url` (not content hash,
+which isn't known before a fetch happens), scoped to API sources only.
+Checked before fetching, written after a successful fetch.
+
+**RunStatus tracking** — `PipelineRunRecord` extended with `status`
+(RUNNING/COMPLETE/INTERRUPTED), `interrupted_phase`,
+`interrupted_after_entry_id`. `Orchestrator.run()` wrapped in try/except,
+updates status on both success and failure paths.
+
+**OCR and Attachment support dropped** — both explored in some depth
+(DTO/ORM drafts for Attachment) before recognizing they're
+domain-specific business logic, not engine responsibilities. A good
+catch of scope creep mid-design.
+
+**Real bugs found and fixed:**
+- `RegistryStoreSQLite.get_entry_by_run_id`/`get_entry_by_hash`
+  referenced a non-existent `payload_address` attribute (should be
+  `address`) — would have raised AttributeError on any real call
+- `.htm` extension wasn't recognized by Selector's decode map
+- `HtmlDecodeStrategy`/`XmlDecodeStrategy` didn't catch `OSError`,
+  so missing files raised raw lxml errors instead of
+  `DecodeSourceFileNotFoundError`
+- `DBLoadStrategy` empty-rows edge case (INSERT DEFAULT VALUES) —
+  found during v0.7's own manual testing, fixed with an explicit
+  empty check + WARNING log
+
+**DB dialect support confirmed for real** — installed Docker Desktop,
+ran a PostgreSQL container, verified `DBFetchStrategy` works completely
+unmodified against it. Closes the one roadmap item that had been
+sitting on a theoretical claim ("SQLAlchemy handles this") rather than
+actual verification.
+
+**Testing:** 77 automated (pytest) + 25 manual (devtools) = 102 tests
+passing. New `docs/TEST_REPORT.md` created as a standalone,
+externally-reviewable verification log, separate from ROADMAP/DIARY.
+
+**Deferred to v0.75:** Transform strategy identity (UUID7 per
+installed strategy), DB rollback safety across a run, Docker Compose
+setup for reproducible PostgreSQL dev environment.
+
+**Status:** v0.7 fully complete, all consistency-review checklist
+items confirmed.
+
+**10:31** | *[NOTE]* 
+### Capability matrix v2 (2026-08-03) — DONE / TODO only
+
+Superseded the earlier DONE/LTD/TODO matrix. Since API Content-Type
+detection now works correctly, no source/target combination is
+architecturally blocked anymore — everything remaining is either
+untested or requires a Transform strategy that doesn't exist yet
+(e.g. one producing XML/CSV/HTML instead of JSON). Both are TODO,
+not a hard limitation.
+
+| Src\Trg | db     | a_json | a_xml | a_csv  | a_html | f_json | f_xml | f_csv | f_html |
+|---------|--------|--------|-------|--------|--------|--------|-------|-------|--------|
+| db      | DONE   | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| a_json  | DONE   | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| a_xml   | DONE*  | DONE   | TODO* | TODO*  | TODO*  | TODO   | TODO* | TODO* | TODO*  |
+| a_csv   | DONE*  | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| a_html  | DONE*  | DONE   | TODO* | TODO*  | TODO*  | TODO   | TODO* | TODO* | TODO*  |
+| f_xml   | DONE*  | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| f_json  | DONE   | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| f_csv   | DONE*  | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+| f_html  | DONE*  | DONE   | TODO* | TODO*  | TODO*  | DONE   | TODO* | TODO* | TODO*  |
+
+\* DONE means the combination was tested and its behavior was
+confirmed as expected. This includes cases where the pipeline
+correctly failed due to a known Transform/target schema mismatch
+(see Tests 11/14/17/20/23), not just cases where data successfully
+reached the target. TODO means not yet tested.
+
+\* TODO All non-JSON target format columns (a_xml, a_csv, a_html, f_xml,
+f_csv, f_html) remain TODO, not because of any architectural
+limitation — `target_format` and `Content-Type` header handling are
+already fully implemented on the Load/Export side. What's missing is
+a concrete Transform strategy that actually converts canonical JSON
+into XML/CSV/HTML output; every strategy written so far (passthrough,
+comments-mapper) only produces JSON. Writing and validating a
+non-JSON-producing Transform strategy is deferred to v0.9's
+real-consumer validation phase (fluxus-ncr), where a genuine use case
+will drive what gets built, rather than writing one now just to
+close a matrix cell.

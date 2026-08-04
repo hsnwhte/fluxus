@@ -1,8 +1,26 @@
-from fluxus.strategies.protocols import DecodeStrategyProtocol
+from pathlib import Path
+import csv
+from fluxus.exceptions import errors
+from fluxus.enums import ContentFormat
+from fluxus.models.dto import ExtractableData
 
-class CsvDecodeStrategy(DecodeStrategyProtocol):
-    """Decodes CSV sources into canonical form.
 
-    TODO: not yet implemented — planned for v0.7 (see docs/ROADMAP.md).
-    """
-    pass
+class CsvDecodeStrategy:
+    @staticmethod
+    def decode(*, file_path: Path) -> ExtractableData:
+        try:
+            content = file_path.read_bytes()
+            with open(file_path, newline="", encoding="utf-8") as f:
+                csv.Sniffer().sniff(f.read(2048))
+        except FileNotFoundError as e:
+            raise errors.DecodeSourceFileNotFoundError(
+                f"Could not find or read file at {file_path}"
+            ) from e
+        except PermissionError as e:
+            raise errors.DecodePermissionError(
+                f"Permission denied reading {file_path}"
+            ) from e
+        except csv.Error as e:
+            raise errors.DecodeMalformedError(f"Malformed CSV at {file_path}") from e
+
+        return ExtractableData(content=content, source_format=ContentFormat.CSV)

@@ -1,11 +1,16 @@
 import logging
 from fluxus import settings
-from fluxus.models.dto import InputArgs, TransformableData, TransformedData
+from fluxus.models.dto import (
+    InputArgs,
+    TransformableData,
+    TransformedData,
+)
 from fluxus.selector import selector
 from fluxus.storage.backend import (
     PayloadStoreProtocol,
     RegistryStoreProtocol,
     PipelineRunRecordsProtocol,
+    FetchCacheStoreProtocol,
 )
 from fluxus.processors.fetcher import Fetcher
 from fluxus.processors.decoder import Decoder
@@ -13,7 +18,7 @@ from fluxus.processors.extractor import Extractor
 from fluxus.processors.transformer import Transformer
 from fluxus.processors.loader import Loader
 from fluxus.processors.exporter import Exporter
-from fluxus.enums import Phase
+from fluxus.enums import Phase, FluxusIOType, RunStatus
 from fluxus import helpers
 from fluxus.exceptions import errors
 
@@ -27,59 +32,110 @@ class Orchestrator:
         run_records_store: PipelineRunRecordsProtocol,
         payload_store: PayloadStoreProtocol,
         registry_store: RegistryStoreProtocol,
+        fetch_cache_store: FetchCacheStoreProtocol,
     ):
         self.input_args = input_args
         self.run_records_store = run_records_store
         self.payload_store = payload_store
         self.registry_store = registry_store
+        self.fetch_cache_store = fetch_cache_store
 
     def run(self) -> int:
+        current_phase = None
+        last_entry_id = None
         run_id: int = self.run_records_store.register_run()
         logger.info(f"Initiating run: {run_id}")
-        if self.input_args.source_type.value in ("api", "db"):
-            logger.info(
-                f"Fetching from {self.input_args.source_type.value}: '{self.input_args.source_address}'"
-            )
-            entry_id = self._fetch(run_id)
-            logger.info("Fetch successful.")
-        elif self.input_args.source_type.value == "file":
-            logger.info(
-                f"Decoding the {self.input_args.source_type.value}: '{self.input_args.source_address}'"
-            )
-            entry_id = self._decode(run_id)
-            logger.info("Decode successful.")
-        else:
-            logger.error(f"Failed to fetch/decode the source - invalid args.")
-            raise errors.InvalidInputError()
+        try:
+            s_type = self.input_args.source_type
+            s_address = self.input_args.source_address
 
-        logger.info("Extracting data...")
-        extr_entry_id = self._extract(run_id, entry_id)
-        logger.info(f"Extract successful.")
+            if s_type == FluxusIOType.FILE:
+                current_phase = Phase.DECODE
+                logger.info(f"Decoding the {s_type.value}: '{s_address}'")
+                last_entry_id = self._decode(run_id)
+                logger.info(
+                    f"{current_phase} successful, registry entry id: {last_entry_id}"
+                )
 
-        logger.info(
-            f"Transforming data based on strategy: '{self.input_args.transform_strategy_id}'"
-        )
-        trns_entry_id = self._transform(run_id, extr_entry_id)
-        logger.info("Transform successful.")
+            elif s_type == FluxusIOType.DB:
+                current_phase = Phase.FETCH
+                logger.info(f"Fetching from {s_type.value}: '{s_address}'")
+                last_entry_id = self._fetch(run_id)
+                logger.info(
+                    f"{current_phase} successful, registry entry id: {last_entry_id}"
+                )
 
-        if self.input_args.target_type.value in ("api", "db"):
+            else:
+                current_phase = Phase.FETCH
+                logger.info(f"Checking fetch cache...")
+                try:
+                    cache = self.fetch_cache_store.load(api_url=s_address)
+                    last_entry_id = cache.registry_address
+                    logger.info(
+                        f"Found cached data for url '{s_address}' at entry id: {last_entry_id}"
+                    )
+
+                except errors.FetchCacheNotFoundError:
+                    logger.info(f"No cache data found for url '{s_address}'")
+                    logger.info(f"Fetching data from source...")
+                    last_entry_id = self._fetch(run_id)
+                    logger.info(
+                        f"{current_phase} successful, registry entry id: {last_entry_id}"
+                    )
+
+            current_phase = Phase.EXTRACT
+            logger.info("Extracting data...")
+            last_entry_id = self._extract(run_id, last_entry_id)
             logger.info(
-                f"Loading to {self.input_args.target_type.value}: '{self.input_args.target_address}'"
+                f"{current_phase} successful, registry entry id: {last_entry_id}"
             )
-            load_entry_id = self._load(run_id, trns_entry_id)
-            logger.info(f"Load successful. Load Id: {load_entry_id}")
-            return load_entry_id
 
-        elif self.input_args.target_type.value == "file":
+            current_phase = Phase.TRANSFORM
             logger.info(
-                f"Exporting to {self.input_args.target_type.value}: '{self.input_args.target_address}'"
+                f"Transforming data based on strategy: '{self.input_args.transform_strategy_id}'"
             )
-            export_entry_id = self._export(run_id, trns_entry_id)
-            logger.info(f"Export successful. Export Id: {export_entry_id}")
-            return export_entry_id
-        else:
-            logger.error(f"Failed to load/export to the source - invalid args.")
-            raise errors.InvalidInputError()
+            last_entry_id = self._transform(run_id, last_entry_id)
+            logger.info(
+                f"{current_phase} successful, registry entry id: {last_entry_id}"
+            )
+
+            if self.input_args.target_type.value in ("api", "db"):
+                current_phase = Phase.LOAD
+                logger.info(
+                    f"Loading to {self.input_args.target_type.value}: '{self.input_args.target_address}'"
+                )
+                last_entry_id = self._load(run_id, last_entry_id)
+                logger.info(
+                    f"{current_phase} successful, registry entry id: {last_entry_id}"
+                )
+                self.run_records_store.update_record(
+                    run_id=run_id, status=RunStatus.COMPLETE
+                )
+                return last_entry_id
+            elif self.input_args.target_type.value == "file":
+                current_phase = Phase.EXPORT
+                logger.info(
+                    f"Exporting to {self.input_args.target_type.value}: '{self.input_args.target_address}'"
+                )
+                last_entry_id = self._export(run_id, last_entry_id)
+                logger.info(
+                    f"{current_phase} successful, registry entry id: {last_entry_id}"
+                )
+                self.run_records_store.update_record(
+                    run_id=run_id, status=RunStatus.COMPLETE
+                )
+                return last_entry_id
+            else:
+                logger.error(f"Failed to load/export to the source - invalid args.")
+                raise errors.InvalidInputError()
+        except Exception as e:
+            self.run_records_store.update_record(
+                run_id=run_id,
+                status=RunStatus.INTERRUPTED,
+                phase=current_phase,
+                entry_id=last_entry_id,
+            )
+            raise e
 
     def _export(self, run_id: int, entry_id: int) -> int:
         entry = self.registry_store.get_entry_by_id(entry_id=entry_id)
@@ -217,4 +273,11 @@ class Orchestrator:
             content_hash=helpers.generate_hash(content=data.content),
             address=str(payload_address),
         )
+        if self.input_args.source_type == FluxusIOType.API:
+            self.fetch_cache_store.save(
+                api_url=self.input_args.source_address,
+                registry_address=entry_id,
+                payload_address=payload_address,
+            )
+
         return entry_id

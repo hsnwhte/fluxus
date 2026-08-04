@@ -72,6 +72,18 @@ class FetchServerError(FetchApiError):
         super().__init__(message)
 
 
+class FetchContentTypeMissingError(FetchApiError):
+    """Source API does not provide content-type data"""
+
+    def __init__(self, address: str):
+        message = f"Source '{address}' content-type is unknown."
+        super().__init__(message)
+
+
+class FetchCacheNotFoundError(FetchApiError):
+    """Fetch cache does not exist or was deleted"""
+
+
 class FetchTableNameNotProvidedError(FetchDbError):
     def __init__(self):
         message = "No table name provided as argument for fetching from db."
@@ -102,6 +114,18 @@ class DecodeError(FluxusError):
 
 class DecodeMalformedError(DecodeError):
     """The file does not conform to the expected format (malformed CSV/XML/JSON)."""
+
+
+class DecodePermissionError(DecodeError):
+    """Access to file is denied"""
+
+
+class DecodeEmptyFileError(DecodeError):
+    """The file is empty"""
+
+
+class DecodeSourceFileNotFoundError(DecodeError):
+    """Source file could not be found"""
 
 
 class ExtractError(FluxusError):

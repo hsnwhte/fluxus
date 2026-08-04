@@ -1,25 +1,26 @@
 import httpx
 
-from fluxus.enums import MimeType, ContentFormat
+from fluxus.enums import ContentFormat
 from fluxus.models.dto import TransformedData
 from fluxus.exceptions import errors
+from fluxus.helpers import content_format_to_mime
 
-CONTENT_FORMAT_TO_MIME = {
-    ContentFormat.JSON: MimeType.JSON,
-    ContentFormat.XML: MimeType.XML,
-    ContentFormat.CSV: MimeType.CSV,
-    ContentFormat.HTML: MimeType.HTML,
-}
 
 class ApiLoadStrategy:
     @staticmethod
-    def load(*, data:TransformedData, address:str, target_format:ContentFormat, table_name:str | None = None) ->None:
+    def load(
+        *,
+        data: TransformedData,
+        address: str,
+        target_format: ContentFormat,
+        table_name: str | None = None,
+    ) -> None:
         try:
             response = httpx.put(
                 url=address,
                 content=data.content,
-                headers={"Content-Type": CONTENT_FORMAT_TO_MIME[target_format].value},
-                timeout=10.0
+                headers={"Content-Type": content_format_to_mime(target_format).value},
+                timeout=10.0,
             )
             response.raise_for_status()
         except httpx.HTTPStatusError as e:
@@ -38,4 +39,3 @@ class ApiLoadStrategy:
             if 500 <= status < 600:
                 raise errors.LoadServerError(address, status)
             raise
-
