@@ -3,7 +3,7 @@ import typer
 import json
 from pydantic import ValidationError
 from dataclasses import asdict
-from devtools.settings import *
+from devtools import settings as dev_settings
 from devtools.tools import db_tools
 from devtools.test_packages import TEST_PACKAGES
 from fluxus import settings as runtime_settings
@@ -74,7 +74,7 @@ def test(
             typer.echo(f"Invalid input: {e}", err=True)
             raise typer.Exit(code=1)
 
-    eng_pipe = db_tools.get_engine(url=DEV_RUNTIME_DB_URL, echo=True)
+    eng_pipe = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=True)
     sess_pipe = db_tools.get_session(engine=eng_pipe)
     logger.debug("Pipeline db session created.")
 
@@ -102,7 +102,7 @@ def test(
 def inspect(
     payload_id: int = typer.Option(..., "--payload-id", "-p"),
 ):
-    eng_pipe = db_tools.get_engine(url=DEV_RUNTIME_DB_URL, echo=False)
+    eng_pipe = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=False)
     sess_pipe = db_tools.get_session(engine=eng_pipe)
     payload_store = PayloadStoreSQLite(session=sess_pipe)
 
@@ -123,39 +123,37 @@ def inspect(
 
 @dev.command(name="setup-test-env")
 def setup_test_env():
-    eng_pipe = db_tools.get_engine(url=DEV_RUNTIME_DB_URL, echo=True)
+    eng_pipe = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=True)
     db_tools.create_all_runtime_tables(engine=eng_pipe)
-    eng_src = db_tools.get_engine(url=DEV_SOURCE_DB_URL, echo=True)
+    eng_src = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=True)
     db_tools.create_all_source_tables(engine=eng_src)
-    eng_trg = db_tools.get_engine(url=DEV_TARGET_DB_URL, echo=True)
+    eng_trg = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=True)
     db_tools.create_all_target_tables(engine=eng_trg)
 
 
 @dev.command(name="reset-test-env")
 def reset_test_env():
-    eng_pipe = db_tools.get_engine(url=DEV_RUNTIME_DB_URL, echo=True)
+    eng_pipe = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=True)
     db_tools.reset_all_runtime_tables(engine=eng_pipe)
-    eng_src = db_tools.get_engine(url=DEV_SOURCE_DB_URL, echo=True)
+    eng_src = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=True)
     db_tools.reset_all_source_tables(engine=eng_src)
-    eng_trg = db_tools.get_engine(url=DEV_TARGET_DB_URL, echo=True)
+    eng_trg = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=True)
     db_tools.reset_all_target_tables(engine=eng_trg)
 
 
 @dev.command(name="hard-reset-test-env")
 def hard_reset_test_env():
-    eng_pipe = db_tools.get_engine(url=DEV_RUNTIME_DB_URL, echo=True)
+    eng_pipe = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=True)
     db_tools.drop_all_runtime_tables(engine=eng_pipe)
-    eng_src = db_tools.get_engine(url=DEV_SOURCE_DB_URL, echo=True)
+    eng_src = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=True)
     db_tools.drop_all_source_tables(engine=eng_src)
-    eng_trg = db_tools.get_engine(url=DEV_TARGET_DB_URL, echo=True)
+    eng_trg = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=True)
     db_tools.drop_all_target_tables(engine=eng_trg)
 
 
 @dev.command(name="reset-runtime-db")
 def reset_runtime_db():
-    eng_runtime = db_tools.get_engine(
-        url=runtime_settings.PIPELINE_STORE_ADDRESS, echo=True
-    )
+    eng_runtime = db_tools.get_engine(url=runtime_settings.RUNTIME_STORE, echo=True)
     db_tools.reset_all_runtime_tables(engine=eng_runtime)
 
 

@@ -669,3 +669,37 @@ non-JSON-producing Transform strategy is deferred to v0.9's
 real-consumer validation phase (fluxus-ncr), where a genuine use case
 will drive what gets built, rather than writing one now just to
 close a matrix cell.
+
+### 📅 2026-08-05, Wednesday
+**06:48** | *[RESOLVE — v0.75]*
+**PostgreSQL storage backend confirmed via full manual test suite**
+
+Added `.env`-based configuration (`FLUXUS_STORE_ADDRESS`, `LOG_DIR`)
+to `settings.py`, replacing hardcoded storage addresses — settings now
+follow an "override via environment, sensible default otherwise"
+pattern throughout. Same pattern applied to `devtools/settings.py`.
+
+Pointed `FLUXUS_STORE_ADDRESS` at the Docker-hosted PostgreSQL
+container and re-ran all 31 manual test packages. All 31 produced the
+expected result (26 PASS/expected-FAIL matching prior SQLite runs) —
+no code changes were needed to `PayloadStoreSQLite`/
+`RegistryStoreSQLite`/`PipelineRunRecordsSQLite`/`FetchCacheStoreSQLite`,
+confirming the SQLAlchemy Session-based implementation was already
+dialect-agnostic. Test 26 (the standalone dialect_check table) was
+excluded after the table was manually dropped — kept as a one-off
+manual verification rather than folded into `setup-test-env`, since
+devtools is a personal tool and doesn't need every path automated.
+
+**Open question surfaced but not yet resolved:** whether Fluxus should
+eventually take advantage of PostgreSQL-specific features (JSONB
+columns, real concurrent-write support) rather than just being
+dialect-portable. Concluded this is a separate, larger concern (would
+require an async-capable Orchestrator to actually benefit from
+concurrent writes) — not in scope for v0.75, noted for a possible
+future milestone.
+
+**Status:** v0.75's "PostgreSQL storage backend added... proves
+storage layer is swappable" requirement is effectively satisfied —
+the existing SQL-based storage classes already work correctly against
+PostgreSQL without modification, no new backend-specific class was
+needed as originally assumed in the roadmap wording.
