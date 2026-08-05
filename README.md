@@ -1,4 +1,4 @@
-# Fluxus v0.6 - alpha
+# Fluxus v0.7 - alpha
 
 Generic, plugin-based ETL & data sync engine. Fetches from a source
 transforms it, and loads it to a target — with the transform step designed
@@ -13,7 +13,7 @@ Source and target types can be API, database, or file.
 ## Installation
 
 ```bash
-pip install -e ".[sql,api,xml,cli,dev]"
+pip install -e ".[sql,api,xml,cli,dev,docx,xlsx,pdf]"
 ```
 
 ## Usage
@@ -78,13 +78,6 @@ actually on disk.
 
 ## Known Limitations
 
-- **CSV and HTML** Decode/Extract strategies are not yet implemented
-  (planned for v0.7). Currently supported: XML, JSON.
-- **API source format detection**: `ApiFetchStrategy` currently assumes
-  all API sources return JSON, regardless of actual `Content-Type`.
-  A genuinely XML/CSV/HTML-returning API source will fail at the
-  Extract phase with a clear error, not silent corruption — but
-  Content-Type-based detection isn't implemented yet.
 - **No filename/format consistency check**: nothing validates that a
   file's extension matches `--target-format` (e.g. writing JSON
   content to a `.xml`-named file goes unflagged).

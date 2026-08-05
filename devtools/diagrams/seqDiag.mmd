@@ -1,7 +1,7 @@
 ---
 config:
   theme: redux-color
-  look: classic
+  look: neo
   fontFamily: '''Source Code Pro Variable'', monospace'
   themeVariables:
     fontFamily: '''Source Code Pro Variable'', monospace'
@@ -16,48 +16,45 @@ sequenceDiagram
   %% Act: Actor
 
   actor ActUsr as User
-  participant BouCli as CLI
-  participant DspCmd as CommandManager<br/>[Dispatcher]
-  participant FacSlc as Selector<br/>[Factory]
-  participant DspOrc as Orchestrator<br/>[Dispatcher]
-  participant DBSrc as Source<br/>Database
-  participant APISrc as Source<br/>API Endpoint
-  participant DBPip as Pipeline<br/>Database
-  participant PrcFet as Fetcher<br/>[Processor]
-  participant PrcDcd as Decoder<br/>[Processor]
-  participant PrcExr as Extractor<br/>[Processor]
-  participant PrcTrs as Transformer<br/>[Processor]
-  participant PrcLod as Loader<br/>[Processor]
-  participant DBTrg as Target
+  participant BouCli as CLI<br>[Presentation]<br>[main.py]
+  participant CmdRun as cli.py<br>[Command]<br>[main.py]
+  participant FacSlc as Selector<br>[Factory]
+  participant DspOrc as Orchestrator<br>[Dispatcher]
+  participant DBSrc as Source<br>Database
+  participant APISrc as Source<br>API Endpoint
+  participant DBPip  as Pipeline<br>Database
+  participant PrcFet as Fetcher<br>[Processor]
+  participant PrcDcd as Decoder<br>[Processor]
+  participant PrcExr as Extractor<br>[Processor]
+  participant PrcTrs as Transformer<br>[Processor]
+  participant PrcLod as Loader<br>[Processor]
+  participant DBTrg as Target<br>Database
 
   autonumber
 
 
   %%SEQUENCE
-  ActUsr ->> BouCli: enters prompt
+  ActUsr ->> BouCli: enters prompt: run kwargs
   activate BouCli
-  BouCli ->> DspCmd: passes prompt
+  BouCli ->> CmdRun: passes prompt kwargs
   deactivate BouCli
-  activate DspCmd
-  DspCmd ->> DspCmd: checks prompt
-  alt INVALID PROMPT
-    Note over DspCmd: Error
-    DspCmd -->> DspCmd: logs and raises error
-  else VALID PROMPT
-    DspCmd ->> DspOrc: orchestrate<br/>.run(**runtime_args)
-  end
-  deactivate DspCmd
+  activate CmdRun
+  CmdRun -->>CmdRun: input_args = InputArgs(**kwargs)
+  Note over CmdRun: recourse for<br/>validation to:<br/>[PydanticModel]<br/>(InputArgs)
+  CmdRun ->> DspOrc: Orchestrator(input_args, **store_kwargs)
+  Note over CmdRun: **store_kwargs<br>these are hardcoded<br>inner SQLite stores<br>TODO: parametarize
+  deactivate CmdRun
   activate DspOrc
-    DspOrc ->> FacSlc: selector.<br/>build_pipeline_route<br/>(**runtime_args)
+    DspOrc ->> FacSlc: selector.<br/>build_pipeline_route<br/>(**input_args)
     activate FacSlc
     Note over FacSlc: recourse to:<br/>[Strategy Map]
-    FacSlc->>FacSlc: _infer_source<br/>_infer_target<br/>_infer_strategy<br/>based on(**runtime_args)
-    FacSlc-->>DspOrc: returns <br/>pipeline route args<br/>(**route_args)
+    FacSlc->>FacSlc: ._infer_strategy<br/>(**input_args)
+    FacSlc-->>DspOrc: returns <br/>route_args
     deactivate FacSlc
     DspOrc->>PrcFet: .fetch<br/>(**route_args)
     activate PrcFet
     Note over PrcFet: recourse to:<br/> [Fetch Strategy]
-    PrcFet->>PrcFet: .context<br/>.fetch<br/>(**route_args, Strategy())
+    PrcFet->>PrcFet: .context<br/>.fetch<br/>(**route_args)
     alt Source: Database
     Note over PrcFet: recourse to:<br/> [ORM for Source DB]
     PrcFet->>DBSrc: queries db
@@ -80,5 +77,6 @@ sequenceDiagram
     Note over PrcFet: recourse to:<br/> [Reg ORM for Pipe DB]
     PrcFet ->> DBPip: writes to DB
     deactivate DBPip
+    PrcFet -->> DspOrc: returns
     deactivate PrcFet
     deactivate DspOrc

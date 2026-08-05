@@ -16,6 +16,7 @@ from fluxus.storage.sqlite_backend import (
     PayloadStoreSQLite,
     RegistryStoreSQLite,
 )
+from sqlite_backend import FetchCacheStoreSQLite
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +66,7 @@ def run(
         run_records_store=PipelineRunRecordsSQLite(session=session),
         payload_store=PayloadStoreSQLite(session=session),
         registry_store=RegistryStoreSQLite(session=session),
+        fetch_cache_store=FetchCacheStoreSQLite(session=session),
     )
 
     logger.info("Pipeline starting...")
