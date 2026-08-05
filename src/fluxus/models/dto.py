@@ -9,7 +9,7 @@ class InputArgs(BaseModel):
     source_type: FluxusIOType
     source_address: str
     source_table: str | None
-    transform_strategy_id: int
+    transform_strategy_uid: str = "default"
     target_type: FluxusIOType
     target_address: str
     target_table: str | None
@@ -71,6 +71,7 @@ class RegistryRecord(BaseModel):
     run_id: int
     phase: Phase
     content_format: ContentFormat
+    transform_strategy_uid: str | None
     strategy_name: str
     content_hash: str
     address: str

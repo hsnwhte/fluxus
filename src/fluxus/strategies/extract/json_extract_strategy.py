@@ -12,7 +12,7 @@ class JsonExtractStrategy:
             if isinstance(parsed, dict):
                 parsed = [parsed]
         except json.JSONDecodeError as e:
-            raise errors.ExtractMalformedError(f"Malformed JSON: {e}") from e
+            raise errors.ExtractSyntaxError(f"Malformed JSON: {e}") from e
 
         normalized = json.dumps(parsed, ensure_ascii=False).encode()
 

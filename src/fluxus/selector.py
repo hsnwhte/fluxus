@@ -45,13 +45,13 @@ class Selector:
             ) from e
 
     @staticmethod
-    def get_transform_strategy(strategy_id: int) -> type[TransformStrategyProtocol]:
+    def get_transform_strategy(strategy_uid: str) -> type[TransformStrategyProtocol]:
         smap = transform.TRANSFORM_STRATEGY_MAP
         try:
-            return smap[strategy_id]
+            return smap[strategy_uid]
         except KeyError as e:
             raise errors.StrategyNotFoundError(
-                f"No transform strategy with id {strategy_id} could be found."
+                f"No transform strategy with uid '{strategy_uid}' could be found."
             ) from e
 
     @staticmethod

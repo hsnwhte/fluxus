@@ -13,7 +13,6 @@ class PipelineRunRecordsProtocol(Protocol):
         run_id: int,
         status: RunStatus,
         phase: Phase | None = None,
-        entry_id: int | None = None,
     ) -> int:
         """Updates run status and details if run is interrupted"""
 
@@ -35,6 +34,7 @@ class RegistryStoreProtocol(Protocol):
         run_id: int,
         phase: Phase,
         content_format: ContentFormat,
+        tranfsorm_strategy_uid: str | None,
         strategy_name: str,
         content_hash: str,
         address: str,

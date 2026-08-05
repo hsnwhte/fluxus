@@ -28,7 +28,7 @@ def run(
     source_address: str = typer.Option(..., "--source-address", "-soad"),
     target_type: FluxusIOType = typer.Option(..., "--target-type", "-taty"),
     target_address: str = typer.Option(..., "--target-address", "-taad"),
-    transform_strategy_id: int = typer.Option(..., "--transform-strategy", "-tsi"),
+    transform_strategy_uid: str = typer.Option(..., "--transform-strategy", "-tsu"),
     source_table: str = typer.Option(None, "--source-table", "-sota"),
     target_table: str = typer.Option(None, "--target-table", "-tata"),
     target_format: ContentFormat = typer.Option(
@@ -45,7 +45,7 @@ def run(
             target_address=target_address,
             target_table=target_table,
             target_format=target_format,
-            transform_strategy_id=transform_strategy_id,
+            transform_strategy_uid=transform_strategy_uid,
         )
     except ValidationError as e:
         logger.exception(f"Invalid input: {e}")
@@ -75,29 +75,29 @@ def install_strategy_command(
     strategy_path: Path = typer.Option(..., "--path", "-p"),
 ):
     try:
-        new_id = transform_installer.install_strategy(strategy_path=strategy_path)
+        new_uid = transform_installer.install_strategy(strategy_path=strategy_path)
     except errors.FluxusError as e:
         logger.exception(f"Strategy install failed: {e}")
         typer.echo(f"Install failed: {e}", err=True)
         raise typer.Exit(code=1)
-    typer.echo(f"Strategy installed successfully with id: {new_id}")
+    typer.echo(f"Strategy installed successfully with uid: {new_uid}")
 
 
 @app.command(name="uninstall-strategy")
 def uninstall_strategy_command(
-    strategy_id: int = typer.Option(..., "--id", "-i"),
+    strategy_uid: str = typer.Option(..., "--uid", "-u"),
 ):
     try:
-        transform_installer.uninstall_strategy(strategy_id=strategy_id)
+        transform_installer.uninstall_strategy(uid=strategy_uid)
     except errors.FluxusError as e:
         logger.exception(f"Strategy uninstall failed: {e}")
         typer.echo(f"Uninstall failed: {e}", err=True)
         raise typer.Exit(code=1)
-    typer.echo(f"Strategy {strategy_id} uninstalled successfully.")
+    typer.echo(f"Strategy {strategy_uid} uninstalled successfully.")
 
 
 @app.command(name="show-strategies")
 def show_strategies():
-    for strategy_id, strategy_class in sorted(TRANSFORM_STRATEGY_MAP.items()):
-        marker = " (default, cannot uninstall)" if strategy_id == 0 else ""
-        typer.echo(f"{strategy_id}: {strategy_class.__name__}{marker}")
+    for strategy_uid, strategy_class in sorted(TRANSFORM_STRATEGY_MAP.items()):
+        marker = " (default, cannot uninstall)" if strategy_uid == "default" else ""
+        typer.echo(f"{strategy_uid}: {strategy_class.__name__}{marker}")

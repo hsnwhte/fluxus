@@ -705,7 +705,6 @@ PostgreSQL without modification, no new backend-specific class was
 needed as originally assumed in the roadmap wording.
 
 **07:45** | *[RESOLVE]*
-
 - Tested postgres_bakcend.py with 11 tests, all passing.
 - Developed over the SQLite storage test suite, and runned against a
   Docker-hosted PostgreSQL instance. Confirms the storage classes are
@@ -715,3 +714,127 @@ needed as originally assumed in the roadmap wording.
   drop/create per test, since PostgreSQL doesn't reset sequence
   counters on rollback and repeated schema teardown proved slow and
   unreliable.
+
+**09:16** | *[REFACTORING]*
+**UnitOfWork introduced; storage layer renamed and consolidated**
+
+Refactored storage access around a `UnitOfWork` class — the classic
+Unit of Work pattern: one object owns the sessions, provides the four
+stores, and defines transaction boundaries (`commit()` / `rollback()`).
+Implemented as a context manager (`__enter__`/`__exit__`), so sessions
+are always closed and an unhandled exception inside the `with` block
+triggers an automatic rollback. Commit stays manual rather than
+automatic on clean exit — auto-commit would break the
+transaction-rollback isolation the tests rely on, and explicit commits
+make "when does this become permanent" visible at the call site.
+
+Two separate sessions on purpose: pipeline work (payload/registry/
+fetch-cache) is rollback-able, while run records are not — an
+INTERRUPTED status must survive the rollback that discards the run's
+partial writes.
+
+Storage naming corrected alongside it. `sqlite_backend.py` and its
+`...SQLite`-suffixed classes were misleading: the code contains nothing
+SQLite-specific and had already been proven to work unmodified against
+PostgreSQL. Now `backend.py` (single implementation) and
+`backend_protocols.py` (contracts). `db_session_factory.py` deleted —
+its one function moved into `UnitOfWork`. CLI and devtools updated to
+construct a `UnitOfWork` instead of wiring four stores by hand;
+devtools passes its own engine so it stays isolated from the app's
+runtime database.
+
+Merged `test_sqlite_backend.py` and `test_postgres_backend.py` into a
+single `test_backend.py`, parametrized over both engines — 11 tests ×
+2 backends, all passing. Same test code, same assertions, two different
+database engines: the strongest evidence so far that the storage layer
+is genuinely swappable. Also dropped the hardcoded `== 1` id
+assertions, which were fragile since PostgreSQL doesn't reset sequence
+counters on rollback.
+
+**12:33** | *[MILESTONE - v.0.7.0 -> v0.7.5]*
+**v0.75 complete: dialect-agnostic storage, UnitOfWork, rollback safety,
+strategy UIDs**
+
+**Storage backend refactored.** `sqlite_backend.py` and its
+`...SQLite`-suffixed classes were misleading — the code contained
+nothing SQLite-specific and had already been proven to work unmodified
+against PostgreSQL. Now `backend.py` (single implementation) and
+`backend_protocols.py` (contracts). The roadmap originally assumed a
+*new* PostgreSQL backend would be needed; the real work turned out to
+be proving the existing one was already portable and correcting the
+naming to say so honestly.
+
+**UnitOfWork introduced.** Owns the sessions, provides the four stores,
+defines transaction boundaries. Implemented as a context manager, so
+sessions always close and an unhandled exception triggers rollback.
+Two sessions on purpose: pipeline writes are rollback-able, run records
+are not — an INTERRUPTED status must survive the rollback that discards
+the run's partial writes. `db_session_factory.py` deleted, absorbed.
+
+**Rollback safety implemented and verified.** Store methods now `flush()`
+instead of `commit()`, so IDs are still assigned but the transaction
+stays open and reversible. `PipelineRunRecords` keeps its commits.
+Verified live: a run that fails mid-pipeline leaves `registry` and
+`payloads` empty for that run, while `pipeline_runs` retains an
+INTERRUPTED row with the failing phase.
+
+**Discussed and rejected: "resume from where it left off."** Keeping
+partial data would allow restarting an interrupted run from its last
+successful phase, but that requires idempotency guarantees the targets
+(APIs, DBs) don't provide, and it would let payload BLOBs accumulate
+from every failed run. Decided the surviving payload has low diagnostic
+value anyway — it was a *valid* output; the missing information is
+whatever the failing phase couldn't produce, which never reaches the
+DB regardless.
+
+**`interrupted_after_entry_id` removed.** With rollback in place it would
+point at a row that no longer exists. `interrupted_phase` alone answers
+the question it was meant to answer.
+
+**Transform strategy identity via UID.** Each installed strategy now gets
+a shortened UUID4 (12 hex chars) at install time, embedded in its
+filename and used as its key in `TRANSFORM_STRATEGY_MAP`. This removed
+the numeric-id system entirely — the original problem was that numbers
+shift across install/uninstall, and UIDs make that impossible.
+`uninstall` now finds the file directly by name instead of computing a
+list index. The built-in passthrough keeps the reserved key `"default"`,
+which is also `InputArgs.transform_strategy_uid`'s default value, so
+users only type a UID when they actually want a custom strategy.
+Registry stores the UID *alongside* `strategy_name`, not instead of it —
+the name gives readable context for every phase, the UID gives a
+unique lineage reference for Transform.
+
+**Chose UUID4 over UUID7.** UUID7 is time-sortable because its first
+48 bits are a timestamp — truncating it to 12 chars would keep *only*
+the timestamp and discard all randomness, making same-millisecond
+collisions certain. At 12 hex chars (48 bits of randomness), UUID4
+gives roughly 281 trillion values; collision probability stays
+negligible well past any realistic number of strategies.
+
+**Accepted limitation: uninstall breaks lineage.** Once a strategy file
+is deleted, historical registry rows carry a UID that resolves to
+nothing. Accepted deliberately — uninstall is an intentional act, and
+`strategy_name` still gives partial context. A central strategy
+repository would solve this properly, but only becomes relevant in a
+hosted/SaaS scenario.
+
+**`postgres-playground` removed from the roadmap.** It was a personal
+PostgreSQL learning goal (PL/pgSQL triggers, RPC functions, RLS
+policies), not a Fluxus deliverable — a product roadmap should describe
+the product, not the developer's study plan.
+
+**Also fixed during the final test pass:** `HtmlExtractStrategy` now
+raises a new, more specific `ExtractSyntaxError` for `XMLSyntaxError`/
+`ParserError` instead of a blanket `except Exception` → 
+`ExtractMalformedError`. Its `UnicodeDecodeError` test was deleted —
+that path stopped existing when the strategy moved from `xmltodict`
+(which required `.decode()`) to `lxml.html` (which handles bytes and
+encoding detection itself).
+
+**Testing:** 87 pytest tests passing, including `test_backend.py`
+parametrized over both SQLite and PostgreSQL (11 tests × 2 engines).
+All 31 manual test packages re-verified against PostgreSQL earlier in
+the day.
+
+**Status:** v0.75 complete. All three consistency-review checklist items
+confirmed.

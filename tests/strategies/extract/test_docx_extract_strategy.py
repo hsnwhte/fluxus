@@ -28,7 +28,7 @@ def test_extract_success(test_content: bytes):
 
 def test_extract_bad_zip():
     invalid_zip_content = b"this is not a zip file"
-    with pytest.raises(errors.ExtractMalformedError):
+    with pytest.raises(errors.ExtractSyntaxError):
         DocxExtractStrategy.extract(content=invalid_zip_content)
 
 
@@ -39,5 +39,5 @@ def test_extract_expat_error(test_content: bytes):
             "xml.parsers.expat", fromlist=["ExpatError"]
         ).ExpatError(),
     ):
-        with pytest.raises(errors.ExtractMalformedError):
+        with pytest.raises(errors.ExtractSyntaxError):
             DocxExtractStrategy.extract(content=test_content)

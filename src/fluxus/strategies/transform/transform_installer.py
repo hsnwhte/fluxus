@@ -3,38 +3,30 @@ import importlib.util
 import shutil
 from fluxus.exceptions import errors
 from fluxus.strategies.protocols import TransformStrategyProtocol
+from fluxus.helpers import generate_strategy_uid
 
 
-def install_strategy(*, strategy_path: Path) -> int:
+def install_strategy(*, strategy_path: Path) -> str:
     _load_strategy_from_file(file_path=strategy_path)
 
     installed_dir = Path(__file__).resolve().parent / "installed"
     installed_dir.mkdir(exist_ok=True)
 
-    existing_files = sorted(installed_dir.glob("*.py"))
-    next_id = len(existing_files) + 1
-    destination = installed_dir / f"strategy_{next_id}.py"
-
+    uid = generate_strategy_uid()
+    destination = installed_dir / f"{uid}.py"
     shutil.copy(strategy_path, destination)
 
-    return next_id
+    return uid
 
 
-def uninstall_strategy(*, strategy_id: int) -> None:
-    if strategy_id == 0:
-        raise errors.StrategyNotFoundError(
-            "Cannot uninstall the default strategy (id 0)."
-        )
+def uninstall_strategy(*, uid: str) -> None:
     installed_dir = Path(__file__).resolve().parent / "installed"
-    files = sorted(installed_dir.glob("*.py"))
+    target = installed_dir / f"{uid}.py"
 
-    index = strategy_id - 1
-    if index < 0 or index >= len(files):
-        raise errors.StrategyNotFoundError(
-            f"No installed strategy with id {strategy_id}."
-        )
+    if not target.exists():
+        raise errors.StrategyNotFoundError(f"No installed strategy with uid '{uid}'.")
 
-    files[index].unlink()
+    target.unlink()
 
 
 def _load_strategy_from_file(*, file_path: Path) -> type:

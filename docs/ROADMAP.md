@@ -57,29 +57,22 @@ v0.7 -- [DONE] Extended content format strategies: CSV, HTML, DOCX,
         [x] TEST_REPORT.md entries exist for every new format
           combination added this milestone
 
-v0.75 -- PostgreSQL storage backend added alongside SQLite (new
-         StorageBackend implementation via SQLAlchemy): Proves
-         storage layer is swappable, not just extensible on the
-         strategy side. Separate, isolated practice repo
-         (postgres-playground) for PL/pgSQL triggers, RPC
-         functions, and RLS policies — documented, not part of
-         Fluxus's core codebase.
-         DB rollback safety across a run added.
-         Transform strategy identity: assign a persistent unique id (UUID7) to
+v0.75 -- Storage backend refactored to dialect-agnostic single version: 
+         Proves storage layer is swappable, not just extensible on the
+         strategy side. DB rollback safety across a run added.
+         Transform strategy identity: assign a shortened unique id (UUID4) to
          each installed strategy at install time, stored in the registry
          alongside strategy_name. Numeric strategy ids can shift across
          install/uninstall and class names aren't guaranteed unique — neither
          is a reliable lineage record on its own.
 
          Consistency review, concrete checklist:
-         [ ] PostgreSQL backend passes the same test suite as SQLite,
+         [x] PostgreSQL backend passes the same test suite as SQLite,
            unmodified (proves the Protocol abstraction actually holds)
-         [ ] A run interrupted mid-phase leaves no orphaned/partial
+         [x] A run interrupted mid-phase leaves no orphaned/partial
            rows once rollback safety is in place
-         [ ] Every RegistryEntry produced by an installed Transform
+         [x] Every RegistryEntry produced by an installed Transform
            strategy carries a resolvable strategy UUID
-         [x] postgres-playground remains fully isolated — no imports
-           from or into Fluxus core
         
 
 v0.8 -- CI pipeline (GitHub Actions) set up: tests run on push.

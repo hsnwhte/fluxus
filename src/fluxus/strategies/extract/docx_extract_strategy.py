@@ -22,8 +22,8 @@ class DocxExtractStrategy:
                     file_bytes = z.read(name)
                     parsed[name] = xmltodict.parse(file_bytes)
         except zipfile.BadZipFile as e:
-            raise errors.ExtractMalformedError(f"Not a valid DOCX content: {e}") from e
+            raise errors.ExtractSyntaxError(f"Not a valid DOCX content: {e}") from e
         except ExpatError as e:
-            raise errors.ExtractMalformedError(f"Malformed XML inside DOCX: {e}") from e
+            raise errors.ExtractSyntaxError(f"Malformed XML inside DOCX: {e}") from e
         content = json.dumps(parsed, ensure_ascii=False).encode()
         return TransformableData(content=content, origin_format=ContentFormat.DOCX)

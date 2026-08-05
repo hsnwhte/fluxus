@@ -21,6 +21,6 @@ class PdfExtractStrategy:
                 page_dict = {"page": page_number, "text": text}
                 parsed.append(page_dict)
         except pypdf.errors.PdfReadError as e:
-            raise errors.ExtractMalformedError(f"Malformed PDF content: {e}") from e
+            raise errors.ExtractSyntaxError(f"Malformed PDF content: {e}") from e
         content = json.dumps(parsed, ensure_ascii=False).encode()
         return TransformableData(content=content, origin_format=ContentFormat.PDF)

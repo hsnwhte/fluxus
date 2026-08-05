@@ -16,7 +16,9 @@ from fluxus.exceptions import errors
 POSTGRES_URL = "postgresql://postgres:testpass@localhost:5432/postgres"
 
 
-@pytest.fixture(scope="session", params=["sqlite", "postgres"], ids=["sqlite", "postgres"])
+@pytest.fixture(
+    scope="session", params=["sqlite", "postgres"], ids=["sqlite", "postgres"]
+)
 def test_engine(request):
     if request.param == "sqlite":
         engine = create_engine("sqlite:///:memory:")
@@ -87,14 +89,13 @@ def test_pipeline_run_records_update_record(test_session: Session):
     run_id = store.register_run()
 
     store.update_record(
-        run_id=run_id, status=RunStatus.INTERRUPTED, phase=Phase.TRANSFORM, entry_id=5
+        run_id=run_id, status=RunStatus.INTERRUPTED, phase=Phase.TRANSFORM
     )
     updated = test_session.get(PipelineRunRecord, run_id)
 
     assert updated is not None
     assert updated.status == RunStatus.INTERRUPTED
     assert updated.interrupted_phase == Phase.TRANSFORM
-    assert updated.interrupted_after_entry_id == 5
 
 
 def test_registry_store_save_entry(test_session: Session, registry_entry_kwargs: dict):

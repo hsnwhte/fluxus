@@ -28,7 +28,7 @@ def test_extract_success(test_content: bytes):
 
 def test_extract_malformed():
     malformed_content = b'{"key": invalid}'
-    with pytest.raises(errors.ExtractMalformedError):
+    with pytest.raises(errors.ExtractSyntaxError):
         JsonExtractStrategy.extract(content=malformed_content)
 
 

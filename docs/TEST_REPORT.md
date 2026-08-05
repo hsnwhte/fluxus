@@ -297,12 +297,12 @@ section.
 ## v0.75
 ### Automated (pytest)
 
-- Total: 88 tests passing (77 SQLite-backed + 11 PostgreSQL-backed)
-- New: `tests/storage/test_postgres_backend.py` — 11 tests, mirroring
-  the SQLite storage suite exactly, run against the Docker-hosted
-  PostgreSQL instance
-- Coverage by category: storage (22 — 11 SQLite + 11 PostgreSQL),
-  fetch (7), decode (27), extract (19), transform (1), load (11),
+- Total: 87 tests passing
+- `tests/storage/test_backend.py` — parametrized over both engines
+  (11 tests × 2 backends: SQLite and PostgreSQL), replacing the
+  previously separate SQLite and PostgreSQL test files
+- Coverage by category: storage (22 — 11 tests × 2 engines),
+  fetch (7), decode (27), extract (18), transform (1), load (11),
   export (1)
 - Test isolation for PostgreSQL uses transaction-rollback fixtures
   (each test in its own transaction, rolled back after) rather than

@@ -132,8 +132,8 @@ class ExtractError(FluxusError):
     """Errors occurring while extracting decoded data into canonical form."""
 
 
-class ExtractMalformedError(ExtractError):
-    """Errors occurring if the extracted data is malformed"""
+class ExtractSyntaxError(ExtractError):
+    """The content could not be parsed due to a syntax error."""
 
 
 class TransformError(FluxusError):

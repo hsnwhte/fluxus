@@ -1,4 +1,4 @@
-# Fluxus v0.7 - alpha
+# Fluxus v0.7.5 - alpha
 
 Generic, plugin-based ETL & data sync engine. Fetches from a source
 transforms it, and loads it to a target — with the transform step designed
@@ -16,26 +16,38 @@ Source and target types can be API, database, or file.
 pip install -e ".[sql,api,xml,cli,dev,docx,xlsx,pdf]"
 ```
 
+## Configuration
+
+Fluxus reads optional settings from a `.env` file in the project root:
+
+```
+FLUXUS_STORE_ADDRESS=sqlite:///data/runtime.sqlite
+LOG_DIR=logs
+```
+
+`FLUXUS_STORE_ADDRESS` accepts any SQLAlchemy connection string —
+SQLite and PostgreSQL are both verified. `LOG_DIR` may be relative to
+the project root or an absolute path. Both have sensible defaults, so
+a `.env` file is optional.
+
 ## Usage
 
 ```bash
 fluxus run \
   --source-type file --source-address ./data/input.xml \
   --target-type file --target-address ./data/output.json \
-  --transform-strategy 0 \
   --target-format json
 ```
 
-Transform strategies are referenced by numeric id, not by name (see
-below). Run `fluxus run --help` for the full list of options.
+Run `fluxus run --help` for the full list of options.
 
 ## Writing and installing a Transform strategy
 
 Transform is the one phase with no fixed built-in implementation —
 it's where your own business logic (field mapping, filtering,
-reshaping data to fit your target) lives. Strategy `0` is a built-in
-passthrough (copies data through unchanged) and always exists; every
-other strategy is installed by you.
+reshaping data to fit your target) lives. The strategy `default` is a
+built-in passthrough (copies data through unchanged) and always
+exists; every other strategy is installed by you.
 
 Every Transform strategy implements `TransformStrategyProtocol`, and
 the class name must start with `TransformStrategy`:
@@ -64,15 +76,21 @@ fluxus install-strategy --path /path/to/my_strategy.py
 ```
 
 This copies the file into Fluxus's `installed/` strategies folder and
-assigns it the next available numeric id (printed on install). List
-installed strategies and their ids with `fluxus list-strategies`.
+assigns it a unique id (printed on install). List installed strategies
+and their ids with `fluxus show-strategies`, then reference one in a
+run:
+
+```bash
+fluxus run ... --transform-strategy <uid>
+```
+
 Uninstall with:
 
 ```bash
-fluxus uninstall-strategy --id <id>
+fluxus uninstall-strategy --uid <uid>
 ```
 
-Strategy `0` cannot be uninstalled. Don't edit the `installed/` folder
+`default` cannot be uninstalled. Don't edit the `installed/` folder
 by hand — use these commands so the strategy map always matches what's
 actually on disk.
 
@@ -85,6 +103,10 @@ actually on disk.
   strategy installed via `install-strategy` may import third-party
   libraries not bundled with Fluxus. You are responsible for installing
   any such dependencies yourself — Fluxus does not manage them.
+- **Uninstalling a strategy breaks its lineage**: registry rows from
+  past runs keep the strategy's uid, but once the file is removed that
+  uid no longer resolves to anything. The recorded strategy class name
+  remains as partial context.
 
 ## Roadmap
 

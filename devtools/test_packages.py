@@ -1,12 +1,7 @@
 from dataclasses import dataclass
 from fluxus.enums import FluxusIOType, ContentFormat
 from devtools.settings import *
-from devtools.tools.dev_orm import (
-    DevTargetDataText,
-    DevTargetDataBlob,
-    DevSourceDataBlob,
-    DevSourceDataText,
-)
+from devtools.tools.dev_orm import DevTargetDataText, DevSourceDataText
 
 """
 Devtools test packages — pre-configured InputArgs kwargs sets for rapid
@@ -15,24 +10,6 @@ manual pipeline testing via `fluxus-dev test --inject <key>`.
 This module is a living catalog of test scenarios, not an exhaustive
 suite. New packages should be added as new source/target combinations,
 error cases, or edge cases become relevant to test manually.
-
-Current coverage:
-
-  1-500   Success scenarios: all source x target type combinations
-        (file, db, api), e.g. file->file, file->db, file->api,
-        db->file, db->db, db->api, api->file, api->db, api->api.
-        Each package represents a valid, expected-to-succeed run.
-
-  501-999 Error scenarios: invalid parameter combinations meant to
-        trigger specific validation or strategy failures — e.g. a
-        db source/target with a nonexistent table name, a malformed
-        api url, an unsupported file extension. Each package should
-        map to a known, expected exception (see fluxus.exceptions.errors)
-        so failures can be manually confirmed against expectations
-        rather than treated as surprises.
-
-Numbering leaves gaps (10, 20+) intentionally, to allow inserting new
-scenarios into a category without renumbering existing ones.
 """
 
 
@@ -42,7 +19,7 @@ class TestPackage:
     source_address: str
     target_type: FluxusIOType
     target_address: str
-    transform_strategy_id: int
+    transform_strategy_uid: str
     source_table: str | None = None
     target_table: str | None = None
     target_format: ContentFormat = ContentFormat.JSON
@@ -54,7 +31,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "comments.json"),
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_json.json"),
-        transform_strategy_id=1,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -64,7 +41,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "comments.json"),
         target_type=FluxusIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
-        transform_strategy_id=1,
+        transform_strategy_uid="99ea751b6d2a",
         source_table=None,
         target_table=DevTargetDataText.__tablename__,
         target_format=ContentFormat.JSON,
@@ -74,7 +51,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "comments.json"),
         target_type=FluxusIOType.API,
         target_address=str(DEV_TARGET_API_URL),
-        transform_strategy_id=1,
+        transform_strategy_uid="99ea751b6d2a",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -84,7 +61,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_DB_URL),
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_db.json"),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=DevSourceDataText.__tablename__,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -94,7 +71,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_DB_URL),
         target_type=FluxusIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=DevSourceDataText.__tablename__,
         target_table=DevTargetDataText.__tablename__,
         target_format=ContentFormat.JSON,
@@ -104,7 +81,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_DB_URL),
         target_type=FluxusIOType.API,
         target_address=str(DEV_TARGET_API_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=DevSourceDataText.__tablename__,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -114,7 +91,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_API_URL),
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_api.json"),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -124,7 +101,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_API_URL),
         target_type=FluxusIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
-        transform_strategy_id=1,
+        transform_strategy_uid="99ea751b6d2a",
         source_table=None,
         target_table=DevTargetDataText.__tablename__,
         target_format=ContentFormat.JSON,
@@ -134,7 +111,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_API_URL),
         target_type=FluxusIOType.API,
         target_address=str(DEV_TARGET_API_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -144,7 +121,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "cities.csv"),
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_csv.json"),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -154,7 +131,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "cities.csv"),
         target_type=FluxusIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
-        transform_strategy_id=1,
+        transform_strategy_uid="99ea751b6d2a",
         source_table=None,
         target_table=DevTargetDataText.__tablename__,
         target_format=ContentFormat.JSON,
@@ -164,7 +141,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "cities.csv"),
         target_type=FluxusIOType.API,
         target_address=str(DEV_TARGET_API_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -174,7 +151,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "The World Wide Web project.htm"),
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_html.json"),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -184,7 +161,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "The World Wide Web project.htm"),
         target_type=FluxusIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="99ea751b6d2a",
         source_table=None,
         target_table=DevTargetDataText.__tablename__,
         target_format=ContentFormat.JSON,
@@ -194,7 +171,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "The World Wide Web project.htm"),
         target_type=FluxusIOType.API,
         target_address=str(DEV_TARGET_API_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -204,7 +181,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "cd_catalog.xml"),
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_xml.json"),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -214,7 +191,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "cd_catalog.xml"),
         target_type=FluxusIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
-        transform_strategy_id=1,
+        transform_strategy_uid="99ea751b6d2a",
         source_table=None,
         target_table=DevTargetDataText.__tablename__,
         target_format=ContentFormat.JSON,
@@ -224,7 +201,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "cd_catalog.xml"),
         target_type=FluxusIOType.API,
         target_address=str(DEV_TARGET_API_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -234,7 +211,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "sample-files.com-basic-text.docx"),
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_docx.json"),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -244,7 +221,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "sample-files.com-basic-text.docx"),
         target_type=FluxusIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=DevTargetDataText.__tablename__,
         target_format=ContentFormat.JSON,
@@ -254,7 +231,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "sample-files.com-basic-text.docx"),
         target_type=FluxusIOType.API,
         target_address=str(DEV_TARGET_API_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -264,7 +241,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "Free_Test_Data_100KB_XLSX.xlsx"),
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_xlsx.json"),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -274,7 +251,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "Free_Test_Data_100KB_XLSX.xlsx"),
         target_type=FluxusIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=DevTargetDataText.__tablename__,
         target_format=ContentFormat.JSON,
@@ -284,7 +261,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address=str(DEV_SOURCE_FILE_DIR / "Free_Test_Data_100KB_XLSX.xlsx"),
         target_type=FluxusIOType.API,
         target_address=str(DEV_TARGET_API_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -294,7 +271,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address="https://www.federalregister.gov/api/v1/documents.csv?per_page=5",
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_api_csv.json"),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -304,7 +281,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address="postgresql://postgres:testpass@localhost:5432/postgres",
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_postgres.json"),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table="dialect_check",
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -314,7 +291,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address="https://www.federalregister.gov/api/v1/documents.csv?per_page=5",
         target_type=FluxusIOType.API,
         target_address=str(DEV_TARGET_API_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -324,7 +301,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address="https://www.nasa.gov/feed/",
         target_type=FluxusIOType.API,
         target_address=str(DEV_TARGET_API_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -334,7 +311,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address="https://www.example.org/",
         target_type=FluxusIOType.API,
         target_address=str(DEV_TARGET_API_URL),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -344,7 +321,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address="https://www.nasa.gov/feed/",
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_api_xml.json"),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,
@@ -354,7 +331,7 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         source_address="https://www.example.org/",
         target_type=FluxusIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_api_html.json"),
-        transform_strategy_id=0,
+        transform_strategy_uid="default",
         source_table=None,
         target_table=None,
         target_format=ContentFormat.JSON,

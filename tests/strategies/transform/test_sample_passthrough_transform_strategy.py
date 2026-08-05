@@ -1,7 +1,7 @@
 import pytest
 from fluxus.enums import ContentFormat
 from fluxus.models.dto import TransformableData, TransformedData
-from fluxus.strategies.transform.transform_strategy_sample_passthrough import (
+from fluxus.strategies.transform.default import (
     TransformStrategySamplePassthrough,
 )
 

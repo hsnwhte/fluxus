@@ -1,12 +1,7 @@
 from sqlalchemy.engine import create_engine, Engine
 from sqlalchemy.orm import Session
 from fluxus.settings import RUNTIME_STORE
-from fluxus.storage.backend_protocols import (
-    PipelineRunRecordsProtocol,
-    PayloadStoreProtocol,
-    RegistryStoreProtocol,
-    FetchCacheStoreProtocol,
-)
+
 from fluxus.storage.backend import (
     PipelineRunRecords,
     PayloadStore,
@@ -35,19 +30,19 @@ class UnitOfWork:
         self.run_records_session.close()
 
     @property
-    def run_records_store(self) -> PipelineRunRecordsProtocol:
+    def run_records_store(self) -> PipelineRunRecords:
         return self._run_records_store
 
     @property
-    def payload_store(self) -> PayloadStoreProtocol:
+    def payload_store(self) -> PayloadStore:
         return self._payload_store
 
     @property
-    def registry_store(self) -> RegistryStoreProtocol:
+    def registry_store(self) -> RegistryStore:
         return self._registry_store
 
     @property
-    def fetch_cache_store(self) -> FetchCacheStoreProtocol:
+    def fetch_cache_store(self) -> FetchCacheStore:
         return self._fetch_cache_store
 
     def commit(self) -> None:

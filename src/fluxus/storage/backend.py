@@ -29,12 +29,10 @@ class PipelineRunRecords:
         run_id: int,
         status: RunStatus,
         phase: Phase | None = None,
-        entry_id: int | None = None,
     ) -> int:
         record = self.session.get(PipelineRunRecord, run_id)
         record.status = status
         record.interrupted_phase = phase
-        record.interrupted_after_entry_id = entry_id
         self.session.commit()
         return run_id
 
@@ -50,7 +48,7 @@ class FetchCacheStore:
             payload_address=payload_address,
         )
         self.session.add(cache)
-        self.session.commit()
+        self.session.flush()
         return api_url
 
     def load(self, *, api_url: str) -> FetchCacheData:
@@ -79,6 +77,7 @@ class RegistryStore:
         run_id: int,
         phase: Phase,
         content_format: ContentFormat,
+        transform_strategy_uid: str | None = None,
         strategy_name: str,
         content_hash: str,
         address: str,
@@ -87,12 +86,13 @@ class RegistryStore:
             run_id=run_id,
             phase=phase,
             content_format=content_format,
+            transform_strategy_uid=transform_strategy_uid,
             strategy_name=strategy_name,
             content_hash=content_hash,
             address=address,
         )
         self.session.add(entry)
-        self.session.commit()
+        self.session.flush()
         return entry.id
 
     def get_entry_by_id(self, *, entry_id: int) -> RegistryRecord:
@@ -112,6 +112,7 @@ class RegistryStore:
                 run_id=db_entry.run_id,
                 phase=db_entry.phase,
                 content_format=db_entry.content_format,
+                transform_strategy_uid=db_entry.transform_strategy_uid,
                 strategy_name=db_entry.strategy_name,
                 content_hash=db_entry.content_hash,
                 address=db_entry.address,
@@ -144,6 +145,7 @@ class RegistryStore:
                 run_id=db_entry.run_id,
                 phase=db_entry.phase,
                 content_format=db_entry.content_format,
+                transform_strategy_uid=db_entry.transform_strategy_uid,
                 strategy_name=db_entry.strategy_name,
                 content_hash=db_entry.content_hash,
                 address=db_entry.address,
@@ -176,6 +178,7 @@ class RegistryStore:
                 run_id=db_entry.run_id,
                 phase=db_entry.phase,
                 content_format=db_entry.content_format,
+                transform_strategy_uid=db_entry.transform_strategy_uid,
                 strategy_name=db_entry.strategy_name,
                 content_hash=db_entry.content_hash,
                 address=db_entry.address,
@@ -194,7 +197,7 @@ class PayloadStore:
     def save(self, *, phase: Phase, payload: bytes) -> str:
         record = PayloadRecord(phase=phase, payload=payload)
         self.session.add(record)
-        self.session.commit()
+        self.session.flush()
         return str(record.id)
 
     def load(self, *, address: str) -> bytes:

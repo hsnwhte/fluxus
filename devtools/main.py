@@ -31,7 +31,7 @@ def test(
     source_address: str = typer.Option(None, "--source-address", "-soad"),
     target_type: FluxusIOType = typer.Option(None, "--target-type", "-taty"),
     target_address: str = typer.Option(None, "--target-address", "-taad"),
-    transform_strategy_id: int = typer.Option(None, "--transform-strategy", "-tsn"),
+    transform_strategy_uid: str = typer.Option(None, "--transform-strategy", "-tsu"),
     source_table: str = typer.Option(None, "--source-table", "-sota"),
     target_table: str = typer.Option(None, "--target-table", "-tata"),
     target_format: ContentFormat = typer.Option(
@@ -62,7 +62,7 @@ def test(
                 target_address=target_address,
                 target_table=target_table,
                 target_format=target_format,
-                transform_strategy_id=transform_strategy_id,
+                transform_strategy_uid=transform_strategy_uid,
             )
         except ValidationError as e:
             logger.exception(f"Invalid input: {e}")
@@ -86,8 +86,6 @@ def test(
             f"Pipeline finished successfully, final registry entry id: {entry_id}"
         )
         typer.echo(f"Success. Final registry entry id: {entry_id}")
-
-
 
 
 @dev.command(name="inspect")

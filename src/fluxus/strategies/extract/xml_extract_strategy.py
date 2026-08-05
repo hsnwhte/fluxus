@@ -14,7 +14,7 @@ class XmlExtractStrategy:
         try:
             parsed = xmltodict.parse(content.decode())
         except (UnicodeDecodeError, ExpatError) as e:
-            raise errors.ExtractMalformedError(f"Malformed XML content: {e}") from e
+            raise errors.ExtractSyntaxError(f"Malformed XML content: {e}") from e
         content_bytes = json.dumps(parsed).encode()
         result = TransformableData(
             content=content_bytes, origin_format=ContentFormat.XML
