@@ -291,3 +291,35 @@ section.
 - **Command:** `python -m devtools.main test --test-pack 31`
 - **Verifies:** a_html × f_json matrix gap
 - **Result:** PASS
+
+
+
+## v0.75
+### Automated (pytest)
+
+- Total: 87 tests passing
+- `tests/storage/test_backend.py` — parametrized over both engines
+  (11 tests × 2 backends: SQLite and PostgreSQL), replacing the
+  previously separate SQLite and PostgreSQL test files
+- Coverage by category: storage (22 — 11 tests × 2 engines),
+  fetch (7), decode (27), extract (18), transform (1), load (11),
+  export (1)
+- Test isolation for PostgreSQL uses transaction-rollback fixtures
+  (each test in its own transaction, rolled back after) rather than
+  drop/create per test — PostgreSQL doesn't reset sequence counters on
+  rollback, and repeated schema teardown proved slow and unreliable
+
+
+### Manual verification
+
+**Summary (as of 2026-08-03):** All 31 manual test packages re-run
+against a PostgreSQL backend (`FLUXUS_STORE_ADDRESS` pointed at a
+Docker-hosted PostgreSQL container instead of SQLite). All produced
+the expected result — identical outcomes to the SQLite runs, with no
+code changes to any storage class. Test 26 excluded (its
+`dialect_check` table was manually dropped and isn't part of
+`setup-test-env`; kept as a one-off verification rather than an
+automated fixture).
+
+This confirms the storage layer is genuinely swappable: switching
+backends is a configuration change, not a code change.

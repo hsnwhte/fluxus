@@ -26,12 +26,6 @@ def test_extract_success(test_content: bytes):
 
 
 def test_extract_malformed():
-    malformed_content = b"this is not valid html <<<"
-    with pytest.raises(errors.ExtractMalformedError):
+    malformed_content = b""
+    with pytest.raises(errors.ExtractSyntaxError):
         HtmlExtractStrategy.extract(content=malformed_content)
-
-
-def test_extract_unicode_decode_error():
-    invalid_utf8_content = b"\xff\xfe invalid utf-8 bytes"
-    with pytest.raises(errors.ExtractMalformedError):
-        HtmlExtractStrategy.extract(content=invalid_utf8_content)

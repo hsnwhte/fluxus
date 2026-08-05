@@ -32,5 +32,5 @@ def test_extract_malformed():
         "fluxus.strategies.extract.pdf_extract_strategy.pypdf.PdfReader",
         side_effect=pypdf.errors.PdfReadError,
     ):
-        with pytest.raises(errors.ExtractMalformedError):
+        with pytest.raises(errors.ExtractSyntaxError):
             PdfExtractStrategy.extract(content=b"not a real pdf")

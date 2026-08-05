@@ -1,5 +1,5 @@
 from sqlalchemy import text
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.orm import Session
 from fluxus.models.orm import FluxusORM
@@ -69,26 +69,34 @@ def command_database(
 
 
 def reset_table(*, engine: Engine, table_name: str) -> None:
+    dialect = engine.dialect.name
     with engine.connect() as conn:
-        conn.execute(text(f"DELETE FROM {table_name}"))
-        try:
-            conn.execute(
-                text("DELETE FROM sqlite_sequence WHERE name = :table_name"),
-                {"table_name": table_name},
-            )
-        except OperationalError:
-            pass
+        if dialect == "postgresql":
+            conn.execute(text(f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE"))
+        else:
+            conn.execute(text(f"DELETE FROM {table_name}"))
+            try:
+                conn.execute(
+                    text("DELETE FROM sqlite_sequence WHERE name = :table_name"),
+                    {"table_name": table_name},
+                )
+            except (OperationalError, ProgrammingError):
+                pass
         conn.commit()
 
 
 def drop_table(*, engine: Engine, table_name: str) -> None:
+    dialect = engine.dialect.name
     with engine.connect() as conn:
-        conn.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
-        try:
-            conn.execute(
-                text("DELETE FROM sqlite_sequence WHERE name = :table_name"),
-                {"table_name": table_name},
-            )
-        except OperationalError:
-            pass
+        if dialect == "postgresql":
+            conn.execute(text(f"DROP TABLE IF EXISTS {table_name} CASCADE"))
+        else:
+            conn.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
+            try:
+                conn.execute(
+                    text("DELETE FROM sqlite_sequence WHERE name = :table_name"),
+                    {"table_name": table_name},
+                )
+            except (OperationalError, ProgrammingError):
+                pass
         conn.commit()

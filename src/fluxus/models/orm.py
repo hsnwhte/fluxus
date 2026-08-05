@@ -19,9 +19,6 @@ class PipelineRunRecord(FluxusORM):
     interrupted_phase: Mapped[Phase | None] = mapped_column(
         SQLEnum(Phase), nullable=True, default=None
     )
-    interrupted_after_entry_id: Mapped[int | None] = mapped_column(
-        nullable=True, default=None
-    )
 
 
 class RegistryEntry(FluxusORM):
@@ -30,6 +27,9 @@ class RegistryEntry(FluxusORM):
     run_id: Mapped[int] = mapped_column(index=True)
     phase: Mapped[Phase] = mapped_column(SQLEnum(Phase))
     content_format: Mapped[ContentFormat] = mapped_column(SQLEnum(ContentFormat))
+    transform_strategy_uid: Mapped[str | None] = mapped_column(
+        String(12), nullable=True, default=None
+    )
     strategy_name: Mapped[str] = mapped_column(String(50))
     content_hash: Mapped[str] = mapped_column(CHAR(64), index=True)
     address: Mapped[str]

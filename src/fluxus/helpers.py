@@ -1,8 +1,13 @@
 import hashlib
+from uuid import uuid4
 
 from fluxus.models.dto import ExtractableData
 from fluxus.enums import ContentFormat, MimeType
 from fluxus.exceptions import errors
+
+
+def generate_strategy_uid() -> str:
+    return uuid4().hex[:12]
 
 
 def to_extractable(

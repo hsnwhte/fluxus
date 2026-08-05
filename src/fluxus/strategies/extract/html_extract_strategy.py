@@ -1,5 +1,7 @@
 import json
 from lxml import html, etree
+from lxml.etree import XMLSyntaxError, ParserError
+
 from fluxus.enums import ContentFormat
 from fluxus.models.dto import TransformableData
 from fluxus.exceptions import errors
@@ -22,8 +24,8 @@ class HtmlExtractStrategy:
     def extract(*, content: bytes) -> TransformableData:
         try:
             tree = html.fromstring(content)
-        except Exception as e:
-            raise errors.ExtractMalformedError(f"Malformed HTML content: {e}") from e
+        except (XMLSyntaxError, ParserError) as e:
+            raise errors.ExtractSyntaxError(f"Malformed HTML content: {e}") from e
         parsed = _element_to_dict(tree)
         content_bytes = json.dumps(parsed, ensure_ascii=False).encode()
         return TransformableData(

@@ -1,17 +1,25 @@
 from pathlib import Path
+import os
 from fluxus.enums import ContentFormat
+from dotenv import load_dotenv
 
 ### --- SYSTEM ADDRESSES
 # ----- Project Root
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-# ----- Pipeline Store
-_DB_PATH = PROJECT_ROOT / "data" / "runtime.sqlite"
-_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-PIPELINE_STORE_ADDRESS = f"sqlite:///{_DB_PATH}"
-# ----- Log Output
-LOG_DIR = PROJECT_ROOT / "logs"
-LOG_DIR.mkdir(parents=True, exist_ok=True)
 
+# ----- Environment
+load_dotenv(dotenv_path=PROJECT_ROOT / ".env")
+
+# ----- Pipeline Store
+DEFAULT_RUNTIME_STORE_PATH = PROJECT_ROOT / "data" / "runtime.sqlite"
+DEFAULT_RUNTIME_STORE_PATH.parent.mkdir(parents=True, exist_ok=True)
+RUNTIME_STORE = os.environ.get(
+    "FLUXUS_STORE_ADDRESS", f"sqlite:///{DEFAULT_RUNTIME_STORE_PATH}"
+)
+
+# ----- Log Output
+LOG_DIR = Path(os.environ.get("LOG_DIR", PROJECT_ROOT / "logs"))
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 ### --- System variables
 NORMALIZED_FORMAT = ContentFormat.JSON

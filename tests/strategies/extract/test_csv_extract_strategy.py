@@ -28,5 +28,5 @@ def test_extract_success(test_content: bytes):
 
 def test_extract_unicode_decode_error():
     invalid_utf8_content = b"\xff\xfe invalid utf-8 bytes"
-    with pytest.raises(errors.ExtractMalformedError):
+    with pytest.raises(errors.ExtractSyntaxError):
         CsvExtractStrategy.extract(content=invalid_utf8_content)

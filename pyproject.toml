@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fluxus"
-version = "0.7.0"
+version = "0.7.5"
 description = "Generic, plugin-based ETL & data sync engine."
 requires-python = ">=3.11"
 readme = "README.md"
@@ -23,10 +23,11 @@ xml = ["lxml>=5.0", "xmltodict>0.15.0"]
 docx = ["python-docx>=1.2.0"]
 xlsx = ["openpyxl>=3.1.5"]
 pdf = ["pypdf>=6.0"]
-cli = ["typer>=0.27"]
+cli = ["typer>=0.27.1"]
 dev = [
     "pytest>=8.0",
     "pytest-cov",
+    "python-dotenv>=1.2.2"
 ]
 
 [tool.setuptools.packages.find]

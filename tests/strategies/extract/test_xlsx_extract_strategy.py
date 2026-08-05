@@ -29,7 +29,7 @@ def test_extract_success(test_content: bytes):
 
 def test_extract_bad_zip():
     invalid_zip_content = b"this is not a zip file"
-    with pytest.raises(errors.ExtractMalformedError):
+    with pytest.raises(errors.ExtractSyntaxError):
         XlsxExtractStrategy.extract(content=invalid_zip_content)
 
 
@@ -38,5 +38,5 @@ def test_extract_expat_error(test_content: bytes):
         "fluxus.strategies.extract.xlsx_extract_strategy.xmltodict.parse",
         side_effect=ExpatError(),
     ):
-        with pytest.raises(errors.ExtractMalformedError):
+        with pytest.raises(errors.ExtractSyntaxError):
             XlsxExtractStrategy.extract(content=test_content)
