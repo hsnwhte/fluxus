@@ -6,12 +6,6 @@ from fluxus.models.dto import (
     TransformedData,
 )
 from fluxus.selector import selector
-from fluxus.storage.backend import (
-    PayloadStoreProtocol,
-    RegistryStoreProtocol,
-    PipelineRunRecordsProtocol,
-    FetchCacheStoreProtocol,
-)
 from fluxus.processors.fetcher import Fetcher
 from fluxus.processors.decoder import Decoder
 from fluxus.processors.extractor import Extractor
@@ -21,29 +15,20 @@ from fluxus.processors.exporter import Exporter
 from fluxus.enums import Phase, FluxusIOType, RunStatus
 from fluxus import helpers
 from fluxus.exceptions import errors
+from fluxus.unit_of_work import UnitOfWork
 
 logger = logging.getLogger(__name__)
 
 
 class Orchestrator:
-    def __init__(
-        self,
-        input_args: InputArgs,
-        run_records_store: PipelineRunRecordsProtocol,
-        payload_store: PayloadStoreProtocol,
-        registry_store: RegistryStoreProtocol,
-        fetch_cache_store: FetchCacheStoreProtocol,
-    ):
+    def __init__(self, *, input_args: InputArgs, uow: UnitOfWork):
         self.input_args = input_args
-        self.run_records_store = run_records_store
-        self.payload_store = payload_store
-        self.registry_store = registry_store
-        self.fetch_cache_store = fetch_cache_store
+        self.uow = uow
 
     def run(self) -> int:
         current_phase = None
         last_entry_id = None
-        run_id: int = self.run_records_store.register_run()
+        run_id: int = self.uow.run_records_store.register_run()
         logger.info(f"Initiating run: {run_id}")
         try:
             s_type = self.input_args.source_type
@@ -69,7 +54,7 @@ class Orchestrator:
                 current_phase = Phase.FETCH
                 logger.info(f"Checking fetch cache...")
                 try:
-                    cache = self.fetch_cache_store.load(api_url=s_address)
+                    cache = self.uow.fetch_cache_store.load(api_url=s_address)
                     last_entry_id = cache.registry_address
                     logger.info(
                         f"Found cached data for url '{s_address}' at entry id: {last_entry_id}"
@@ -108,7 +93,7 @@ class Orchestrator:
                 logger.info(
                     f"{current_phase} successful, registry entry id: {last_entry_id}"
                 )
-                self.run_records_store.update_record(
+                self.uow.run_records_store.update_record(
                     run_id=run_id, status=RunStatus.COMPLETE
                 )
                 return last_entry_id
@@ -121,7 +106,7 @@ class Orchestrator:
                 logger.info(
                     f"{current_phase} successful, registry entry id: {last_entry_id}"
                 )
-                self.run_records_store.update_record(
+                self.uow.run_records_store.update_record(
                     run_id=run_id, status=RunStatus.COMPLETE
                 )
                 return last_entry_id
@@ -129,7 +114,7 @@ class Orchestrator:
                 logger.error(f"Failed to load/export to the source - invalid args.")
                 raise errors.InvalidInputError()
         except Exception as e:
-            self.run_records_store.update_record(
+            self.uow.run_records_store.update_record(
                 run_id=run_id,
                 status=RunStatus.INTERRUPTED,
                 phase=current_phase,
@@ -138,8 +123,8 @@ class Orchestrator:
             raise e
 
     def _export(self, run_id: int, entry_id: int) -> int:
-        entry = self.registry_store.get_entry_by_id(entry_id=entry_id)
-        content_bytes = self.payload_store.load(address=entry.address)
+        entry = self.uow.registry_store.get_entry_by_id(entry_id=entry_id)
+        content_bytes = self.uow.payload_store.load(address=entry.address)
         transformed_content = TransformedData(content=content_bytes)
 
         export_strategy = selector.get_export_strategy()
@@ -148,7 +133,7 @@ class Orchestrator:
         )
         exporter.export(data=transformed_content)
 
-        export_entry_id = self.registry_store.save_entry(
+        export_entry_id = self.uow.registry_store.save_entry(
             run_id=run_id,
             phase=Phase.EXPORT,
             content_format=self.input_args.target_format,
@@ -159,8 +144,8 @@ class Orchestrator:
         return export_entry_id
 
     def _load(self, run_id: int, entry_id: int) -> int:
-        entry = self.registry_store.get_entry_by_id(entry_id=entry_id)
-        content_bytes = self.payload_store.load(address=entry.address)
+        entry = self.uow.registry_store.get_entry_by_id(entry_id=entry_id)
+        content_bytes = self.uow.payload_store.load(address=entry.address)
         transformed_content = TransformedData(content=content_bytes)
 
         load_strategy = selector.get_load_strategy(self.input_args.target_type)
@@ -172,7 +157,7 @@ class Orchestrator:
         )
         loader.load(data=transformed_content)
 
-        load_entry_id = self.registry_store.save_entry(
+        load_entry_id = self.uow.registry_store.save_entry(
             run_id=run_id,
             phase=Phase.LOAD,
             content_format=self.input_args.target_format,
@@ -183,17 +168,17 @@ class Orchestrator:
         return load_entry_id
 
     def _extract(self, run_id: int, entry_id: int) -> int:
-        entry = self.registry_store.get_entry_by_id(entry_id=entry_id)
+        entry = self.uow.registry_store.get_entry_by_id(entry_id=entry_id)
         extract_strategy = selector.get_extract_strategy(entry.content_format)
-        content_bytes = self.payload_store.load(address=entry.address)
+        content_bytes = self.uow.payload_store.load(address=entry.address)
         extractor = Extractor(content=content_bytes, strategy=extract_strategy)
         data = extractor.extract()
 
-        payload_address = self.payload_store.save(
+        payload_address = self.uow.payload_store.save(
             phase=Phase.EXTRACT, payload=data.content
         )
 
-        extr_entry_id = self.registry_store.save_entry(
+        extr_entry_id = self.uow.registry_store.save_entry(
             run_id=run_id,
             phase=Phase.EXTRACT,
             content_format=settings.NORMALIZED_FORMAT,
@@ -204,8 +189,8 @@ class Orchestrator:
         return extr_entry_id
 
     def _transform(self, run_id: int, entry_id: int) -> int:
-        entry = self.registry_store.get_entry_by_id(entry_id=entry_id)
-        content_bytes = self.payload_store.load(address=entry.address)
+        entry = self.uow.registry_store.get_entry_by_id(entry_id=entry_id)
+        content_bytes = self.uow.payload_store.load(address=entry.address)
         transformable_content = TransformableData(
             content=content_bytes, origin_format=entry.content_format
         )
@@ -219,11 +204,11 @@ class Orchestrator:
         transformer = Transformer(strategy=transform_strategy)
         data = transformer.transform()
 
-        payload_address = self.payload_store.save(
+        payload_address = self.uow.payload_store.save(
             phase=Phase.TRANSFORM, payload=data.content
         )
 
-        trns_entry_id = self.registry_store.save_entry(
+        trns_entry_id = self.uow.registry_store.save_entry(
             run_id=run_id,
             phase=Phase.TRANSFORM,
             content_format=self.input_args.target_format,
@@ -239,11 +224,11 @@ class Orchestrator:
             source_address=self.input_args.source_as_path, strategy=decode_strategy
         )
         data = decoder.decode()
-        payload_address = self.payload_store.save(
+        payload_address = self.uow.payload_store.save(
             phase=Phase.DECODE, payload=data.content
         )
 
-        entry_id = self.registry_store.save_entry(
+        entry_id = self.uow.registry_store.save_entry(
             run_id=run_id,
             phase=Phase.DECODE,
             content_format=data.source_format,
@@ -261,11 +246,11 @@ class Orchestrator:
             table_name=self.input_args.source_table,
         )
         data = fetcher.fetch()
-        payload_address = self.payload_store.save(
+        payload_address = self.uow.payload_store.save(
             phase=Phase.FETCH, payload=data.content
         )
 
-        entry_id = self.registry_store.save_entry(
+        entry_id = self.uow.registry_store.save_entry(
             run_id=run_id,
             phase=Phase.FETCH,
             content_format=data.source_format,
@@ -274,7 +259,7 @@ class Orchestrator:
             address=str(payload_address),
         )
         if self.input_args.source_type == FluxusIOType.API:
-            self.fetch_cache_store.save(
+            self.uow.fetch_cache_store.save(
                 api_url=self.input_args.source_address,
                 registry_address=entry_id,
                 payload_address=payload_address,

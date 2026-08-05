@@ -78,7 +78,7 @@ v0.75 -- PostgreSQL storage backend added alongside SQLite (new
            rows once rollback safety is in place
          [ ] Every RegistryEntry produced by an installed Transform
            strategy carries a resolvable strategy UUID
-         [ ] postgres-playground remains fully isolated — no imports
+         [x] postgres-playground remains fully isolated — no imports
            from or into Fluxus core
         
 

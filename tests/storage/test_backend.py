@@ -5,22 +5,29 @@ from sqlalchemy.orm import Session
 from fluxus.helpers import generate_hash
 from fluxus.enums import Phase, ContentFormat, RunStatus
 from fluxus.models.orm import FluxusORM, PipelineRunRecord
-from fluxus.storage.postgres_backend import (
-    PayloadStorePostgreSql,
-    PipelineRunRecordsPostgreSql,
-    FetchCacheStorePostgreSql,
-    RegistryStorePostgreSql,
+from fluxus.storage.backend import (
+    PipelineRunRecords,
+    RegistryStore,
+    PayloadStore,
+    FetchCacheStore,
 )
 from fluxus.exceptions import errors
 
+POSTGRES_URL = "postgresql://postgres:testpass@localhost:5432/postgres"
 
-@pytest.fixture(scope="session")
-def test_engine():
-    engine = create_engine("postgresql://postgres:testpass@localhost:5432/postgres")
-    FluxusORM.metadata.drop_all(engine)
-    FluxusORM.metadata.create_all(engine, checkfirst=True)
-    yield engine
-    FluxusORM.metadata.drop_all(engine)
+
+@pytest.fixture(scope="session", params=["sqlite", "postgres"], ids=["sqlite", "postgres"])
+def test_engine(request):
+    if request.param == "sqlite":
+        engine = create_engine("sqlite:///:memory:")
+        FluxusORM.metadata.create_all(engine)
+        yield engine
+    else:
+        engine = create_engine(POSTGRES_URL)
+        FluxusORM.metadata.drop_all(engine)
+        FluxusORM.metadata.create_all(engine, checkfirst=True)
+        yield engine
+        FluxusORM.metadata.drop_all(engine)
 
 
 @pytest.fixture(scope="function")
@@ -48,37 +55,35 @@ def registry_entry_kwargs():
 
 @pytest.fixture
 def registry_store(test_session: Session):
-    return RegistryStorePostgreSql(session=test_session)
+    return RegistryStore(session=test_session)
 
 
 @pytest.fixture
-def saved_registry_entry(
-    registry_store: RegistryStorePostgreSql, registry_entry_kwargs: dict
-):
+def saved_registry_entry(registry_store: RegistryStore, registry_entry_kwargs: dict):
     entry_id = registry_store.save_entry(**registry_entry_kwargs)
     return entry_id, registry_entry_kwargs
 
 
 @pytest.fixture
 def payload_store(test_session: Session):
-    return RegistryStorePostgreSql(session=test_session)
+    return PayloadStore(session=test_session)
 
 
 @pytest.fixture
 def fetch_cache_store(test_session: Session):
-    return FetchCacheStorePostgreSql(session=test_session)
+    return FetchCacheStore(session=test_session)
 
 
 def test_pipeline_run_records_register_run(test_session: Session):
-    store = PipelineRunRecordsPostgreSql(session=test_session)
+    store = PipelineRunRecords(session=test_session)
+
     run_id = store.register_run()
 
     assert isinstance(run_id, int)
-    assert run_id == 1
 
 
 def test_pipeline_run_records_update_record(test_session: Session):
-    store = PipelineRunRecordsPostgreSql(session=test_session)
+    store = PipelineRunRecords(session=test_session)
     run_id = store.register_run()
 
     store.update_record(
@@ -93,24 +98,21 @@ def test_pipeline_run_records_update_record(test_session: Session):
 
 
 def test_registry_store_save_entry(test_session: Session, registry_entry_kwargs: dict):
-    store = RegistryStorePostgreSql(session=test_session)
+    store = RegistryStore(session=test_session)
 
     entry_id = store.save_entry(**registry_entry_kwargs)
 
     assert isinstance(entry_id, int)
-    assert entry_id == 1
 
 
 def test_registry_store_get_entry_by_id(
-    test_session: Session,
     saved_registry_entry: tuple[int, dict],
+    registry_store: RegistryStore,
 ):
-    store = RegistryStorePostgreSql(session=test_session)
     entry_id, kwargs = saved_registry_entry
 
-    data = store.get_entry_by_id(entry_id=entry_id)
+    data = registry_store.get_entry_by_id(entry_id=entry_id)
 
-    # Assert
     assert data.id == entry_id
     assert data.run_id == kwargs["run_id"]
     assert data.phase == kwargs["phase"]
@@ -121,15 +123,15 @@ def test_registry_store_get_entry_by_id(
 
 
 def test_registry_store_get_entry_by_run_id(
-    test_session: Session,
     saved_registry_entry: tuple[int, dict],
+    registry_store: RegistryStore,
 ):
-    store = RegistryStorePostgreSql(session=test_session)
     entry_id, kwargs = saved_registry_entry
 
-    data = store.get_entry_by_run_id(run_id=kwargs["run_id"], phase=kwargs["phase"])
+    data = registry_store.get_entry_by_run_id(
+        run_id=kwargs["run_id"], phase=kwargs["phase"]
+    )
 
-    # Assert
     assert data.id == entry_id
     assert data.run_id == kwargs["run_id"]
     assert data.phase == kwargs["phase"]
@@ -139,15 +141,13 @@ def test_registry_store_get_entry_by_run_id(
 
 
 def test_registry_store_get_entry_by_content_hash(
-    test_session: Session,
     saved_registry_entry: tuple[int, dict],
-    registry_store: RegistryStorePostgreSql,
+    registry_store: RegistryStore,
 ):
     entry_id, kwargs = saved_registry_entry
 
     data = registry_store.get_entry_by_hash(content_hash=kwargs["content_hash"])
 
-    # Assert
     assert data.id == entry_id
     assert data.run_id == kwargs["run_id"]
     assert data.phase == kwargs["phase"]
@@ -156,36 +156,34 @@ def test_registry_store_get_entry_by_content_hash(
     assert data.address == kwargs["address"]
 
 
-def test_payload_store_save(test_session: Session):
-    store = PayloadStorePostgreSql(session=test_session)
+def test_payload_store_save(payload_store: PayloadStore):
     phase = Phase.FETCH
     payload = "test".encode()
-    record_id_str = store.save(phase=phase, payload=payload)
+
+    record_id_str = payload_store.save(phase=phase, payload=payload)
 
     assert isinstance(record_id_str, str)
-    assert record_id_str == "1"
 
 
-def test_payload_store_load(test_session: Session):
-    store = PayloadStorePostgreSql(session=test_session)
+def test_payload_store_load(payload_store: PayloadStore):
     phase = Phase.FETCH
     payload = "test".encode()
-    address = store.save(phase=phase, payload=payload)
+    address = payload_store.save(phase=phase, payload=payload)
 
-    payload = store.load(address=address)
+    loaded = payload_store.load(address=address)
 
-    assert isinstance(payload, bytes)
-    assert payload == "test".encode()
+    assert isinstance(loaded, bytes)
+    assert loaded == "test".encode()
 
 
-def test_fetch_cache_store_save(fetch_cache_store: FetchCacheStorePostgreSql):
+def test_fetch_cache_store_save(fetch_cache_store: FetchCacheStore):
     result = fetch_cache_store.save(
         api_url="https://example.com/api", registry_address=1, payload_address="1"
     )
     assert result == "https://example.com/api"
 
 
-def test_fetch_cache_store_load_success(fetch_cache_store: FetchCacheStorePostgreSql):
+def test_fetch_cache_store_load_success(fetch_cache_store: FetchCacheStore):
     fetch_cache_store.save(
         api_url="https://example.com/api", registry_address=1, payload_address="1"
     )
@@ -197,6 +195,6 @@ def test_fetch_cache_store_load_success(fetch_cache_store: FetchCacheStorePostgr
     assert result.payload_address == "1"
 
 
-def test_fetch_cache_store_load_not_found(fetch_cache_store: FetchCacheStorePostgreSql):
+def test_fetch_cache_store_load_not_found(fetch_cache_store: FetchCacheStore):
     with pytest.raises(errors.FetchCacheNotFoundError):
         fetch_cache_store.load(api_url="https://nonexistent.com")

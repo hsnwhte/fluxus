@@ -5,18 +5,12 @@ from pydantic import ValidationError
 
 from fluxus.logging_config import setup_logging
 from fluxus.enums import FluxusIOType, ContentFormat
-from fluxus.db_session_factory import create_pipeline_store_session
+from fluxus.unit_of_work import UnitOfWork
 from fluxus.orchestrator import Orchestrator
 from fluxus.exceptions import errors
 from fluxus.strategies.transform import transform_installer
 from fluxus.strategies.transform import TRANSFORM_STRATEGY_MAP
 from fluxus.models.dto import InputArgs
-from fluxus.storage.sqlite_backend import (
-    PipelineRunRecordsSQLite,
-    PayloadStoreSQLite,
-    RegistryStoreSQLite,
-)
-from sqlite_backend import FetchCacheStoreSQLite
 
 logger = logging.getLogger(__name__)
 
@@ -58,27 +52,22 @@ def run(
         typer.echo(f"Invalid input: {e}", err=True)
         raise typer.Exit(code=1)
 
-    session = create_pipeline_store_session()
-    logger.debug("Pipeline db session created.")
+    with UnitOfWork() as uow:
+        orchestrator = Orchestrator(input_args=input_args, uow=uow)
+        logger.debug("Orchestrator object instantiated")
+        logger.info("Pipeline starting...")
+        try:
+            entry_id = orchestrator.run()
+        except errors.FluxusError as e:
+            logger.exception(f"Pipeline failed: {e}")
+            typer.echo(f"Pipeline failed: {e}", err=True)
+            raise typer.Exit(code=1)
 
-    orchestrator = Orchestrator(
-        input_args=input_args,
-        run_records_store=PipelineRunRecordsSQLite(session=session),
-        payload_store=PayloadStoreSQLite(session=session),
-        registry_store=RegistryStoreSQLite(session=session),
-        fetch_cache_store=FetchCacheStoreSQLite(session=session),
-    )
-
-    logger.info("Pipeline starting...")
-    try:
-        entry_id = orchestrator.run()
-    except errors.FluxusError as e:
-        logger.exception(f"Pipeline failed: {e}")
-        typer.echo(f"Pipeline failed: {e}", err=True)
-        raise typer.Exit(code=1)
-
-    logger.info(f"Pipeline finished successfully, final registry entry id: {entry_id}")
-    typer.echo(f"Success. Final registry entry id: {entry_id}")
+        uow.commit()
+        logger.info(
+            f"Pipeline finished successfully, final registry entry id: {entry_id}"
+        )
+        typer.echo(f"Success. Final registry entry id: {entry_id}")
 
 
 @app.command(name="install-strategy")

@@ -703,3 +703,15 @@ storage layer is swappable" requirement is effectively satisfied —
 the existing SQL-based storage classes already work correctly against
 PostgreSQL without modification, no new backend-specific class was
 needed as originally assumed in the roadmap wording.
+
+**07:45** | *[RESOLVE]*
+
+- Tested postgres_bakcend.py with 11 tests, all passing.
+- Developed over the SQLite storage test suite, and runned against a
+  Docker-hosted PostgreSQL instance. Confirms the storage classes are
+  genuinely dialect-agnostic — same code, same tests, different engine.
+- Test isolation handled via transaction-rollback fixtures (each test
+  runs in its own transaction, rolled back afterwards) rather than
+  drop/create per test, since PostgreSQL doesn't reset sequence
+  counters on rollback and repeated schema teardown proved slow and
+  unreliable.
