@@ -57,7 +57,7 @@ v0.7 -- [DONE] Extended content format strategies: CSV, HTML, DOCX,
         [x] TEST_REPORT.md entries exist for every new format
           combination added this milestone
 
-v0.75 -- Storage backend refactored to dialect-agnostic single version: 
+v0.75 -- [DONE] Storage backend refactored to dialect-agnostic single version: 
          Proves storage layer is swappable, not just extensible on the
          strategy side. DB rollback safety across a run added.
          Transform strategy identity: assign a shortened unique id (UUID4) to
@@ -75,28 +75,34 @@ v0.75 -- Storage backend refactored to dialect-agnostic single version:
            strategy carries a resolvable strategy UUID
         
 
-v0.8 -- CI pipeline (GitHub Actions) set up: tests run on push.
-        Optional dependency groups (sql, api, dev) verified to
-        work in isolation. Error handling audited (no bare
-        Exception/ValueError anywhere). Logging finalized across
-        all processors.
-        Transform failures wrapped with a generic troubleshooting hint (not a
-        diagnosis) pointing users to check their strategy against the
-        source data shape.
+v0.8 -- CI pipeline set up (scope to be defined at implementation
+        time — likely GitHub Actions, running the test suite on push
+        at minimum). Error handling audited across the codebase (no
+        bare Exception/ValueError anywhere; every failure mode maps
+        to a specific, meaningful exception). Logging finalized
+        across all processors and strategies, not just the
+        Orchestrator.
 
         Consistency review, concrete checklist:
         [ ] CI runs the full test suite on every push and blocks
           merge on failure
-        [ ] Installing only one optional dependency group (e.g.
-          fluxus[api]) and invoking an unrelated feature (e.g. DB
-          fetch) fails with a clear, actionable error — not a raw
-          ImportError/ModuleNotFoundError
         [ ] grep for "raise Exception" / "raise ValueError" across
           src/fluxus returns nothing
-        [ ] Every processor (Fetcher, Decoder, Extractor, Transformer,
-          Loader, Exporter) logs at least start/success/failure at a
-          consistent level, not just the Orchestrator
+        [ ] Every processor and strategy logs at least start/success/
+          failure at a consistent level
+        [ ] Optional dependency groups (api, xml, docx, xlsx, pdf)
+          verified to fail with a clear, actionable error when a
+          feature is used without its group installed — not a raw
+          ImportError
 
+v0.85 -- fluxus-strategies: a separate, curated repo of vetted
+         Transform strategies (manually reviewed before being added,
+         not an open marketplace). `fluxus install-strategy
+         --from-repo <name>` fetches and installs directly, in
+         addition to the existing local-file install path.
+         Transform strategy identity revisited if repo-sourced
+         strategies raise new lineage questions.
+         (Scope likely to grow as the repo takes shape.)
 
 v0.9  -- BETA release: README complete (setup, summary) complete.
          DEVELOPER_MANUAL.md (architecture, rationale) complete.
