@@ -1,6 +1,7 @@
-from fluxus.strategies.protocols import ExportStrategyProtocol
-from fluxus.models.dto import TransformedData
 from pathlib import Path
+
+from fluxus.models.dto import TransformedData
+from fluxus.strategies.protocols import ExportStrategyProtocol
 
 
 class Exporter:

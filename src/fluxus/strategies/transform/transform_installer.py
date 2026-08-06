@@ -1,9 +1,10 @@
-from pathlib import Path
 import importlib.util
 import shutil
+from pathlib import Path
+
 from fluxus.exceptions import errors
-from fluxus.strategies.protocols import TransformStrategyProtocol
 from fluxus.helpers import generate_strategy_uid
+from fluxus.strategies.protocols import TransformStrategyProtocol
 
 
 def install_strategy(*, strategy_path: Path) -> str:

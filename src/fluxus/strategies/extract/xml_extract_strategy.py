@@ -1,10 +1,10 @@
-import xmltodict
 import json
-
 from pyexpat import ExpatError
 
-from fluxus.exceptions import errors
+import xmltodict
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import TransformableData
 
 

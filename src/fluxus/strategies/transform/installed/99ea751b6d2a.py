@@ -1,6 +1,7 @@
+import json
+
 from fluxus.enums import ContentFormat
 from fluxus.models.dto import TransformableData, TransformedData
-import json
 
 
 class TransformStrategyForSampleCommentsJson:

@@ -1,10 +1,11 @@
-import pytest
-import pypdf
 from pathlib import Path
 from unittest.mock import patch
 
-from fluxus.exceptions import errors
+import pypdf
+import pytest
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import ExtractableData
 from fluxus.strategies.decode.pdf_decode_strategy import PdfDecodeStrategy
 

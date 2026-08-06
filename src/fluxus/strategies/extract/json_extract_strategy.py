@@ -1,7 +1,8 @@
 import json
-from fluxus.models.dto import TransformableData
+
 from fluxus.enums import ContentFormat
 from fluxus.exceptions import errors
+from fluxus.models.dto import TransformableData
 
 
 class JsonExtractStrategy:

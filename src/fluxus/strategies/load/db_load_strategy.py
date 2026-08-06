@@ -1,11 +1,13 @@
 import json
 import logging
-from sqlalchemy import Table, MetaData, create_engine
-from sqlalchemy.exc import ArgumentError, OperationalError, NoSuchTableError
+
+from sqlalchemy import MetaData, Table, create_engine
+from sqlalchemy.exc import ArgumentError, NoSuchTableError, OperationalError
 from sqlalchemy.orm import Session
+
+from fluxus.enums import ContentFormat
 from fluxus.exceptions import errors
 from fluxus.models.dto import TransformedData
-from fluxus.enums import ContentFormat
 
 logger = logging.getLogger(__name__)
 

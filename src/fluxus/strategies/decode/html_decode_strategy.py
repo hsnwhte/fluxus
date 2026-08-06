@@ -1,7 +1,9 @@
 from pathlib import Path
-from lxml import html, etree
-from fluxus.exceptions import errors
+
+from lxml import etree, html
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import ExtractableData
 
 

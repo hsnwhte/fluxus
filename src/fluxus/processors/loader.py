@@ -1,10 +1,17 @@
-from fluxus.strategies.protocols import LoadStrategyProtocol
-from fluxus.models.dto import TransformedData
 from fluxus.enums import ContentFormat
+from fluxus.models.dto import TransformedData
+from fluxus.strategies.protocols import LoadStrategyProtocol
 
 
 class Loader:
-    def __init__(self, *, address: str, strategy: LoadStrategyProtocol, target_format: ContentFormat, table_name: str | None = None):
+    def __init__(
+        self,
+        *,
+        address: str,
+        strategy: LoadStrategyProtocol,
+        target_format: ContentFormat,
+        table_name: str | None = None,
+    ):
         self.address = address
         self.strategy = strategy
         self.target_format = target_format

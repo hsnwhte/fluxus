@@ -1,8 +1,10 @@
-from fluxus.enums import Phase
 from datetime import datetime
-from fluxus.enums import ContentFormat, RunStatus
+
+from sqlalchemy import CHAR, DateTime, LargeBinary, String
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import DateTime, CHAR, Enum as SQLEnum, LargeBinary, String
+
+from fluxus.enums import ContentFormat, Phase, RunStatus
 
 
 class FluxusORM(DeclarativeBase):

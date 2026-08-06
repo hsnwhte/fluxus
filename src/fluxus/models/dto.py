@@ -1,7 +1,9 @@
-from pydantic import BaseModel, computed_field, model_validator
-from pathlib import Path
 from datetime import datetime
-from fluxus.enums import FluxusIOType, ContentFormat, Phase
+from pathlib import Path
+
+from pydantic import BaseModel, computed_field, model_validator
+
+from fluxus.enums import ContentFormat, FluxusIOType, Phase
 
 
 class InputArgs(BaseModel):

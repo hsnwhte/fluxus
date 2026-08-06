@@ -1,7 +1,9 @@
-from pathlib import Path
 import os
-from fluxus.enums import ContentFormat
+from pathlib import Path
+
 from dotenv import load_dotenv
+
+from fluxus.enums import ContentFormat
 
 ### --- SYSTEM ADDRESSES
 # ----- Project Root

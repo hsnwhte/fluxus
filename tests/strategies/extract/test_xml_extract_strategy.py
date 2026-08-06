@@ -1,9 +1,11 @@
-import pytest
 from pathlib import Path
+
+import pytest
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import TransformableData
 from fluxus.strategies.extract.xml_extract_strategy import XmlExtractStrategy
-from fluxus.exceptions import errors
 
 
 @pytest.fixture

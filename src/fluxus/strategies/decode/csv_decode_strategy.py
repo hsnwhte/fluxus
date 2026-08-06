@@ -1,7 +1,8 @@
-from pathlib import Path
 import csv
-from fluxus.exceptions import errors
+from pathlib import Path
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import ExtractableData
 
 

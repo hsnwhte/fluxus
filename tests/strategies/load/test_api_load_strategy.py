@@ -1,8 +1,10 @@
+from unittest.mock import MagicMock, patch
+
 import httpx
 import pytest
-from unittest.mock import patch, MagicMock
-from fluxus.exceptions import errors
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import TransformedData
 from fluxus.strategies.load.api_load_strategy import ApiLoadStrategy
 
@@ -22,9 +24,16 @@ def _mock_response(status_code):
     return mock_response
 
 
-def test_api_load_strategy_success(sample_data:TransformedData):
-    with patch("fluxus.strategies.load.api_load_strategy.httpx.put", return_value=_mock_response(200)) as mock_put:
-        ApiLoadStrategy.load(data=sample_data, address="https://mock-url.com", target_format=ContentFormat.JSON)
+def test_api_load_strategy_success(sample_data: TransformedData):
+    with patch(
+        "fluxus.strategies.load.api_load_strategy.httpx.put",
+        return_value=_mock_response(200),
+    ) as mock_put:
+        ApiLoadStrategy.load(
+            data=sample_data,
+            address="https://mock-url.com",
+            target_format=ContentFormat.JSON,
+        )
 
     mock_put.assert_called_once_with(
         url="https://mock-url.com",
@@ -33,16 +42,29 @@ def test_api_load_strategy_success(sample_data:TransformedData):
         timeout=10.0,
     )
 
-@pytest.mark.parametrize("status_code,expected_error", [
-    (400, errors.LoadBadRequestError),
-    (401, errors.LoadNotAuthorizedError),
-    (403, errors.LoadNotAuthorizedError),
-    (404, errors.LoadNotFoundError),
-    (413, errors.LoadPayloadTooLargeError),
-    (429, errors.LoadRateLimitError),
-    (502, errors.LoadServerError),
-])
-def test_api_load_strategy_status_errors(sample_data:TransformedData, status_code:int, expected_error):
-    with patch("fluxus.strategies.load.api_load_strategy.httpx.put", return_value=_mock_response(status_code)):
+
+@pytest.mark.parametrize(
+    "status_code,expected_error",
+    [
+        (400, errors.LoadBadRequestError),
+        (401, errors.LoadNotAuthorizedError),
+        (403, errors.LoadNotAuthorizedError),
+        (404, errors.LoadNotFoundError),
+        (413, errors.LoadPayloadTooLargeError),
+        (429, errors.LoadRateLimitError),
+        (502, errors.LoadServerError),
+    ],
+)
+def test_api_load_strategy_status_errors(
+    sample_data: TransformedData, status_code: int, expected_error
+):
+    with patch(
+        "fluxus.strategies.load.api_load_strategy.httpx.put",
+        return_value=_mock_response(status_code),
+    ):
         with pytest.raises(expected_error):
-            ApiLoadStrategy.load(data=sample_data, address="https://mock-url.com", target_format=ContentFormat.JSON)
+            ApiLoadStrategy.load(
+                data=sample_data,
+                address="https://mock-url.com",
+                target_format=ContentFormat.JSON,
+            )

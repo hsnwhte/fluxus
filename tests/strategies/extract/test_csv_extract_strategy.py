@@ -1,10 +1,11 @@
-import pytest
-import json
 from pathlib import Path
+
+import pytest
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import TransformableData
 from fluxus.strategies.extract.csv_extract_strategy import CsvExtractStrategy
-from fluxus.exceptions import errors
 
 
 @pytest.fixture

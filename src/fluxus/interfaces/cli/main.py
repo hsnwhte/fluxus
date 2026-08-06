@@ -1,16 +1,16 @@
 import logging
-import typer
 from pathlib import Path
+
+import typer
 from pydantic import ValidationError
 
-from fluxus.logging_config import setup_logging
-from fluxus.enums import FluxusIOType, ContentFormat
-from fluxus.unit_of_work import UnitOfWork
-from fluxus.orchestrator import Orchestrator
+from fluxus.enums import ContentFormat, FluxusIOType
 from fluxus.exceptions import errors
-from fluxus.strategies.transform import transform_installer
-from fluxus.strategies.transform import TRANSFORM_STRATEGY_MAP
+from fluxus.logging_config import setup_logging
 from fluxus.models.dto import InputArgs
+from fluxus.orchestrator import Orchestrator
+from fluxus.strategies.transform import TRANSFORM_STRATEGY_MAP, transform_installer
+from fluxus.unit_of_work import UnitOfWork
 
 logger = logging.getLogger(__name__)
 
@@ -47,8 +47,8 @@ def run(
             target_format=target_format,
             transform_strategy_uid=transform_strategy_uid,
         )
-    except ValidationError as e:
-        logger.exception(f"Invalid input: {e}")
+    except (ValidationError, AttributeError) as e:
+        logger.error(f"Invalid prompt: {e}")
         typer.echo(f"Invalid input: {e}", err=True)
         raise typer.Exit(code=1)
 

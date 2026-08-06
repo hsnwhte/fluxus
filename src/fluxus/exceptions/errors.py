@@ -28,10 +28,6 @@ class FetchApiError(FetchError):
     """Errors occuring when fetching from an API Endpoint"""
 
 
-class FetchDbError(FetchError):
-    """Errors occuring when fetching from a Database"""
-
-
 class FetchBadRequestError(FetchApiError):
     """The request to the source was malformed (HTTP 400)."""
 
@@ -82,6 +78,10 @@ class FetchContentTypeMissingError(FetchApiError):
 
 class FetchCacheNotFoundError(FetchApiError):
     """Fetch cache does not exist or was deleted"""
+
+
+class FetchDbError(FetchError):
+    """Errors occuring when fetching from a Database"""
 
 
 class FetchTableNameNotProvidedError(FetchDbError):
@@ -243,7 +243,6 @@ class RegistryEntryNotFoundError(RegistryError):
         no_id_msg = f"No active registry entry at address {entry_id}"
         no_hash_msg = f"No active registry entry with hash {content_hash}"
         no_run_id_msg = f"No active registry entry with run_id {run_id} at phase {phase} could be found."
-
         if entry_id:
             super().__init__(no_id_msg)
         elif content_hash:

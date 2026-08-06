@@ -1,17 +1,17 @@
 import pytest
-from sqlalchemy import create_engine, Engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 
+from fluxus.enums import ContentFormat, Phase, RunStatus
+from fluxus.exceptions import errors
 from fluxus.helpers import generate_hash
-from fluxus.enums import Phase, ContentFormat, RunStatus
 from fluxus.models.orm import FluxusORM, PipelineRunRecord
 from fluxus.storage.backend import (
+    FetchCacheStore,
+    PayloadStore,
     PipelineRunRecords,
     RegistryStore,
-    PayloadStore,
-    FetchCacheStore,
 )
-from fluxus.exceptions import errors
 
 POSTGRES_URL = "postgresql://postgres:testpass@localhost:5432/postgres"
 

@@ -1,4 +1,5 @@
 import logging
+
 from fluxus.settings import LOG_DIR
 
 
@@ -18,7 +19,6 @@ def setup_logging(debug: bool = False) -> None:
     root_logger.addHandler(console_handler)
 
     if debug:
-
         file_handler = logging.FileHandler(
             LOG_DIR / "fluxus_debug.log", encoding="utf-8"
         )

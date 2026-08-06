@@ -1,9 +1,11 @@
-import pytest
 import json
 from pathlib import Path
-from sqlalchemy import create_engine, text, Engine
-from fluxus.exceptions import errors
+
+import pytest
+from sqlalchemy import Engine, create_engine, text
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import TransformedData
 from fluxus.strategies.load.db_load_strategy import DBLoadStrategy
 

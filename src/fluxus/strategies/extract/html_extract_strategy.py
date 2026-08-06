@@ -1,10 +1,11 @@
 import json
-from lxml import html, etree
-from lxml.etree import XMLSyntaxError, ParserError
+
+from lxml import etree, html
+from lxml.etree import ParserError, XMLSyntaxError
 
 from fluxus.enums import ContentFormat
-from fluxus.models.dto import TransformableData
 from fluxus.exceptions import errors
+from fluxus.models.dto import TransformableData
 
 
 def _element_to_dict(element: etree._Element):

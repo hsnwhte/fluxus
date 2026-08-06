@@ -1,7 +1,8 @@
-from typing import Protocol, runtime_checkable
 from pathlib import Path
-from fluxus.models.dto import ExtractableData, TransformableData, TransformedData
+from typing import Protocol, runtime_checkable
+
 from fluxus.enums import ContentFormat
+from fluxus.models.dto import ExtractableData, TransformableData, TransformedData
 
 
 class FetchStrategyProtocol(Protocol):

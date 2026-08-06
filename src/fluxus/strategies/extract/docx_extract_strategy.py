@@ -1,13 +1,13 @@
+import io
 import json
 import zipfile
-import xmltodict
-import io
-
 from pyexpat import ExpatError
 
+import xmltodict
+
+from fluxus.enums import ContentFormat
 from fluxus.exceptions import errors
 from fluxus.models.dto import TransformableData
-from fluxus.enums import ContentFormat
 
 
 class DocxExtractStrategy:

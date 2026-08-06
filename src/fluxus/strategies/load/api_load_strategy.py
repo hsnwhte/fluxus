@@ -1,9 +1,9 @@
 import httpx
 
 from fluxus.enums import ContentFormat
-from fluxus.models.dto import TransformedData
 from fluxus.exceptions import errors
 from fluxus.helpers import content_format_to_mime
+from fluxus.models.dto import TransformedData
 
 
 class ApiLoadStrategy:

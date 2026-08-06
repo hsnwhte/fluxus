@@ -1,9 +1,10 @@
+from unittest.mock import MagicMock, patch
+
 import httpx
 import pytest
-from unittest.mock import patch, MagicMock
 
-from fluxus.exceptions import errors
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.strategies.fetch.api_fetch_strategy import ApiFetchStrategy
 
 CONTENT = b'{"test_key":"test_value"}'

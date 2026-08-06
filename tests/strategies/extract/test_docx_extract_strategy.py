@@ -1,10 +1,12 @@
-import pytest
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import TransformableData
 from fluxus.strategies.extract.docx_extract_strategy import DocxExtractStrategy
-from fluxus.exceptions import errors
 
 
 @pytest.fixture

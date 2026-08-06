@@ -1,20 +1,20 @@
 import logging
-from fluxus import settings
+
+from fluxus import helpers, settings
+from fluxus.enums import FluxusIOType, Phase, RunStatus
+from fluxus.exceptions import errors
 from fluxus.models.dto import (
     InputArgs,
     TransformableData,
     TransformedData,
 )
-from fluxus.selector import selector
-from fluxus.processors.fetcher import Fetcher
 from fluxus.processors.decoder import Decoder
-from fluxus.processors.extractor import Extractor
-from fluxus.processors.transformer import Transformer
-from fluxus.processors.loader import Loader
 from fluxus.processors.exporter import Exporter
-from fluxus.enums import Phase, FluxusIOType, RunStatus
-from fluxus import helpers
-from fluxus.exceptions import errors
+from fluxus.processors.extractor import Extractor
+from fluxus.processors.fetcher import Fetcher
+from fluxus.processors.loader import Loader
+from fluxus.processors.transformer import Transformer
+from fluxus.selector import selector
 from fluxus.unit_of_work import UnitOfWork
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class Orchestrator:
 
             else:
                 current_phase = Phase.FETCH
-                logger.info(f"Checking fetch cache...")
+                logger.info("Checking fetch cache...")
                 try:
                     cache = self.uow.fetch_cache_store.load(api_url=s_address)
                     last_entry_id = cache.registry_address
@@ -61,7 +61,7 @@ class Orchestrator:
 
                 except errors.FetchCacheNotFoundError:
                     logger.info(f"No cache data found for url '{s_address}'")
-                    logger.info(f"Fetching data from source...")
+                    logger.info("Fetching data from source...")
                     last_entry_id = self._fetch(run_id)
                     logger.info(
                         f"{current_phase} successful, registry entry id: {last_entry_id}"
@@ -110,15 +110,15 @@ class Orchestrator:
                 )
                 return last_entry_id
             else:
-                logger.error(f"Failed to load/export to the source - invalid args.")
+                logger.error("Failed to load/export to the target - invalid args.")
                 raise errors.InvalidInputError()
-        except Exception as e:
+        except Exception:
             self.uow.run_records_store.update_record(
                 run_id=run_id,
                 status=RunStatus.INTERRUPTED,
                 phase=current_phase,
             )
-            raise e
+            raise
 
     def _export(self, run_id: int, entry_id: int) -> int:
         entry = self.uow.registry_store.get_entry_by_id(entry_id=entry_id)

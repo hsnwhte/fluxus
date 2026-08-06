@@ -1,6 +1,8 @@
 from pathlib import Path
-from fluxus.strategies.protocols import DecodeStrategyProtocol
+
 from fluxus.models.dto import ExtractableData
+from fluxus.strategies.protocols import DecodeStrategyProtocol
+
 
 class Decoder:
     def __init__(self, *, source_address: Path, strategy: DecodeStrategyProtocol):

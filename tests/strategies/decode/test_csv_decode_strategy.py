@@ -1,10 +1,11 @@
-import pytest
 import csv
 from pathlib import Path
 from unittest.mock import patch
 
-from fluxus.exceptions import errors
+import pytest
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import ExtractableData
 from fluxus.strategies.decode.csv_decode_strategy import CsvDecodeStrategy
 

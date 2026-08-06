@@ -1,15 +1,16 @@
 from pathlib import Path
-from fluxus.strategies import fetch, decode, extract, transform, load, export
-from fluxus.strategies.protocols import (
-    FetchStrategyProtocol,
-    DecodeStrategyProtocol,
-    ExtractStrategyProtocol,
-    TransformStrategyProtocol,
-    LoadStrategyProtocol,
-    ExportStrategyProtocol,
-)
+
+from fluxus.enums import ContentFormat, FluxusIOType
 from fluxus.exceptions import errors
-from fluxus.enums import FluxusIOType, ContentFormat
+from fluxus.strategies import decode, export, extract, fetch, load, transform
+from fluxus.strategies.protocols import (
+    DecodeStrategyProtocol,
+    ExportStrategyProtocol,
+    ExtractStrategyProtocol,
+    FetchStrategyProtocol,
+    LoadStrategyProtocol,
+    TransformStrategyProtocol,
+)
 
 
 class Selector:

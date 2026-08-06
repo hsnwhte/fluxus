@@ -1,12 +1,14 @@
-from sqlalchemy.engine import create_engine, Engine
-from sqlalchemy.orm import Session
-from fluxus.settings import RUNTIME_STORE
+from typing import Self
 
+from sqlalchemy.engine import Engine, create_engine
+from sqlalchemy.orm import Session
+
+from fluxus.settings import RUNTIME_STORE
 from fluxus.storage.backend import (
-    PipelineRunRecords,
-    PayloadStore,
-    RegistryStore,
     FetchCacheStore,
+    PayloadStore,
+    PipelineRunRecords,
+    RegistryStore,
 )
 
 
@@ -20,7 +22,7 @@ class UnitOfWork:
         self._registry_store = RegistryStore(session=self.pipeline_session)
         self._fetch_cache_store = FetchCacheStore(session=self.pipeline_session)
 
-    def __enter__(self) -> "UnitOfWork":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:

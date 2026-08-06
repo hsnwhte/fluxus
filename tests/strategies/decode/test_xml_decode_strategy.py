@@ -1,8 +1,9 @@
-import pytest
 from pathlib import Path
 
-from fluxus.exceptions import errors
+import pytest
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import ExtractableData
 from fluxus.strategies.decode.xml_decode_strategy import XmlDecodeStrategy
 

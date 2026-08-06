@@ -1,9 +1,9 @@
 import httpx
 
 from fluxus.enums import MimeType
-from fluxus.models.dto import ExtractableData
 from fluxus.exceptions import errors
 from fluxus.helpers import mime_to_content_format
+from fluxus.models.dto import ExtractableData
 
 
 class ApiFetchStrategy:

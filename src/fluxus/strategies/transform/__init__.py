@@ -1,8 +1,9 @@
 from pathlib import Path
-from fluxus.strategies.transform.transform_installer import _load_strategy_from_file
+
 from fluxus.strategies.transform.default import (
     TransformStrategySamplePassthrough,
 )
+from fluxus.strategies.transform.transform_installer import _load_strategy_from_file
 
 TRANSFORM_STRATEGY_MAP: dict[str, type] = {
     "default": TransformStrategySamplePassthrough,  # constant, not to be erased

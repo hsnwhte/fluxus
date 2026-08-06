@@ -1,9 +1,9 @@
 import csv
-import json
 import io
+import json
 
-from fluxus.exceptions import errors
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import TransformableData
 
 

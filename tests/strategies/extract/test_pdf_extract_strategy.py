@@ -1,11 +1,13 @@
-import pytest
 from pathlib import Path
 from unittest.mock import patch
+
 import pypdf
+import pytest
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import TransformableData
 from fluxus.strategies.extract.pdf_extract_strategy import PdfExtractStrategy
-from fluxus.exceptions import errors
 
 
 @pytest.fixture

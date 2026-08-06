@@ -1,18 +1,19 @@
-import logging
-import typer
 import json
-from pydantic import ValidationError
+import logging
 from dataclasses import asdict
-from devtools import settings as dev_settings
-from devtools.tools import db_tools
-from devtools.test_packages import TEST_PACKAGES
-from fluxus import settings as runtime_settings
-from fluxus.logging_config import setup_logging
-from fluxus.enums import FluxusIOType, ContentFormat
-from fluxus.orchestrator import Orchestrator
-from fluxus.exceptions import errors
 
+import typer
+from pydantic import ValidationError
+
+from devtools import settings as dev_settings
+from devtools.test_packages import TEST_PACKAGES
+from devtools.tools import db_tools
+from fluxus import settings as runtime_settings
+from fluxus.enums import ContentFormat, FluxusIOType
+from fluxus.exceptions import errors
+from fluxus.logging_config import setup_logging
 from fluxus.models.dto import InputArgs
+from fluxus.orchestrator import Orchestrator
 from fluxus.unit_of_work import UnitOfWork
 
 logger = logging.getLogger(__name__)
@@ -48,8 +49,8 @@ def test(
                 )
                 raise typer.Exit(code=1)
             input_args = InputArgs(**asdict(pack))
-        except ValidationError as e:
-            logger.exception(f"Invalid input: {e}")
+        except (ValidationError, AttributeError) as e:
+            logger.error(f"Invalid input: {e}")
             typer.echo(f"Invalid input: {e}", err=True)
             raise typer.Exit(code=1)
     else:
@@ -64,8 +65,8 @@ def test(
                 target_format=target_format,
                 transform_strategy_uid=transform_strategy_uid,
             )
-        except ValidationError as e:
-            logger.exception(f"Invalid input: {e}")
+        except (ValidationError, AttributeError)  as e:
+            logger.error(f"Invalid input: {e}")
             typer.echo(f"Invalid input: {e}", err=True)
             raise typer.Exit(code=1)
 

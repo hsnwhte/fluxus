@@ -1,6 +1,7 @@
 from typing import Protocol
-from fluxus.enums import Phase, ContentFormat, RunStatus
-from fluxus.models.dto import RegistryRecord, FetchCacheData
+
+from fluxus.enums import ContentFormat, Phase, RunStatus
+from fluxus.models.dto import FetchCacheData, RegistryRecord
 
 
 class PipelineRunRecordsProtocol(Protocol):

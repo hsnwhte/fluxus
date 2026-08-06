@@ -1,14 +1,17 @@
 import json
-from sqlalchemy import Table, MetaData, select, create_engine
-from sqlalchemy.exc import ArgumentError, OperationalError, NoSuchTableError
+
+from sqlalchemy import MetaData, Table, create_engine, select
+from sqlalchemy.exc import ArgumentError, NoSuchTableError, OperationalError
 from sqlalchemy.orm import Session
-from fluxus.exceptions import errors
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import ExtractableData
+
 
 class DBFetchStrategy:
     @staticmethod
-    def fetch(*, address:str, table_name:str|None=None)-> ExtractableData:
+    def fetch(*, address: str, table_name: str | None = None) -> ExtractableData:
         if table_name is None:
             raise errors.FetchTableNameNotProvidedError()
         try:

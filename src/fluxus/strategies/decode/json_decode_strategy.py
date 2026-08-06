@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
-from fluxus.exceptions import errors
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import ExtractableData
 
 

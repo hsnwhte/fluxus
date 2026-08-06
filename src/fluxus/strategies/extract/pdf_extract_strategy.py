@@ -1,9 +1,12 @@
-import json
-import pypdf, pypdf.errors
 import io
-from fluxus.models.dto import TransformableData
+import json
+
+import pypdf
+import pypdf.errors
+
 from fluxus.enums import ContentFormat
 from fluxus.exceptions import errors
+from fluxus.models.dto import TransformableData
 
 
 class PdfExtractStrategy:

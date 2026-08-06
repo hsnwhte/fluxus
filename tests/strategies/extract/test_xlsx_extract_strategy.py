@@ -1,11 +1,13 @@
-import pytest
 from pathlib import Path
 from unittest.mock import patch
 from xml.parsers.expat import ExpatError
+
+import pytest
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import TransformableData
 from fluxus.strategies.extract.xlsx_extract_strategy import XlsxExtractStrategy
-from fluxus.exceptions import errors
 
 
 @pytest.fixture

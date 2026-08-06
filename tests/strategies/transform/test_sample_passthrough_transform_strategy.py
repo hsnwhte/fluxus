@@ -1,4 +1,5 @@
 import pytest
+
 from fluxus.enums import ContentFormat
 from fluxus.models.dto import TransformableData, TransformedData
 from fluxus.strategies.transform.default import (

@@ -1,7 +1,10 @@
 from pathlib import Path
-import pypdf, pypdf.errors
-from fluxus.exceptions import errors
+
+import pypdf
+import pypdf.errors
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import ExtractableData
 
 

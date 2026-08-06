@@ -1,9 +1,11 @@
-import pytest
 from pathlib import Path
-from lxml import etree
 from unittest.mock import patch
-from fluxus.exceptions import errors
+
+import pytest
+from lxml import etree
+
 from fluxus.enums import ContentFormat
+from fluxus.exceptions import errors
 from fluxus.models.dto import ExtractableData
 from fluxus.strategies.decode.html_decode_strategy import HtmlDecodeStrategy
 
