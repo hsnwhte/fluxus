@@ -1,7 +1,7 @@
 from typing import Protocol
 
 from fluxus.enums import ContentFormat, Phase, RunStatus
-from fluxus.models.dto import FetchCacheData, RegistryRecord
+from fluxus.models.dto import FetchCacheData, PipelineRunRecordData, RegistryRecord
 
 
 class PipelineRunRecordsProtocol(Protocol):
@@ -16,6 +16,13 @@ class PipelineRunRecordsProtocol(Protocol):
         phase: Phase | None = None,
     ) -> int:
         """Updates run status and details if run is interrupted"""
+        ...
+
+    def list_runs(self, *, limit: int, offset: int) -> list[PipelineRunRecordData]:
+        """Lists previous runs as paginated"""
+        ...
+
+    def count_runs(self) -> int: ...
 
 
 class FetchCacheStoreProtocol(Protocol):
@@ -54,6 +61,14 @@ class RegistryStoreProtocol(Protocol):
     def get_entry_by_hash(self, *, content_hash: str) -> RegistryRecord:
         """Retreives entry object by content hash"""
         ...
+
+    def list_entries(
+        self, *, limit: int, offset: int, run_id: int | None = None
+    ) -> list[RegistryRecord]:
+        """Lists entries as paginated"""
+        ...
+
+    def count_entries(self, *, run_id: int | None = None) -> int: ...
 
 
 class PayloadStoreProtocol(Protocol):

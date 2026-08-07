@@ -1,11 +1,11 @@
 from pydantic import ValidationError
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import select
+from sqlalchemy.sql import func, select
 
 from fluxus.enums import ContentFormat, Phase, RunStatus
 from fluxus.exceptions import errors
-from fluxus.models.dto import FetchCacheData, RegistryRecord
+from fluxus.models.dto import FetchCacheData, PipelineRunRecordData, RegistryRecord
 from fluxus.models.orm import (
     FetchCache,
     PayloadRecord,
@@ -36,6 +36,34 @@ class PipelineRunRecords:
         record.interrupted_phase = phase
         self.session.commit()
         return run_id
+
+    def list_runs(
+        self, limit: int = 20, offset: int = 0
+    ) -> list[PipelineRunRecordData]:
+        records = (
+            self.session.execute(
+                select(PipelineRunRecord)
+                .order_by(PipelineRunRecord.run_id.desc())
+                .limit(limit)
+                .offset(offset)
+            )
+            .scalars()
+            .all()
+        )
+        return [
+            PipelineRunRecordData(
+                run_id=r.run_id,
+                started_at=r.started_at,
+                status=r.status,
+                interrupted_phase=r.interrupted_phase,
+            )
+            for r in records
+        ]
+
+    def count_runs(self) -> int:
+        return self.session.execute(
+            select(func.count()).select_from(PipelineRunRecord)
+        ).scalar_one()
 
 
 class FetchCacheStore:
@@ -189,6 +217,37 @@ class RegistryStore:
         except ValidationError as e:
             raise errors.InvalidRegistryEntryError(content_hash=content_hash) from e
         return entry_obj
+
+    def list_entries(
+        self, *, limit: int = 20, offset: int = 0, run_id: int | None = None
+    ) -> list[RegistryRecord]:
+        query = select(RegistryEntry).order_by(RegistryEntry.id.desc())
+        if run_id is not None:
+            query = query.where(RegistryEntry.run_id == run_id)
+        query = query.limit(limit).offset(offset)
+
+        records = self.session.execute(query).scalars().all()
+        return [
+            RegistryRecord(
+                id=r.id,
+                run_id=r.run_id,
+                phase=r.phase,
+                content_format=r.content_format,
+                strategy_name=r.strategy_name,
+                transform_strategy_uid=r.transform_strategy_uid,
+                content_hash=r.content_hash,
+                address=r.address,
+                created_at=r.created_at,
+                is_active=r.is_active,
+            )
+            for r in records
+        ]
+
+    def count_entries(self, *, run_id: int | None = None) -> int:
+        query = select(func.count()).select_from(RegistryEntry)
+        if run_id is not None:
+            query = query.where(RegistryEntry.run_id == run_id)
+        return self.session.execute(query).scalar_one()
 
 
 class PayloadStore:

@@ -1,8 +1,10 @@
 from typing import Self
 
+from sqlalchemy import text
 from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.orm import Session
 
+from fluxus.models.orm import FluxusORM
 from fluxus.settings import RUNTIME_STORE
 from fluxus.storage.backend import (
     FetchCacheStore,
@@ -15,8 +17,10 @@ from fluxus.storage.backend import (
 class UnitOfWork:
     def __init__(self, engine: Engine | None = None):
         self.engine = engine or create_engine(RUNTIME_STORE)
-        self.pipeline_session = self._get_session(self.engine)
-        self.run_records_session = self._get_session(self.engine)
+        FluxusORM.metadata.create_all(self.engine, checkfirst=True)
+        self.connection = self.engine.connect()
+        self.pipeline_session = Session(bind=self.engine)
+        self.run_records_session = Session(bind=self.engine)
         self._run_records_store = PipelineRunRecords(session=self.run_records_session)
         self._payload_store = PayloadStore(session=self.pipeline_session)
         self._registry_store = RegistryStore(session=self.pipeline_session)
@@ -52,7 +56,3 @@ class UnitOfWork:
 
     def rollback(self) -> None:
         self.pipeline_session.rollback()
-
-    @staticmethod
-    def _get_session(engine: Engine) -> Session:
-        return Session(bind=engine)

@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 
 
 class Orchestrator:
-    def __init__(self, *, input_args: InputArgs, uow: UnitOfWork):
+    def __init__(self, *, input_args: InputArgs):
         self.input_args = input_args
-        self.uow = uow
+        self.uow = UnitOfWork()
 
     def run(self) -> int:
         current_phase = None
@@ -39,7 +39,7 @@ class Orchestrator:
                 logger.info(f"Decoding the {s_type.value}: '{s_address}'")
                 last_entry_id = self._decode(run_id)
                 logger.info(
-                    f"{current_phase} successful, registry entry id: {last_entry_id}"
+                    f"{current_phase.value.upper()} successful, registry entry id: {last_entry_id}"
                 )
 
             elif s_type == FluxusIOType.DB:
@@ -47,7 +47,7 @@ class Orchestrator:
                 logger.info(f"Fetching from {s_type.value}: '{s_address} - {s_table}'")
                 last_entry_id = self._fetch(run_id)
                 logger.info(
-                    f"{current_phase} successful, registry entry id: {last_entry_id}"
+                    f"{current_phase.value.upper()} successful, registry entry id: {last_entry_id}"
                 )
 
             else:
@@ -66,25 +66,23 @@ class Orchestrator:
                     logger.info("Fetching data from source...")
                     last_entry_id = self._fetch(run_id)
                     logger.info(
-                        f"{current_phase} successful, registry entry id: "
-                        f"{last_entry_id}"
+                        f"{current_phase.value.upper()} successful, registry entry id: {last_entry_id}"
                     )
 
             current_phase = Phase.EXTRACT
             logger.info("Extracting data...")
             last_entry_id = self._extract(run_id, last_entry_id)
             logger.info(
-                f"{current_phase} successful, registry entry id: {last_entry_id}"
+                f"{current_phase.value.upper()} successful, registry entry id: {last_entry_id}"
             )
 
             current_phase = Phase.TRANSFORM
             logger.info(
-                f"Transforming data based on strategy: "
-                f"'{self.input_args.transform_strategy_uid}'"
+                f"Transforming data based on strategy: '{self.input_args.transform_strategy_uid}'"
             )
             last_entry_id = self._transform(run_id, last_entry_id)
             logger.info(
-                f"{current_phase} successful, registry entry id: {last_entry_id}"
+                f"{current_phase.value.upper()} successful, registry entry id: {last_entry_id}"
             )
 
             if self.input_args.target_type.value in ("api", "db"):
@@ -94,11 +92,12 @@ class Orchestrator:
                     f"'{self.input_args.target_address}'"
                 )
                 last_entry_id = self._load(run_id, last_entry_id)
-                logger.info(
-                    f"{current_phase} successful, registry entry id: {last_entry_id}"
-                )
+                self.uow.commit()
                 self.uow.run_records_store.update_record(
                     run_id=run_id, status=RunStatus.COMPLETE
+                )
+                logger.info(
+                    f"{current_phase.value.upper()} successful, registry entry id: {last_entry_id}"
                 )
                 return last_entry_id
             elif self.input_args.target_type.value == "file":
@@ -108,22 +107,27 @@ class Orchestrator:
                     f"'{self.input_args.target_address}'"
                 )
                 last_entry_id = self._export(run_id, last_entry_id)
-                logger.info(
-                    f"{current_phase} successful, registry entry id: {last_entry_id}"
-                )
+                self.uow.commit()
                 self.uow.run_records_store.update_record(
                     run_id=run_id, status=RunStatus.COMPLETE
+                )
+                logger.info(
+                    f"{current_phase.value.upper()} successful, registry entry id: {last_entry_id}"
                 )
                 return last_entry_id
             else:
                 raise errors.InvalidInputError()
         except Exception:
+            self.uow.rollback()
             self.uow.run_records_store.update_record(
                 run_id=run_id,
                 status=RunStatus.INTERRUPTED,
                 phase=current_phase,
             )
             raise
+        finally:
+            self.uow.pipeline_session.close()
+            self.uow.run_records_session.close()
 
     def _export(self, run_id: int, entry_id: int) -> int:
         entry = self.uow.registry_store.get_entry_by_id(entry_id=entry_id)
@@ -131,6 +135,7 @@ class Orchestrator:
         transformed_content = TransformedData(content=content_bytes)
 
         export_strategy = selector.get_export_strategy()
+        logger.debug(f"Applying strategy: '{export_strategy.__name__}'")
         exporter = Exporter(
             file_path=self.input_args.target_as_path, strategy=export_strategy
         )
@@ -153,6 +158,8 @@ class Orchestrator:
         transformed_content = TransformedData(content=content_bytes)
 
         load_strategy = selector.get_load_strategy(self.input_args.target_type)
+        logger.debug(f"Applying strategy: '{load_strategy.__name__}'")
+
         loader = Loader(
             address=self.input_args.target_address,
             strategy=load_strategy,
@@ -174,6 +181,7 @@ class Orchestrator:
     def _extract(self, run_id: int, entry_id: int) -> int:
         entry = self.uow.registry_store.get_entry_by_id(entry_id=entry_id)
         extract_strategy = selector.get_extract_strategy(entry.content_format)
+        logger.debug(f"Applying strategy: '{extract_strategy.__name__}'")
         content_bytes = self.uow.payload_store.load(address=entry.address)
         extractor = Extractor(content=content_bytes, strategy=extract_strategy)
         data = extractor.extract()
@@ -205,6 +213,7 @@ class Orchestrator:
         transform_strategy = transform_strategy_class(
             target_format=self.input_args.target_format, data=transformable_content
         )
+        logger.debug(f"Applying strategy: '{transform_strategy_class.__name__}'")
         transformer = Transformer(strategy=transform_strategy)
         data = transformer.transform()
 
@@ -225,6 +234,7 @@ class Orchestrator:
 
     def _decode(self, run_id: int) -> int:
         decode_strategy = selector.get_decode_strategy(self.input_args.source_as_path)
+        logger.debug(f"Applying strategy: '{decode_strategy.__name__}'")
         decoder = Decoder(
             source_address=self.input_args.source_as_path, strategy=decode_strategy
         )
@@ -245,6 +255,8 @@ class Orchestrator:
 
     def _fetch(self, run_id: int) -> int:
         fetch_strategy = selector.get_fetch_strategy(self.input_args.source_type)
+        logger.debug(f"Applying strategy: '{fetch_strategy.__name__}'")
+
         fetcher = Fetcher(
             source_address=self.input_args.source_address,
             strategy=fetch_strategy,

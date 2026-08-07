@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fluxus"
-version = "0.7.5"
+version = "0.8.0"
 description = "Generic, plugin-based ETL & data sync engine."
 requires-python = ">=3.14"
 readme = "README.md"

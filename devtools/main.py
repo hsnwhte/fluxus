@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from dataclasses import asdict
 
 import typer
@@ -18,6 +19,8 @@ from fluxus.unit_of_work import UnitOfWork
 
 logger = logging.getLogger(__name__)
 dev = typer.Typer()
+
+os.environ["FLUXUS_STORE_ADDRESS"] = dev_settings.DEV_RUNTIME_POSTGRE
 
 
 @dev.callback()
@@ -65,28 +68,23 @@ def test(
                 target_format=target_format,
                 transform_strategy_uid=transform_strategy_uid,
             )
-        except (ValidationError, AttributeError)  as e:
+        except (ValidationError, AttributeError) as e:
             logger.error(f"Invalid input: {e}")
             typer.echo(f"Invalid input: {e}", err=True)
             raise typer.Exit(code=1)
 
-    engine = db_tools.get_engine(url=dev_settings.DEV_RUNTIME_POSTGRE, echo=False)
-    with UnitOfWork(engine=engine) as uow:
-        orchestrator = Orchestrator(input_args=input_args, uow=uow)
-        logger.debug("Orchestrator object instantiated")
-        logger.info("Pipeline starting...")
-        try:
-            entry_id = orchestrator.run()
-        except errors.FluxusError as e:
-            logger.exception(f"Pipeline failed: {e}")
-            typer.echo(f"Pipeline failed: {e}", err=True)
-            raise typer.Exit(code=1)
+    orchestrator = Orchestrator(input_args=input_args)
+    logger.debug("Orchestrator object instantiated")
+    logger.info("Pipeline starting...")
+    try:
+        entry_id = orchestrator.run()
+    except errors.FluxusError as e:
+        logger.exception(f"Pipeline failed: {e}")
+        typer.echo(f"Pipeline failed: {e}", err=True)
+        raise typer.Exit(code=1)
 
-        uow.commit()
-        logger.info(
-            f"Pipeline finished successfully, final registry entry id: {entry_id}"
-        )
-        typer.echo(f"Success. Final registry entry id: {entry_id}")
+    logger.info(f"Pipeline finished successfully, final registry entry id: {entry_id}")
+    typer.echo(f"Success. Final registry entry id: {entry_id}")
 
 
 @dev.command(name="inspect")
