@@ -32,6 +32,7 @@ class Orchestrator:
         try:
             s_type = self.input_args.source_type
             s_address = self.input_args.source_address
+            s_table = self.input_args.source_table
 
             if s_type == FluxusIOType.FILE:
                 current_phase = Phase.DECODE
@@ -43,7 +44,7 @@ class Orchestrator:
 
             elif s_type == FluxusIOType.DB:
                 current_phase = Phase.FETCH
-                logger.info(f"Fetching from {s_type.value}: '{s_address}'")
+                logger.info(f"Fetching from {s_type.value}: '{s_address} - {s_table}'")
                 last_entry_id = self._fetch(run_id)
                 logger.info(
                     f"{current_phase} successful, registry entry id: {last_entry_id}"
@@ -56,7 +57,8 @@ class Orchestrator:
                     cache = self.uow.fetch_cache_store.load(api_url=s_address)
                     last_entry_id = cache.registry_address
                     logger.info(
-                        f"Found cached data for url '{s_address}' at entry id: {last_entry_id}"
+                        f"Found cached data for url '{s_address}' at registry entry id:"
+                        f"{last_entry_id}"
                     )
 
                 except errors.FetchCacheNotFoundError:
@@ -64,7 +66,8 @@ class Orchestrator:
                     logger.info("Fetching data from source...")
                     last_entry_id = self._fetch(run_id)
                     logger.info(
-                        f"{current_phase} successful, registry entry id: {last_entry_id}"
+                        f"{current_phase} successful, registry entry id: "
+                        f"{last_entry_id}"
                     )
 
             current_phase = Phase.EXTRACT
@@ -76,7 +79,8 @@ class Orchestrator:
 
             current_phase = Phase.TRANSFORM
             logger.info(
-                f"Transforming data based on strategy: '{self.input_args.transform_strategy_uid}'"
+                f"Transforming data based on strategy: "
+                f"'{self.input_args.transform_strategy_uid}'"
             )
             last_entry_id = self._transform(run_id, last_entry_id)
             logger.info(
@@ -86,7 +90,8 @@ class Orchestrator:
             if self.input_args.target_type.value in ("api", "db"):
                 current_phase = Phase.LOAD
                 logger.info(
-                    f"Loading to {self.input_args.target_type.value}: '{self.input_args.target_address}'"
+                    f"Loading to {self.input_args.target_type.value}: "
+                    f"'{self.input_args.target_address}'"
                 )
                 last_entry_id = self._load(run_id, last_entry_id)
                 logger.info(
@@ -99,7 +104,8 @@ class Orchestrator:
             elif self.input_args.target_type.value == "file":
                 current_phase = Phase.EXPORT
                 logger.info(
-                    f"Exporting to {self.input_args.target_type.value}: '{self.input_args.target_address}'"
+                    f"Exporting to {self.input_args.target_type.value}: "
+                    f"'{self.input_args.target_address}'"
                 )
                 last_entry_id = self._export(run_id, last_entry_id)
                 logger.info(
@@ -110,7 +116,6 @@ class Orchestrator:
                 )
                 return last_entry_id
             else:
-                logger.error("Failed to load/export to the target - invalid args.")
                 raise errors.InvalidInputError()
         except Exception:
             self.uow.run_records_store.update_record(

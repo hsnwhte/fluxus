@@ -22,9 +22,6 @@ class ExtractStrategyProtocol(Protocol):
 
 @runtime_checkable
 class TransformStrategyProtocol(Protocol):
-    def __init__(
-        self, *, target_format: ContentFormat, data: TransformableData, **kwargs
-    ): ...
     def transform(self) -> TransformedData: ...
 
 

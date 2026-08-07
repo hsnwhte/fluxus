@@ -76,10 +76,6 @@ class FetchContentTypeMissingError(FetchApiError):
         super().__init__(message)
 
 
-class FetchCacheNotFoundError(FetchApiError):
-    """Fetch cache does not exist or was deleted"""
-
-
 class FetchDbError(FetchError):
     """Errors occuring when fetching from a Database"""
 
@@ -137,7 +133,13 @@ class ExtractSyntaxError(ExtractError):
 
 
 class TransformError(FluxusError):
-    """Errors occurring while transforming canonical data into the target format."""
+    """Errors occurring while transforming canonical data into the
+    target format. Transform strategies are entirely user-authored —
+    Fluxus cannot diagnose the specific cause of a failure here.
+    HINT: If you see a raw exception (KeyError, AttributeError, etc.)
+    instead of a TransformError, check that your strategy's field
+    mapping matches the actual shape of the data it receives.
+    """
 
 
 class LoadError(FluxusError):
@@ -163,6 +165,12 @@ class LoadDbUrlNotFoundError(LoadDbError):
 class LoadTableNotFoundError(LoadDbError):
     def __init__(self, table_name: str):
         message = f"Table '{table_name}' not found in the target db."
+        super().__init__(message)
+
+
+class LoadTableSerializationError(LoadDbError):
+    def __init__(self, table_name: str):
+        message = f"Content for '{table_name}' could not be deserialized from JSON."
         super().__init__(message)
 
 
@@ -276,6 +284,9 @@ class InvalidRegistryEntryError(RegistryError):
 class StorageError(FluxusError):
     """Errors occurring while reading/writing payload data via a storage backend."""
 
+
+class FetchCacheNotFoundError(StorageError):
+    """Fetch cache does not exist or was deleted"""
 
 class PayloadNotFoundError(StorageError):
     """The requested payload does not exist or has been deactivated."""

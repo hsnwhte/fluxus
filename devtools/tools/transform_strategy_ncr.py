@@ -1,9 +1,7 @@
-from pydantic import BaseModel, computed_field, model_validator
-from pathlib import Path
-from datetime import datetime
-import json
+from pydantic import BaseModel
+
 from fluxus.enums import ContentFormat
-from fluxus.models.dto import TransformableData, TransformedData, Attachment
+from fluxus.models.dto import TransformableData, TransformedData
 
 
 class Actor(BaseModel):
@@ -24,7 +22,6 @@ class Capa(BaseModel):
     verified_by: Actor | None
     verify_date: str | None
     evidence: str | None
-    evidence_attachments: list[Attachment]
 
 
 class CapaPlan(BaseModel):
@@ -41,7 +38,6 @@ class NCRDocument(BaseModel):
     issuer: Actor
     occurance_site: str
     nc_description: str
-    nc_attachments: list[Attachment]
     severity: str
     disposition: str
     capa_plans: list[CapaPlan]

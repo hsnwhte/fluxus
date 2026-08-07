@@ -1,7 +1,15 @@
 from dataclasses import dataclass
-from fluxus.enums import FluxusIOType, ContentFormat
-from devtools.settings import *
-from devtools.tools.dev_orm import DevTargetDataText, DevSourceDataText
+
+from devtools.settings import (
+    DEV_SOURCE_API_URL,
+    DEV_SOURCE_DB_URL,
+    DEV_SOURCE_FILE_DIR,
+    DEV_TARGET_API_URL,
+    DEV_TARGET_DB_URL,
+    DEV_TARGET_FILE_DIR,
+)
+from devtools.tools.dev_orm import DevSourceDataText, DevTargetDataText
+from fluxus.enums import ContentFormat, FluxusIOType
 
 """
 Devtools test packages — pre-configured InputArgs kwargs sets for rapid

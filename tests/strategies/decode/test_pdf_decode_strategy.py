@@ -41,6 +41,7 @@ def test_decode_empty_file(tmp_path: Path):
 
 
 def test_decode_not_decrypted():
+    # noinspection PyUnresolvedReferences
     with patch(
         "fluxus.strategies.decode.pdf_decode_strategy.pypdf.PdfReader",
         side_effect=pypdf.errors.FileNotDecryptedError,
@@ -50,6 +51,7 @@ def test_decode_not_decrypted():
 
 
 def test_decode_malformed():
+    # noinspection PyUnresolvedReferences
     with patch(
         "fluxus.strategies.decode.pdf_decode_strategy.pypdf.PdfReader",
         side_effect=pypdf.errors.PdfReadError,

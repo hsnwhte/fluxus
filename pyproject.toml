@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "fluxus"
 version = "0.7.5"
 description = "Generic, plugin-based ETL & data sync engine."
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 readme = "README.md"
 
 dependencies = [
@@ -26,10 +26,18 @@ xml = ["lxml>=5.0", "xmltodict>0.15"]
 docx = ["python-docx>=1.2"]
 xlsx = ["openpyxl>=3.1"]
 pdf = ["pypdf>=6.0"]
-dev = ["pytest>=9.1","pytest-cov>=7.1", "ruff>=0.16"]
+dev = ["pytest>=9.1", "pytest-cov>=7.1", "ruff>=0.16"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]  # pycodestyle, pyflakes, warnings, import sorting
+ignore = ["B008", "E501"] # Typer's Option()/Argument() as default values is intentional

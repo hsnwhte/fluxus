@@ -33,12 +33,14 @@ def test_decode_file_not_found():
 
 
 def test_decode_malformed(source_file_path_success):
-    with patch(
-        "fluxus.strategies.decode.docx_decode_strategy.zipfile.is_zipfile",
-        return_value=False,
+    with (
+        patch(
+            "fluxus.strategies.decode.docx_decode_strategy.zipfile.is_zipfile",
+            return_value=False,
+        ),
+        pytest.raises(errors.DecodeMalformedError),
     ):
-        with pytest.raises(errors.DecodeMalformedError):
-            DocxDecodeStrategy.decode(file_path=source_file_path_success)
+        DocxDecodeStrategy.decode(file_path=source_file_path_success)
 
 
 def test_decode_permission_denied():
