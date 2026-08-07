@@ -81,7 +81,7 @@ def reset_table(*, engine: Engine, table_name: str) -> None:
                     text("DELETE FROM sqlite_sequence WHERE name = :table_name"),
                     {"table_name": table_name},
                 )
-            except (OperationalError, ProgrammingError):
+            except OperationalError, ProgrammingError:
                 pass
         conn.commit()
 
@@ -98,6 +98,6 @@ def drop_table(*, engine: Engine, table_name: str) -> None:
                     text("DELETE FROM sqlite_sequence WHERE name = :table_name"),
                     {"table_name": table_name},
                 )
-            except (OperationalError, ProgrammingError):
+            except OperationalError, ProgrammingError:
                 pass
         conn.commit()

@@ -30,7 +30,7 @@ def uninstall_strategy(*, uid: str) -> None:
     target.unlink()
 
 
-def _load_strategy_from_file(*, file_path: Path) -> type:
+def _load_strategy_from_file(*, file_path: Path) -> type[TransformStrategyProtocol]:
     try:
         spec = importlib.util.spec_from_file_location(file_path.stem, file_path)
         if spec:
@@ -57,11 +57,13 @@ def _load_strategy_from_file(*, file_path: Path) -> type:
         )
     if len(matches) > 1:
         raise errors.StrategyNotFoundError(
-            f"Multiple classes starting with 'TransformStrategy' found in {file_path}: {matches}. Exactly one is required."
+            f"Multiple classes starting with 'TransformStrategy' found in {file_path}:"
+            f" {matches}. Exactly one is required."
         )
     strategy_class = getattr(module, matches[0])
     if not issubclass(strategy_class, TransformStrategyProtocol):
         raise errors.StrategyNotFoundError(
-            f"{strategy_class.__class__.__name__} does not implement TransformStrategyProtocol"
+            f"{strategy_class.__class__.__name__} does not implement "
+            f"TransformStrategyProtocol"
         )
     return strategy_class

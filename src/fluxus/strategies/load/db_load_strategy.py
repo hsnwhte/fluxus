@@ -24,7 +24,10 @@ class DBLoadStrategy:
         if table_name is None:
             raise errors.LoadTableNameNotProvidedError()
 
-        rows = json.loads(data.content)
+        try:
+            rows = json.loads(data.content)
+        except json.JSONDecodeError as e:
+            raise errors.LoadTableSerializationError(table_name) from e
 
         try:
             engine = create_engine(address)

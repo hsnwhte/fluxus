@@ -24,15 +24,15 @@ def callback(debug: bool = typer.Option(False, "--debug", "-d")):
 
 @app.command(name="run")
 def run(
-    source_type: FluxusIOType = typer.Option(..., "--source-type", "-soty"),
-    source_address: str = typer.Option(..., "--source-address", "-soad"),
-    target_type: FluxusIOType = typer.Option(..., "--target-type", "-taty"),
-    target_address: str = typer.Option(..., "--target-address", "-taad"),
-    transform_strategy_uid: str = typer.Option(..., "--transform-strategy", "-tsu"),
-    source_table: str = typer.Option(None, "--source-table", "-sota"),
-    target_table: str = typer.Option(None, "--target-table", "-tata"),
+    source_type: FluxusIOType = typer.Option(..., "--source-type", "-sy"),
+    source_address: str = typer.Option(..., "--source-address", "-sd"),
+    target_type: FluxusIOType = typer.Option(..., "--target-type", "-ty"),
+    target_address: str = typer.Option(..., "--target-address", "-td"),
+    transform_strategy_uid: str = typer.Option(..., "--transform-strategy", "-S"),
+    source_table: str = typer.Option(None, "--source-table", "-st"),
+    target_table: str = typer.Option(None, "--target-table", "-tt"),
     target_format: ContentFormat = typer.Option(
-        ContentFormat.JSON, "--target-format", "-tafo"
+        ContentFormat.JSON, "--target-format", "-tf"
     ),
 ):
 
@@ -59,7 +59,7 @@ def run(
         try:
             entry_id = orchestrator.run()
         except errors.FluxusError as e:
-            logger.exception(f"Pipeline failed: {e}")
+            logger.error(f"Pipeline failed: {e}")
             typer.echo(f"Pipeline failed: {e}", err=True)
             raise typer.Exit(code=1)
 
@@ -77,7 +77,7 @@ def install_strategy_command(
     try:
         new_uid = transform_installer.install_strategy(strategy_path=strategy_path)
     except errors.FluxusError as e:
-        logger.exception(f"Strategy install failed: {e}")
+        logger.error(f"Strategy install failed: {e}")
         typer.echo(f"Install failed: {e}", err=True)
         raise typer.Exit(code=1)
     typer.echo(f"Strategy installed successfully with uid: {new_uid}")
@@ -90,7 +90,7 @@ def uninstall_strategy_command(
     try:
         transform_installer.uninstall_strategy(uid=strategy_uid)
     except errors.FluxusError as e:
-        logger.exception(f"Strategy uninstall failed: {e}")
+        logger.error(f"Strategy uninstall failed: {e}")
         typer.echo(f"Uninstall failed: {e}", err=True)
         raise typer.Exit(code=1)
     typer.echo(f"Strategy {strategy_uid} uninstalled successfully.")

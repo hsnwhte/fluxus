@@ -30,6 +30,7 @@ def test_extract_success(test_content: bytes):
 
 
 def test_extract_malformed():
+    # noinspection PyUnresolvedReferences
     with patch(
         "fluxus.strategies.extract.pdf_extract_strategy.pypdf.PdfReader",
         side_effect=pypdf.errors.PdfReadError,

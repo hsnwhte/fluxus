@@ -35,11 +35,13 @@ def test_extract_bad_zip():
 
 
 def test_extract_expat_error(test_content: bytes):
-    with patch(
-        "fluxus.strategies.extract.docx_extract_strategy.xmltodict.parse",
-        side_effect=__import__(
-            "xml.parsers.expat", fromlist=["ExpatError"]
-        ).ExpatError(),
+    with (
+        patch(
+            "fluxus.strategies.extract.docx_extract_strategy.xmltodict.parse",
+            side_effect=__import__(
+                "xml.parsers.expat", fromlist=["ExpatError"]
+            ).ExpatError(),
+        ),
+        pytest.raises(errors.ExtractSyntaxError),
     ):
-        with pytest.raises(errors.ExtractSyntaxError):
-            DocxExtractStrategy.extract(content=test_content)
+        DocxExtractStrategy.extract(content=test_content)
