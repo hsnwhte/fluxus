@@ -1,9 +1,8 @@
-# Fluxus v0.7.5 - alpha
+# Fluxus v0.8 - alpha
 
-Generic, plugin-based ETL & data sync engine. Fetches from a source
-transforms it, and loads it to a target — with the transform step designed
-to carry your own business logic, not a fixed built-in one.
-Source and target types can be API, database, or file.
+Generic, plugin-based ETL & data sync engine. Fetches from a source transforms it, and
+loads it to a target — with the transform step designed to carry your own business
+logic, not a fixed built-in one. Source and target types can be API, database, or file.
 
 > **Status: Alpha.** Core pipeline (Fetch → Decode → Extract →
 > Transform → Load/Export) is implemented and tested. See
@@ -13,8 +12,13 @@ Source and target types can be API, database, or file.
 ## Installation
 
 ```bash
-pip install -e ".[sql,api,xml,cli,dev,docx,xlsx,pdf]"
+pip install -e ".[db,api,xml,cli,dev,docx,xlsx,pdf]"
 ```
+
+`pydantic`, `sqlalchemy`, `typer`, and `python-dotenv` are core dependencies. The
+optional groups above add support for specific source/target types — installing without
+a group and using its feature raises a clear `ModuleNotFoundError` naming the missing
+package.
 
 ## Configuration
 
@@ -25,10 +29,22 @@ FLUXUS_STORE_ADDRESS=sqlite:///data/runtime.sqlite
 LOG_DIR=logs
 ```
 
-`FLUXUS_STORE_ADDRESS` accepts any SQLAlchemy connection string —
-SQLite and PostgreSQL are both verified. `LOG_DIR` may be relative to
-the project root or an absolute path. Both have sensible defaults, so
-a `.env` file is optional.
+A template is provided at `.env.example` — copy it to `.env` and adjust as needed:
+
+```bash
+cp .env.example .env
+```
+
+`FLUXUS_STORE_ADDRESS` accepts any SQLAlchemy connection string — SQLite and PostgreSQL
+are both verified. `LOG_DIR` may be relative to the project root or an absolute path.
+Both have sensible defaults, so a `.env` file is optional; tables are created
+automatically on first run.
+
+For local PostgreSQL testing, `docker-compose.yml` is included:
+
+```bash
+docker compose up -d
+```
 
 ## Usage
 
@@ -41,23 +57,38 @@ fluxus run \
 
 Run `fluxus run --help` for the full list of options.
 
+### Other commands
+
+```bash
+fluxus show --mode runs        # list past pipeline runs
+fluxus show --mode registry     # list per-phase registry entries
+fluxus show --mode strategies   # list installed Transform strategies
+fluxus inspect --record registry --id <entry_id>   # entry metadata
+fluxus inspect --record payload --id <payload_address>  # raw content
+fluxus doctor                   # check env, DB connection, directories
+fluxus version                  # print installed version
+```
+
+Run any command with `--help` for its full option list.
+
 ## Writing and installing a Transform strategy
 
-Transform is the one phase with no fixed built-in implementation —
-it's where your own business logic (field mapping, filtering,
-reshaping data to fit your target) lives. The strategy `default` is a
-built-in passthrough (copies data through unchanged) and always
+Transform is the one phase with no fixed built-in implementation — it's where your own
+business logic (field mapping, filtering, reshaping data to fit your target) lives. The
+strategy `default` is a built-in passthrough (copies data through unchanged) and always
 exists; every other strategy is installed by you.
 
-Every Transform strategy implements `TransformStrategyProtocol`, and
-the class name must start with `TransformStrategy`:
+Every Transform strategy implements `TransformStrategyProtocol`, and the class name must
+start with `TransformStrategy`:
 
 ```python
 from fluxus.models.dto import TransformableData, TransformedData
 from fluxus.enums import ContentFormat
 
+
 class TransformStrategyMyMapping:
-    def __init__(self, *, target_format: ContentFormat, data: TransformableData, **kwargs):
+    def __init__(self, *, target_format: ContentFormat, data: TransformableData,
+                 **kwargs):
         self.target_format = target_format
         self.data = data
 
@@ -75,10 +106,9 @@ Install it:
 fluxus install-strategy --path /path/to/my_strategy.py
 ```
 
-This copies the file into Fluxus's `installed/` strategies folder and
-assigns it a unique id (printed on install). List installed strategies
-and their ids with `fluxus show-strategies`, then reference one in a
-run:
+This copies the file into Fluxus's `installed/` strategies folder and assigns it a
+unique id (printed on install). List installed strategies and their ids with
+`fluxus show --mode strategies`, then reference one in a run:
 
 ```bash
 fluxus run ... --transform-strategy <uid>
@@ -90,23 +120,21 @@ Uninstall with:
 fluxus uninstall-strategy --uid <uid>
 ```
 
-`default` cannot be uninstalled. Don't edit the `installed/` folder
-by hand — use these commands so the strategy map always matches what's
-actually on disk.
+`default` cannot be uninstalled. Don't edit the `installed/` folder by hand — use these
+commands so the strategy map always matches what's actually on disk.
 
 ## Known Limitations
 
-- **No filename/format consistency check**: nothing validates that a
-  file's extension matches `--target-format` (e.g. writing JSON
-  content to a `.xml`-named file goes unflagged).
-- **No dependency management for installed strategies**: a Transform
-  strategy installed via `install-strategy` may import third-party
-  libraries not bundled with Fluxus. You are responsible for installing
-  any such dependencies yourself — Fluxus does not manage them.
-- **Uninstalling a strategy breaks its lineage**: registry rows from
-  past runs keep the strategy's uid, but once the file is removed that
-  uid no longer resolves to anything. The recorded strategy class name
-  remains as partial context.
+- **No filename/format consistency check**: nothing validates that a file's extension
+  matches `--target-format` (e.g. writing JSON content to a `.xml`-named file goes
+  unflagged).
+- **No dependency management for installed strategies**: a Transform strategy installed
+  via `install-strategy` may import third-party libraries not bundled with Fluxus. You
+  are responsible for installing any such dependencies yourself — Fluxus does not manage
+  them.
+- **Uninstalling a strategy breaks its lineage**: registry rows from past runs keep the
+  strategy's uid, but once the file is removed that uid no longer resolves to anything.
+  The recorded strategy class name remains as partial context.
 
 ## Roadmap
 

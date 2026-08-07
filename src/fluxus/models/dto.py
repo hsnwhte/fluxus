@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, computed_field, model_validator
 
-from fluxus.enums import ContentFormat, FluxusIOType, Phase
+from fluxus.enums import ContentFormat, FluxusIOType, Phase, RunStatus
 
 
 class InputArgs(BaseModel):
@@ -65,6 +65,14 @@ class FetchCacheData(BaseModel):
     payload_address: str
     created_at: datetime
     is_active: bool
+
+
+class PipelineRunRecordData(BaseModel):
+    model_config = {"frozen": True}
+    run_id: int
+    started_at: datetime
+    status: RunStatus
+    interrupted_phase: Phase | None
 
 
 class RegistryRecord(BaseModel):

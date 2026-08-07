@@ -42,3 +42,14 @@ class FluxusIOType(enum.Enum):
     API = "api"
     DB = "db"
     FILE = "file"
+
+
+class CliListType(enum.Enum):
+    RUNS = "runs"
+    REGISTRY = "registry"
+    STRATEGIES = "strategies"
+
+
+class CliInspectType(enum.Enum):
+    REGISTRY = "registry"
+    PAYLOAD = "payload"

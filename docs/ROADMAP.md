@@ -1,127 +1,102 @@
-v0.1 -- [DONE] Project scaffolding complete. src layout, pyproject.toml, 
-        .gitignore, docs/ set up. Core Pydantic DTOs and exception 
-        hierarchy defined. No working logic yet.
+v0.1 -- [DONE] Project scaffolding complete. src layout, pyproject.toml, .gitignore,
+docs/ set up. Core Pydantic DTOs and exception hierarchy defined. No working logic yet.
 
-v0.2 -- [DONE] Storage layer works. StorageBackend Protocol defined,
-        SQLiteStorage reference implementation complete. Registry
-        (hash-based lineage tracking) functional and tested.
+v0.2 -- [DONE] Storage layer works. StorageBackend Protocol defined, SQLiteStorage
+reference implementation complete. Registry (hash-based lineage tracking) functional and
+tested.
 
-v0.3 -- [DONE] First vertical slice, fetch side: API source strategy
-        implemented. Fetcher processor calls it, writes to
-        phase-1 storage via registry. Unit tests pass.
+v0.3 -- [DONE] First vertical slice, fetch side: API source strategy implemented.
+Fetcher processor calls it, writes to phase-1 storage via registry. Unit tests pass.
 
-v0.4 -- [DONE] First vertical slice, decode/extract side: XML decode +
-        extract strategy implemented. Data reaches phase-2 storage
-        in canonical format. Unit tests pass.
+v0.4 -- [DONE] First vertical slice, decode/extract side: XML decode + extract strategy
+implemented. Data reaches phase-2 storage in canonical format. Unit tests pass.
 
-v0.5 -- [DONE] First vertical slice, transform + load side: Transformer
-        + Database (SQLAlchemy-based) load strategy implemented.
-        End-to-end pipeline runs: API source -> DB target,
-        fully working, fully tested.
+v0.5 -- [DONE] First vertical slice, transform + load side: Transformer + Database
+(SQLAlchemy-based) load strategy implemented. End-to-end pipeline runs: API source -> DB
+target, fully working, fully tested.
 
-v0.6 -- [DONE] ALPHA release: CLI interface complete (interfaces/cli).
-        Selector/Factory mechanism generalized (not hardcoded to
-        the v0.5 path). Devtools inspect tool functional.
+v0.6 -- [DONE] ALPHA release: CLI interface complete (interfaces/cli). Selector/Factory
+mechanism generalized (not hardcoded to the v0.5 path). Devtools inspect tool
+functional.
 
-v0.7 -- [DONE] Extended content format strategies: CSV, HTML, DOCX,
-        XLSX, and PDF sources added (Decode + Extract), proving the
-        "new strategy = new file, not new architecture" claim.
-        API Content-Type detection implemented (ApiFetchStrategy now
-        reads the real Content-Type header instead of assuming JSON;
-        raises explicitly if the header is missing/unrecognized).
-        DB-side dialect support confirmed via SQLAlchemy's own
-        abstraction — no new strategy code required, only verification
-        against a non-SQLite dialect.
-        Test coverage extended for each new format. Manual end-to-end
-        verification via devtools.
-        PipelineRunRecord is extended to include status.
+v0.7 -- [DONE] Extended content format strategies: CSV, HTML, DOCX, XLSX, and PDF
+sources added (Decode + Extract), proving the
+"new strategy = new file, not new architecture" claim. API Content-Type detection
+implemented (ApiFetchStrategy now reads the real Content-Type header instead of assuming
+JSON; raises explicitly if the header is missing/unrecognized). DB-side dialect support
+confirmed via SQLAlchemy's own abstraction — no new strategy code required, only
+verification against a non-SQLite dialect. Test coverage extended for each new format.
+Manual end-to-end verification via devtools. PipelineRunRecord is extended to include
+status.
 
-        FetchCache implemented: Fetch strategies check FetchCache
-        by api_url before hitting the source, and write to fetch_cache
-        table in Runtime Database after a successful fetch.
+FetchCache implemented: Fetch strategies check FetchCache by api_url before hitting the
+source, and write to fetch_cache table in Runtime Database after a successful fetch.
 
-        OCR and Attachment support considered and deliberately dropped:
-        both are domain-specific business logic (image-to-text,
-        file-reference tracking), not engine-level concerns. Belongs
-        in downstream Transform strategies or domain frameworks
-        (e.g. a QMS layer), not in Fluxus core. See DIARY.md.
+OCR and Attachment support considered and deliberately dropped:
+both are domain-specific business logic (image-to-text, file-reference tracking), not
+engine-level concerns. Belongs in downstream Transform strategies or domain frameworks
+(e.g. a QMS layer), not in Fluxus core. See DIARY.md.
 
-        Consistency review, concrete checklist:
-        [x] Every new strategy file (CSV/HTML/DOCX/XLSX/PDF Decode and
-          Extract) follows the same internal structure as the
-          reference strategy
-        [x] RunStatus is never left at RUNNING after a completed
-          process, including unexpected/non-FluxusError exceptions
-        [x] FetchCache is only written to and read from for API
-          sources, never DB or FILE
-        [x] TEST_REPORT.md entries exist for every new format
-          combination added this milestone
+Consistency review, concrete checklist:
+[x] Every new strategy file (CSV/HTML/DOCX/XLSX/PDF Decode and Extract) follows the same
+internal structure as the reference strategy
+[x] RunStatus is never left at RUNNING after a completed process, including
+unexpected/non-FluxusError exceptions
+[x] FetchCache is only written to and read from for API sources, never DB or FILE
+[x] TEST_REPORT.md entries exist for every new format combination added this milestone
 
-v0.75 -- [DONE] Storage backend refactored to dialect-agnostic single version: 
-         Proves storage layer is swappable, not just extensible on the
-         strategy side. DB rollback safety across a run added.
-         Transform strategy identity: assign a shortened unique id (UUID4) to
-         each installed strategy at install time, stored in the registry
-         alongside strategy_name. Numeric strategy ids can shift across
-         install/uninstall and class names aren't guaranteed unique — neither
-         is a reliable lineage record on its own.
+v0.75 -- [DONE] Storage backend refactored to dialect-agnostic single version:
+Proves storage layer is swappable, not just extensible on the strategy side. DB rollback
+safety across a run added. Transform strategy identity: assign a shortened unique id
+(UUID4) to each installed strategy at install time, stored in the registry alongside
+strategy_name. Numeric strategy ids can shift across install/uninstall and class names
+aren't guaranteed unique — neither is a reliable lineage record on its own.
 
-         Consistency review, concrete checklist:
-         [x] PostgreSQL backend passes the same test suite as SQLite,
-           unmodified (proves the Protocol abstraction actually holds)
-         [x] A run interrupted mid-phase leaves no orphaned/partial
-           rows once rollback safety is in place
-         [x] Every RegistryEntry produced by an installed Transform
-           strategy carries a resolvable strategy UUID
-        
+Consistency review, concrete checklist:
+[x] PostgreSQL backend passes the same test suite as SQLite, unmodified (proves the
+Protocol abstraction actually holds)
+[x] A run interrupted mid-phase leaves no orphaned/partial rows once rollback safety is
+in place
+[x] Every RegistryEntry produced by an installed Transform strategy carries a resolvable
+strategy UUID
 
-v0.8 -- CI pipeline set up (scope to be defined at implementation
-        time — likely GitHub Actions, running the test suite on push
-        at minimum). Error handling audited across the codebase (no
-        bare Exception/ValueError anywhere; every failure mode maps
-        to a specific, meaningful exception). Logging finalized
-        across all processors and strategies, not just the
-        Orchestrator.
+v0.8 -- [DONE] CI pipeline set up (scope to be defined at implementation time — likely
+GitHub Actions, running the test suite on push at minimum). Error handling audited
+across the codebase (no bare Exception/ValueError anywhere; every failure mode maps to a
+specific, meaningful exception). Logging finalized across all processors and strategies,
+not just the Orchestrator.
 
-        Consistency review, concrete checklist:
-        [ ] CI runs the full test suite on every push and blocks
-          merge on failure
-        [ ] grep for "raise Exception" / "raise ValueError" across
-          src/fluxus returns nothing
-        [ ] Every processor and strategy logs at least start/success/
-          failure at a consistent level
-        [ ] Optional dependency groups (api, xml, docx, xlsx, pdf)
-          verified to fail with a clear, actionable error when a
-          feature is used without its group installed — not a raw
-          ImportError
+Consistency review, concrete checklist:
+[x] CI runs the full test suite on every push and blocks merge on failure
+[x] grep for "raise Exception" / "raise ValueError" across src/fluxus returns nothing
+[x] Every processor and strategy logs at least start/success/ failure at a consistent
+level
+[x] Optional dependency groups (api, xml, docx, xlsx, pdf)
+verified to fail with a clear, actionable error when a feature is used without its group
+installed — not a raw ImportError
 
-v0.85 -- fluxus-strategies: a separate, curated repo of vetted
-         Transform strategies (manually reviewed before being added,
-         not an open marketplace). `fluxus install-strategy
-         --from-repo <name>` fetches and installs directly, in
-         addition to the existing local-file install path.
-         Transform strategy identity revisited if repo-sourced
-         strategies raise new lineage questions.
-         (Scope likely to grow as the repo takes shape.)
+v0.85 -- fluxus-strategies: a separate, curated repo of vetted Transform strategies
+(manually reviewed before being added, not an open marketplace). `fluxus install-strategy
+         --from-repo <name>` fetches and installs directly, in addition to the existing
+local-file install path. Transform strategy identity revisited if repo-sourced
+strategies raise new lineage questions. (Scope likely to grow as the repo takes shape.)
 
-v0.9  -- BETA release: README complete (setup, summary) complete.
-         DEVELOPER_MANUAL.md (architecture, rationale) complete.
-         Published to PyPI (pip install fluxus becomes real).
+v0.9 -- BETA release: README complete (setup, summary) complete. DEVELOPER_MANUAL.md
+(architecture, rationale) complete. Published to PyPI (pip install fluxus becomes real).
 
-         Real-consumer validation: fluxus-ncr's first TransformStrategy
-         (Excel source) implemented and run end-to-end against Fluxus
-         as an external dependency (pip install, not copy-pasted code).
-         Any friction/gaps found this way get fixed in Fluxus core,
-         not worked around in fluxus-ncr.
+Real-consumer validation: fluxus-ncr's first TransformStrategy (Excel source)
+implemented and run end-to-end against Fluxus as an external dependency (pip install,
+not copy-pasted code). Any friction/gaps found this way get fixed in Fluxus core, not
+worked around in fluxus-ncr.
 
-         Consistency review, concrete checklist:
-         [ ] Every public function/class has a docstring
-         [ ] Every raised exception uses the custom hierarchy (grep for
-           bare "raise Exception" / "raise ValueError" returns nothing)
-         [ ] Every strategy file follows the same internal structure
-           (same method names/order as the reference strategy)
-         [ ] Error messages follow a consistent format (what failed,
-           what value, what was expected)
+Consistency review, concrete checklist:
+[ ] Every public function/class has a docstring
+[ ] Every raised exception uses the custom hierarchy (grep for bare "raise Exception" /
+"raise ValueError" returns nothing)
+[ ] Every strategy file follows the same internal structure (same method names/order as
+the reference strategy)
+[ ] Error messages follow a consistent format (what failed, what value, what was
+expected)
 
-v1.0 -- Full release: portfolio-ready. Documented, tested,
-        demonstrably extensible. Public-facing polish complete.
+v1.0 -- Full release: portfolio-ready. Documented, tested, demonstrably extensible.
+Public-facing polish complete.
