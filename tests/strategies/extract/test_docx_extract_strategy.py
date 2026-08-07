@@ -3,10 +3,10 @@ from unittest.mock import patch
 
 import pytest
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.models.dto import TransformableData
-from fluxus.strategies.extract.docx_extract_strategy import DocxExtractStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.models.dto import TransformableData
+from pluggle.strategies.extract.docx_extract_strategy import DocxExtractStrategy
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def test_extract_bad_zip():
 def test_extract_expat_error(test_content: bytes):
     with (
         patch(
-            "fluxus.strategies.extract.docx_extract_strategy.xmltodict.parse",
+            "pluggle.strategies.extract.docx_extract_strategy.xmltodict.parse",
             side_effect=__import__(
                 "xml.parsers.expat", fromlist=["ExpatError"]
             ).ExpatError(),

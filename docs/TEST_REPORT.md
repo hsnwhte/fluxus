@@ -1,7 +1,7 @@
-# Fluxus — Manual & Automated Test Report
+# Pluggle — Manual & Automated Test Report
 
 This report tracks manual end-to-end verification (via devtools) and
-automated test suite results for each Fluxus release. It exists
+automated test suite results for each Pluggle release. It exists
 alongside `docs/ROADMAP.md` (what's planned) and `docs/DIARY.md`
 (development narrative) as a focused, at-a-glance record of what has
 actually been verified to work — intended for anyone evaluating the
@@ -27,7 +27,7 @@ section.
  - Failed: 4
  - Passed: 73
  - Warnings: 0
- - Fluxus App Bugs: 0
+ - Pluggle App Bugs: 0
  - Test Design Shortcomings: 2
    1. `html_decode_strategy.py` / `xml_decode_stratgy.py`: neither
       catches `OSError`(`FileNotFoundError does not catch the error 
@@ -45,14 +45,14 @@ section.
  - Failed: 0
  - Passed: 77
  - Warnings: 0
- - Fluxus App Bugs: 0
+ - Pluggle App Bugs: 0
  - Test Design Shortcomings: FIXED
 
 ### Manual verification
 **Summary (as of 2026-08-04):** 
  - Total manual test packages run: 31
  - Valid results: 31 (26 passed as expected, 5 failed as expected)
- - Fluxus App Bugs: 6 
+ - Pluggle App Bugs: 6 
   `.htm` extension, OSError handling in HTML/XML Decode, empty-rows
   DB insert, bare-JSON-object wrapping, `+xml` mime type variants,
   HtmlExtractStrategy's xmltodict→lxml.html rewrite for real-world HTML
@@ -313,7 +313,7 @@ section.
 ### Manual verification
 
 **Summary (as of 2026-08-03):** All 31 manual test packages re-run
-against a PostgreSQL backend (`FLUXUS_STORE_ADDRESS` pointed at a
+against a PostgreSQL backend (`PLUGGLE_STORE_ADDRESS` pointed at a
 Docker-hosted PostgreSQL container instead of SQLite). All produced
 the expected result — identical outcomes to the SQLite runs, with no
 code changes to any storage class. Test 26 excluded (its

@@ -2,10 +2,10 @@ from pathlib import Path
 
 import pytest
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.models.dto import TransformableData
-from fluxus.strategies.extract.html_extract_strategy import HtmlExtractStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.models.dto import TransformableData
+from pluggle.strategies.extract.html_extract_strategy import HtmlExtractStrategy
 
 
 @pytest.fixture

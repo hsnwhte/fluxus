@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 from sqlalchemy import Engine, create_engine, text
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.strategies.fetch.db_fetch_strategy import DBFetchStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.strategies.fetch.db_fetch_strategy import DBFetchStrategy
 
 
 @pytest.fixture

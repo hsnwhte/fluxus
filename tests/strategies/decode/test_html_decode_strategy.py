@@ -4,10 +4,10 @@ from unittest.mock import patch
 import pytest
 from lxml import etree
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.models.dto import ExtractableData
-from fluxus.strategies.decode.html_decode_strategy import HtmlDecodeStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.models.dto import ExtractableData
+from pluggle.strategies.decode.html_decode_strategy import HtmlDecodeStrategy
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def test_decode_success(source_file_path_success: Path):
 
 def test_decode_malformed(source_file_path_success: Path):
     with patch(
-        "fluxus.strategies.decode.html_decode_strategy.html.parse",
+        "pluggle.strategies.decode.html_decode_strategy.html.parse",
         side_effect=etree.ParseError("mocked_error", 0, 0, 0),
     ):
         with pytest.raises(errors.DecodeMalformedError):

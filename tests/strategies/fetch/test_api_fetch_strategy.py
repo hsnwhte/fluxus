@@ -3,9 +3,9 @@ from unittest.mock import MagicMock, patch
 import httpx
 import pytest
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.strategies.fetch.api_fetch_strategy import ApiFetchStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.strategies.fetch.api_fetch_strategy import ApiFetchStrategy
 
 CONTENT = b'{"test_key":"test_value"}'
 
@@ -26,7 +26,7 @@ def _mock_response(
 
 def test_api_fetch_strategy_success():
     with patch(
-        "fluxus.strategies.fetch.api_fetch_strategy.httpx.get",
+        "pluggle.strategies.fetch.api_fetch_strategy.httpx.get",
         return_value=_mock_response(200),
     ):
         result = ApiFetchStrategy.fetch(address="https://mock-url.com")
@@ -39,7 +39,7 @@ def test_api_fetch_strategy_missing_content_type():
     mock_response = _mock_response(200, content_type=None)
     mock_response.headers = {}
     with patch(
-        "fluxus.strategies.fetch.api_fetch_strategy.httpx.get",
+        "pluggle.strategies.fetch.api_fetch_strategy.httpx.get",
         return_value=mock_response,
     ):
         with pytest.raises(errors.FetchContentTypeMissingError):
@@ -48,7 +48,7 @@ def test_api_fetch_strategy_missing_content_type():
 
 def test_api_fetch_strategy_unrecognized_content_type():
     with patch(
-        "fluxus.strategies.fetch.api_fetch_strategy.httpx.get",
+        "pluggle.strategies.fetch.api_fetch_strategy.httpx.get",
         return_value=_mock_response(200, content_type="application/unknown"),
     ):
         with pytest.raises(errors.FetchApiError):

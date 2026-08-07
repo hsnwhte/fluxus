@@ -2,11 +2,11 @@ import pytest
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 
-from fluxus.enums import ContentFormat, Phase, RunStatus
-from fluxus.exceptions import errors
-from fluxus.helpers import generate_hash
-from fluxus.models.orm import FluxusORM, PipelineRunRecord
-from fluxus.storage.backend import (
+from pluggle.enums import ContentFormat, Phase, RunStatus
+from pluggle.exceptions import errors
+from pluggle.helpers import generate_hash
+from pluggle.models.orm import PluggleORM, PipelineRunRecord
+from pluggle.storage.backend import (
     FetchCacheStore,
     PayloadStore,
     PipelineRunRecords,
@@ -22,14 +22,14 @@ POSTGRES_URL = "postgresql://postgres:testpass@localhost:5432/postgres"
 def test_engine(request):
     if request.param == "sqlite":
         engine = create_engine("sqlite:///:memory:")
-        FluxusORM.metadata.create_all(engine)
+        PluggleORM.metadata.create_all(engine)
         yield engine
     else:
         engine = create_engine(POSTGRES_URL)
-        FluxusORM.metadata.drop_all(engine)
-        FluxusORM.metadata.create_all(engine, checkfirst=True)
+        PluggleORM.metadata.drop_all(engine)
+        PluggleORM.metadata.create_all(engine, checkfirst=True)
         yield engine
-        FluxusORM.metadata.drop_all(engine)
+        PluggleORM.metadata.drop_all(engine)
 
 
 @pytest.fixture(scope="function")

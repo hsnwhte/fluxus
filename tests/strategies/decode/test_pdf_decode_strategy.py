@@ -4,10 +4,10 @@ from unittest.mock import patch
 import pypdf
 import pytest
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.models.dto import ExtractableData
-from fluxus.strategies.decode.pdf_decode_strategy import PdfDecodeStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.models.dto import ExtractableData
+from pluggle.strategies.decode.pdf_decode_strategy import PdfDecodeStrategy
 
 
 @pytest.fixture
@@ -43,7 +43,7 @@ def test_decode_empty_file(tmp_path: Path):
 def test_decode_not_decrypted():
     # noinspection PyUnresolvedReferences
     with patch(
-        "fluxus.strategies.decode.pdf_decode_strategy.pypdf.PdfReader",
+        "pluggle.strategies.decode.pdf_decode_strategy.pypdf.PdfReader",
         side_effect=pypdf.errors.FileNotDecryptedError,
     ):
         with pytest.raises(errors.DecodePermissionError):
@@ -53,7 +53,7 @@ def test_decode_not_decrypted():
 def test_decode_malformed():
     # noinspection PyUnresolvedReferences
     with patch(
-        "fluxus.strategies.decode.pdf_decode_strategy.pypdf.PdfReader",
+        "pluggle.strategies.decode.pdf_decode_strategy.pypdf.PdfReader",
         side_effect=pypdf.errors.PdfReadError,
     ):
         with pytest.raises(errors.DecodeMalformedError):

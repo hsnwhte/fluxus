@@ -4,10 +4,10 @@ from xml.parsers.expat import ExpatError
 
 import pytest
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.models.dto import TransformableData
-from fluxus.strategies.extract.xlsx_extract_strategy import XlsxExtractStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.models.dto import TransformableData
+from pluggle.strategies.extract.xlsx_extract_strategy import XlsxExtractStrategy
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def test_extract_bad_zip():
 
 def test_extract_expat_error(test_content: bytes):
     with patch(
-        "fluxus.strategies.extract.xlsx_extract_strategy.xmltodict.parse",
+        "pluggle.strategies.extract.xlsx_extract_strategy.xmltodict.parse",
         side_effect=ExpatError(),
     ):
         with pytest.raises(errors.ExtractSyntaxError):

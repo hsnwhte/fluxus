@@ -3,8 +3,8 @@ from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
-from devtools.tools.dev_orm import FluxusDevSourceORM, FluxusDevTargetORM
-from fluxus.models.orm import FluxusORM
+from devtools.tools.dev_orm import PluggleDevSourceORM, PluggleDevTargetORM
+from pluggle.models.orm import PluggleORM
 
 
 def get_engine(*, url: str, echo: bool = False) -> Engine:
@@ -16,44 +16,44 @@ def get_session(*, engine: Engine) -> Session:
 
 
 def create_all_runtime_tables(*, engine: Engine) -> None:
-    FluxusORM.metadata.create_all(engine)
+    PluggleORM.metadata.create_all(engine)
 
 
 def reset_all_runtime_tables(*, engine: Engine) -> None:
-    for table_name in FluxusORM.metadata.tables.keys():
+    for table_name in PluggleORM.metadata.tables.keys():
         reset_table(engine=engine, table_name=table_name)
 
 
 def drop_all_runtime_tables(*, engine: Engine) -> None:
-    for table_name in FluxusORM.metadata.tables.keys():
+    for table_name in PluggleORM.metadata.tables.keys():
         drop_table(engine=engine, table_name=table_name)
 
 
 def create_all_source_tables(*, engine: Engine) -> None:
-    FluxusDevSourceORM.metadata.create_all(engine)
+    PluggleDevSourceORM.metadata.create_all(engine)
 
 
 def reset_all_source_tables(*, engine: Engine) -> None:
-    for table_name in FluxusDevSourceORM.metadata.tables.keys():
+    for table_name in PluggleDevSourceORM.metadata.tables.keys():
         reset_table(engine=engine, table_name=table_name)
 
 
 def drop_all_source_tables(*, engine: Engine) -> None:
-    for table_name in FluxusDevSourceORM.metadata.tables.keys():
+    for table_name in PluggleDevSourceORM.metadata.tables.keys():
         drop_table(engine=engine, table_name=table_name)
 
 
 def create_all_target_tables(*, engine: Engine) -> None:
-    FluxusDevTargetORM.metadata.create_all(engine)
+    PluggleDevTargetORM.metadata.create_all(engine)
 
 
 def reset_all_target_tables(*, engine: Engine) -> None:
-    for table_name in FluxusDevTargetORM.metadata.tables.keys():
+    for table_name in PluggleDevTargetORM.metadata.tables.keys():
         reset_table(engine=engine, table_name=table_name)
 
 
 def drop_all_target_tables(*, engine: Engine) -> None:
-    for table_name in FluxusDevTargetORM.metadata.tables.keys():
+    for table_name in PluggleDevTargetORM.metadata.tables.keys():
         drop_table(engine=engine, table_name=table_name)
 
 

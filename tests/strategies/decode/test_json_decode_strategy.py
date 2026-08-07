@@ -3,10 +3,10 @@ from unittest.mock import patch
 
 import pytest
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.models.dto import ExtractableData
-from fluxus.strategies.decode.json_decode_strategy import JsonDecodeStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.models.dto import ExtractableData
+from pluggle.strategies.decode.json_decode_strategy import JsonDecodeStrategy
 
 
 @pytest.fixture

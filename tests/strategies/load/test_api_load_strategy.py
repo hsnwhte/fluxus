@@ -3,10 +3,10 @@ from unittest.mock import MagicMock, patch
 import httpx
 import pytest
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.models.dto import TransformedData
-from fluxus.strategies.load.api_load_strategy import ApiLoadStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.models.dto import TransformedData
+from pluggle.strategies.load.api_load_strategy import ApiLoadStrategy
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def _mock_response(status_code):
 
 def test_api_load_strategy_success(sample_data: TransformedData):
     with patch(
-        "fluxus.strategies.load.api_load_strategy.httpx.put",
+        "pluggle.strategies.load.api_load_strategy.httpx.put",
         return_value=_mock_response(200),
     ) as mock_put:
         ApiLoadStrategy.load(
@@ -59,7 +59,7 @@ def test_api_load_strategy_status_errors(
     sample_data: TransformedData, status_code: int, expected_error
 ):
     with patch(
-        "fluxus.strategies.load.api_load_strategy.httpx.put",
+        "pluggle.strategies.load.api_load_strategy.httpx.put",
         return_value=_mock_response(status_code),
     ):
         with pytest.raises(expected_error):

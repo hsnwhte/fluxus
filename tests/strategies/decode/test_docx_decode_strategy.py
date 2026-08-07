@@ -3,10 +3,10 @@ from unittest.mock import patch
 
 import pytest
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.models.dto import ExtractableData
-from fluxus.strategies.decode.docx_decode_strategy import DocxDecodeStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.models.dto import ExtractableData
+from pluggle.strategies.decode.docx_decode_strategy import DocxDecodeStrategy
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ def test_decode_file_not_found():
 def test_decode_malformed(source_file_path_success):
     with (
         patch(
-            "fluxus.strategies.decode.docx_decode_strategy.zipfile.is_zipfile",
+            "pluggle.strategies.decode.docx_decode_strategy.zipfile.is_zipfile",
             return_value=False,
         ),
         pytest.raises(errors.DecodeMalformedError),

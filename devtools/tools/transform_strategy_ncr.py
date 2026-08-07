@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-from fluxus.enums import ContentFormat
-from fluxus.models.dto import TransformableData, TransformedData
+from pluggle.enums import ContentFormat
+from pluggle.models.dto import TransformableData, TransformedData
 
 
 class Actor(BaseModel):
