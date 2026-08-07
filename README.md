@@ -1,4 +1,4 @@
-# Fluxus v0.8 - alpha
+# Pluggle v0.8 - alpha
 
 Generic, plugin-based ETL & data sync engine. Fetches from a source transforms it, and
 loads it to a target — with the transform step designed to carry your own business
@@ -22,10 +22,10 @@ package.
 
 ## Configuration
 
-Fluxus reads optional settings from a `.env` file in the project root:
+Pluggle reads optional settings from a `.env` file in the project root:
 
 ```
-FLUXUS_STORE_ADDRESS=sqlite:///data/runtime.sqlite
+PLUGGLE_STORE_ADDRESS=sqlite:///data/runtime.sqlite
 LOG_DIR=logs
 ```
 
@@ -35,7 +35,7 @@ A template is provided at `.env.example` — copy it to `.env` and adjust as nee
 cp .env.example .env
 ```
 
-`FLUXUS_STORE_ADDRESS` accepts any SQLAlchemy connection string — SQLite and PostgreSQL
+`PLUGGLE_STORE_ADDRESS` accepts any SQLAlchemy connection string — SQLite and PostgreSQL
 are both verified. `LOG_DIR` may be relative to the project root or an absolute path.
 Both have sensible defaults, so a `.env` file is optional; tables are created
 automatically on first run.
@@ -49,24 +49,24 @@ docker compose up -d
 ## Usage
 
 ```bash
-fluxus run \
+pluggle run \
   --source-type file --source-address ./data/input.xml \
   --target-type file --target-address ./data/output.json \
   --target-format json
 ```
 
-Run `fluxus run --help` for the full list of options.
+Run `pluggle run --help` for the full list of options.
 
 ### Other commands
 
 ```bash
-fluxus show --mode runs        # list past pipeline runs
-fluxus show --mode registry     # list per-phase registry entries
-fluxus show --mode strategies   # list installed Transform strategies
-fluxus inspect --record registry --id <entry_id>   # entry metadata
-fluxus inspect --record payload --id <payload_address>  # raw content
-fluxus doctor                   # check env, DB connection, directories
-fluxus version                  # print installed version
+pluggle show --mode runs        # list past pipeline runs
+pluggle show --mode registry     # list per-phase registry entries
+pluggle show --mode strategies   # list installed Transform strategies
+pluggle inspect --record registry --id <entry_id>   # entry metadata
+pluggle inspect --record payload --id <payload_address>  # raw content
+pluggle doctor                   # check env, DB connection, directories
+pluggle version                  # print installed version
 ```
 
 Run any command with `--help` for its full option list.
@@ -82,20 +82,20 @@ Every Transform strategy implements `TransformStrategyProtocol`, and the class n
 start with `TransformStrategy`:
 
 ```python
-from fluxus.models.dto import TransformableData, TransformedData
-from fluxus.enums import ContentFormat
+from pluggle.models.dto import TransformableData, TransformedData
+from pluggle.enums import ContentFormat
 
 
 class TransformStrategyMyMapping:
-    def __init__(self, *, target_format: ContentFormat, data: TransformableData,
-                 **kwargs):
-        self.target_format = target_format
-        self.data = data
+  def __init__(self, *, target_format: ContentFormat, data: TransformableData,
+               **kwargs):
+    self.target_format = target_format
+    self.data = data
 
-    def transform(self) -> TransformedData:
-        # your logic here — data.content is canonical JSON (bytes)
-        ...
-        return TransformedData(content=...)
+  def transform(self) -> TransformedData:
+    # your logic here — data.content is canonical JSON (bytes)
+    ...
+    return TransformedData(content=...)
 ```
 
 A file must contain exactly one class matching that naming pattern.
@@ -103,21 +103,21 @@ A file must contain exactly one class matching that naming pattern.
 Install it:
 
 ```bash
-fluxus install-strategy --path /path/to/my_strategy.py
+pluggle install-strategy --path /path/to/my_strategy.py
 ```
 
-This copies the file into Fluxus's `installed/` strategies folder and assigns it a
+This copies the file into Pluggle's `installed/` strategies folder and assigns it a
 unique id (printed on install). List installed strategies and their ids with
-`fluxus show --mode strategies`, then reference one in a run:
+`pluggle show --mode strategies`, then reference one in a run:
 
 ```bash
-fluxus run ... --transform-strategy <uid>
+pluggle run ... --transform-strategy <uid>
 ```
 
 Uninstall with:
 
 ```bash
-fluxus uninstall-strategy --uid <uid>
+pluggle uninstall-strategy --uid <uid>
 ```
 
 `default` cannot be uninstalled. Don't edit the `installed/` folder by hand — use these
@@ -129,8 +129,8 @@ commands so the strategy map always matches what's actually on disk.
   matches `--target-format` (e.g. writing JSON content to a `.xml`-named file goes
   unflagged).
 - **No dependency management for installed strategies**: a Transform strategy installed
-  via `install-strategy` may import third-party libraries not bundled with Fluxus. You
-  are responsible for installing any such dependencies yourself — Fluxus does not manage
+  via `install-strategy` may import third-party libraries not bundled with Pluggle. You
+  are responsible for installing any such dependencies yourself — Pluggle does not manage
   them.
 - **Uninstalling a strategy breaks its lineage**: registry rows from past runs keep the
   strategy's uid, but once the file is removed that uid no longer resolves to anything.

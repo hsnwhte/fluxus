@@ -35,13 +35,13 @@ source, and write to fetch_cache table in Runtime Database after a successful fe
 OCR and Attachment support considered and deliberately dropped:
 both are domain-specific business logic (image-to-text, file-reference tracking), not
 engine-level concerns. Belongs in downstream Transform strategies or domain frameworks
-(e.g. a QMS layer), not in Fluxus core. See DIARY.md.
+(e.g. a QMS layer), not in Pluggle core. See DIARY.md.
 
 Consistency review, concrete checklist:
 [x] Every new strategy file (CSV/HTML/DOCX/XLSX/PDF Decode and Extract) follows the same
 internal structure as the reference strategy
 [x] RunStatus is never left at RUNNING after a completed process, including
-unexpected/non-FluxusError exceptions
+unexpected/non-PluggleError exceptions
 [x] FetchCache is only written to and read from for API sources, never DB or FILE
 [x] TEST_REPORT.md entries exist for every new format combination added this milestone
 
@@ -68,26 +68,26 @@ not just the Orchestrator.
 
 Consistency review, concrete checklist:
 [x] CI runs the full test suite on every push and blocks merge on failure
-[x] grep for "raise Exception" / "raise ValueError" across src/fluxus returns nothing
+[x] grep for "raise Exception" / "raise ValueError" across src/pluggle returns nothing
 [x] Every processor and strategy logs at least start/success/ failure at a consistent
 level
 [x] Optional dependency groups (api, xml, docx, xlsx, pdf)
 verified to fail with a clear, actionable error when a feature is used without its group
 installed — not a raw ImportError
 
-v0.85 -- fluxus-strategies: a separate, curated repo of vetted Transform strategies
-(manually reviewed before being added, not an open marketplace). `fluxus install-strategy
+v0.85 -- pluggle-strategies: a separate, curated repo of vetted Transform strategies
+(manually reviewed before being added, not an open marketplace). `pluggle install-strategy
          --from-repo <name>` fetches and installs directly, in addition to the existing
 local-file install path. Transform strategy identity revisited if repo-sourced
 strategies raise new lineage questions. (Scope likely to grow as the repo takes shape.)
 
 v0.9 -- BETA release: README complete (setup, summary) complete. DEVELOPER_MANUAL.md
-(architecture, rationale) complete. Published to PyPI (pip install fluxus becomes real).
+(architecture, rationale) complete. Published to PyPI (pip install pluggle becomes real).
 
-Real-consumer validation: fluxus-ncr's first TransformStrategy (Excel source)
-implemented and run end-to-end against Fluxus as an external dependency (pip install,
-not copy-pasted code). Any friction/gaps found this way get fixed in Fluxus core, not
-worked around in fluxus-ncr.
+Real-consumer validation: pluggle-ncr's first TransformStrategy (Excel source)
+implemented and run end-to-end against Pluggle as an external dependency (pip install,
+not copy-pasted code). Any friction/gaps found this way get fixed in Pluggle core, not
+worked around in pluggle-ncr.
 
 Consistency review, concrete checklist:
 [ ] Every public function/class has a docstring

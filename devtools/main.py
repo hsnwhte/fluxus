@@ -9,18 +9,18 @@ from pydantic import ValidationError
 from devtools import settings as dev_settings
 from devtools.test_packages import TEST_PACKAGES
 from devtools.tools import db_tools
-from fluxus import settings as runtime_settings
-from fluxus.enums import ContentFormat, FluxusIOType
-from fluxus.exceptions import errors
-from fluxus.logging_config import setup_logging
-from fluxus.models.dto import InputArgs
-from fluxus.orchestrator import Orchestrator
-from fluxus.unit_of_work import UnitOfWork
+from pluggle import settings as runtime_settings
+from pluggle.enums import ContentFormat, PluggleIOType
+from pluggle.exceptions import errors
+from pluggle.logging_config import setup_logging
+from pluggle.models.dto import InputArgs
+from pluggle.orchestrator import Orchestrator
+from pluggle.unit_of_work import UnitOfWork
 
 logger = logging.getLogger(__name__)
 dev = typer.Typer()
 
-os.environ["FLUXUS_STORE_ADDRESS"] = dev_settings.DEV_RUNTIME_POSTGRE
+os.environ["PLUGGLE_STORE_ADDRESS"] = dev_settings.DEV_RUNTIME_POSTGRE
 
 
 @dev.callback()
@@ -31,9 +31,9 @@ def callback(debug: bool = typer.Option(False, "--debug", "-d")):
 @dev.command(name="test")
 def test(
     inject_test_pack: int = typer.Option(None, "--test-pack", "-i"),
-    source_type: FluxusIOType = typer.Option(None, "--source-type", "-soty"),
+    source_type: PluggleIOType = typer.Option(None, "--source-type", "-soty"),
     source_address: str = typer.Option(None, "--source-address", "-soad"),
-    target_type: FluxusIOType = typer.Option(None, "--target-type", "-taty"),
+    target_type: PluggleIOType = typer.Option(None, "--target-type", "-taty"),
     target_address: str = typer.Option(None, "--target-address", "-taad"),
     transform_strategy_uid: str = typer.Option(None, "--transform-strategy", "-tsu"),
     source_table: str = typer.Option(None, "--source-table", "-sota"),
@@ -78,7 +78,7 @@ def test(
     logger.info("Pipeline starting...")
     try:
         entry_id = orchestrator.run()
-    except errors.FluxusError as e:
+    except errors.PluggleError as e:
         logger.exception(f"Pipeline failed: {e}")
         typer.echo(f"Pipeline failed: {e}", err=True)
         raise typer.Exit(code=1)

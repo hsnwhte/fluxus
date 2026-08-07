@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from fluxus.models.dto import TransformedData
-from fluxus.strategies.export.export_strategy import ExportStrategy
+from pluggle.models.dto import TransformedData
+from pluggle.strategies.export.export_strategy import ExportStrategy
 
 
 def test_export_strategy_writes_content(tmp_path: Path):

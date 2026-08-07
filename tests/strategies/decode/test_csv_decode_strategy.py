@@ -4,10 +4,10 @@ from unittest.mock import patch
 
 import pytest
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.models.dto import ExtractableData
-from fluxus.strategies.decode.csv_decode_strategy import CsvDecodeStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.models.dto import ExtractableData
+from pluggle.strategies.decode.csv_decode_strategy import CsvDecodeStrategy
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def test_decode_file_not_found():
 
 def test_decode_malformed(source_file_path_success: Path):
     with patch(
-        "fluxus.strategies.decode.csv_decode_strategy.csv.Sniffer.sniff",
+        "pluggle.strategies.decode.csv_decode_strategy.csv.Sniffer.sniff",
         side_effect=csv.Error("mocked sniff failure"),
     ):
         with pytest.raises(errors.DecodeMalformedError):

@@ -169,7 +169,7 @@ project, because:
 
 - Name collisions become possible once strategies aren't all written by the same person
   in the same session
-- There's no way to distinguish "built-in" (shipped with Fluxus) from
+- There's no way to distinguish "built-in" (shipped with Pluggle) from
   "installed" (added later, possibly by someone else) strategies
 - There's no tracking of what's actually installed, so `RegistryEntry`
   can't reliably reference *which* strategy (beyond its name string)
@@ -189,7 +189,7 @@ ROADMAP.md v0.5) over anticipatory infrastructure for a scenario that doesn't ex
 
 **19:58** | *[STATUS TRACKER]*
 
-### Fluxus capability matrix (source_format × target_format)
+### Pluggle capability matrix (source_format × target_format)
 
 Source codes: db_json, api_json, api_xml, api_csv, api_html, file_xml, file_json,
 file_csv, file_html (db_xml/db_csv/db_html don't exist — DB fetch has no format choice)
@@ -239,7 +239,7 @@ CsvExtractStrategy and HtmlExtractStrategy remain stubbed (v0.7).
 **07:51** | *[FUTURE IDEA - for Beta version]*
 **Input/output consistency checks (file extension vs. target_format)**
 
-Currently, Fluxus does not validate that a user-provided `target_address`
+Currently, Pluggle does not validate that a user-provided `target_address`
 file extension matches the chosen `target_format`. For example, a user can set
 `target_format=JSON` while `target_address` ends in `.xml` — the file will be written
 with the correct (JSON) content, but a misleading extension. This is a deliberate v1
@@ -288,8 +288,8 @@ issue — the pipeline itself works correctly regardless of the misleading filen
 
 **Devtools CLI and manual test infrastructure built**
 **06:55** | *[MILESTONE]*
-Built out the devtools CLI (`fluxus-dev`, via `python -m devtools.main`)
-mirroring the production `fluxus` CLI's `run` command, plus supporting tooling:
+Built out the devtools CLI (`pluggle-dev`, via `python -m devtools.main`)
+mirroring the production `pluggle` CLI's `run` command, plus supporting tooling:
 
 - `db_tools.py`: engine/session helpers, `reset_table`
 - `setup-test-env` / `reset-test-env` commands to bootstrap and tear down dev
@@ -350,7 +350,7 @@ a reliable foundation for regression-testing future changes to the pipeline.
 **11:09** | *[FUTURE IDEA]*
 **Third-party strategy dependency management**
 
-Installed Transform strategies may import libraries not part of Fluxus's own dependency
+Installed Transform strategies may import libraries not part of Pluggle's own dependency
 set (e.g. `pandas`). `install_strategy()`
 copies the file but does not manage its dependencies — if the strategy's own imports
 aren't already installed in the environment, loading it will fail with a standard
@@ -365,14 +365,14 @@ friction point once third-party strategies actually exist.
 **v0.6 complete: CLI, logging, generalized Selector, and a real Transform strategy
 installer**
 
-**CLI (`fluxus`)**
+**CLI (`pluggle`)**
 
 - `run` command wired to full pipeline, Typer-based, tip-annotated parameters with short
   flags
 - Callback-based shared setup (`--debug` now applies to every command, not duplicated
   per-command)
-- `ValidationError`/`FluxusError` caught at the CLI boundary, clean user-facing messages
-  instead of raw tracebacks
+- `ValidationError`/`PluggleError` caught at the CLI boundary, clean user-facing
+  messages instead of raw tracebacks
 
 **Logging**
 
@@ -392,7 +392,7 @@ installer**
 
 **Devtools**
 
-- `fluxus-dev` CLI mirrors `run`, plus `setup-test-env`,
+- `pluggle-dev` CLI mirrors `run`, plus `setup-test-env`,
   `reset-test-env`, `inspect` (pretty-prints a payload's JSON content — DB Browser shows
   raw BLOBs, this decodes them)
 - `TestPackage` catalog + `--test-pack` injection: all 9 source×target combinations
@@ -406,17 +406,17 @@ installer**
 
 - Transform strategies are now referenced by **numeric id**, not name. Id `0` is the
   built-in passthrough — permanent, cannot be uninstalled.
-- `fluxus install-strategy --path <file>`: validates the file (exactly one class named
+- `pluggle install-strategy --path <file>`: validates the file (exactly one class named
   `TransformStrategy*`, and — via a newly
   `@runtime_checkable` `TransformStrategyProtocol` — an `isinstance`
   check that it actually implements the required methods), then copies it into
   `strategies/transform/installed/` under a standardized name and assigns the next
   available id.
-- `fluxus uninstall-strategy --id <n>`: removes the file from disk.
+- `pluggle uninstall-strategy --id <n>`: removes the file from disk.
   `TRANSFORM_STRATEGY_MAP` is rebuilt from the `installed/` folder on every process
   start, so there's no separate registry to keep in sync — the filesystem *is* the
   source of truth.
-- `fluxus show-strategies`: lists all currently installed ids.
+- `pluggle show-strategies`: lists all currently installed ids.
 - Scoped out (see earlier diary note, still valid): no dependency management for what an
   installed strategy itself imports.
 
@@ -443,7 +443,7 @@ structure — `list[dict]` for CSV/PDF, raw `xmltodict`-parsed nested dict for X
 and (after reconsidering `python-docx`/`openpyxl` vs. raw-XML-via-zipfile) a full
 `{filename.xml: <parsed>}` dict per internal ZIP member for DOCX/XLSX. Deliberately
 chose the "lossless but raw" approach over library-mediated output for DOCX/XLSX —
-reasoning: Fluxus is a young engine, Transform strategies are still few, but each one
+reasoning: Pluggle is a young engine, Transform strategies are still few, but each one
 written adds a reference example that makes the next easier. The library-mediated route
 would have been easier short-term but hides structure Transform might need.
 
@@ -466,8 +466,8 @@ scope) before recognizing they're domain-specific business logic, not engine
 responsibilities — a parser/sync engine doesn't need to
 "understand" attachments as a first-class concept when it can already carry arbitrary
 binary content through the existing pipeline. Belongs in a downstream Transform strategy
-or a domain-specific framework (e.g. a future QMS layer), not Fluxus core. Good instance
-of catching scope creep mid-design rather than after building it.
+or a domain-specific framework (e.g. a future QMS layer), not Pluggle core. Good
+instance of catching scope creep mid-design rather than after building it.
 
 **Remaining before v0.7 is done:** devtools extension for new formats, Selector-side
 fixes, pytest coverage for all new strategies, full manual end-to-end verification. Not
@@ -476,9 +476,9 @@ detailing further here — tracked in progress, not this entry.
 ### 📅 2026-08-03, Monday
 
 **15:12** | *[FUTURE IDEA — post-v1.0]*
-**fluxus-llm: a lightweight LLM API tool for Transform strategies**
+**pluggle-llm: a lightweight LLM API tool for Transform strategies**
 
-Idea: a separate, small companion package (not part of Fluxus core)
+Idea: a separate, small companion package (not part of Pluggle core)
 that gives Transform strategy authors an easy way to call LLM APIs (OpenAI, Anthropic,
 etc.) from within a strategy — e.g. summarizing, classifying, or enriching data
 mid-transform.
@@ -492,7 +492,7 @@ retries, or provider-specific request shapes.
 
 Two motivations: (1) learning how to properly manage LLM API requests (rate limiting,
 retries, provider differences) in a small, isolated scope rather than a large one; (2)
-keeping it a genuinely light, optional companion — not a dependency Fluxus core ever
+keeping it a genuinely light, optional companion — not a dependency Pluggle core ever
 needs.
 
 Not scoped into any current roadmap version — revisit after v1.0.
@@ -516,7 +516,7 @@ not urgent for v0.7's own scope.
 
 Manually testing a mismatched strategy (csv source, comments-shaped Transform strategy)
 produced a bare `KeyError: 'id'` traceback — correct behavior, but not helpful to a user
-seeing it for the first time. Fluxus can't know why a Transform strategy failed (it's
+seeing it for the first time. Pluggle can't know why a Transform strategy failed (it's
 entirely user-authored), but it can wrap Transform exceptions with a generic,
 non-specific hint — e.g. "Transform strategy raised an error; check that the strategy
 matches the shape of the data it receives" — without pretending to diagnose the actual
@@ -636,20 +636,21 @@ remain TODO, not because of any architectural limitation — `target_format` and
 What's missing is a concrete Transform strategy that actually converts canonical JSON
 into XML/CSV/HTML output; every strategy written so far (passthrough, comments-mapper)
 only produces JSON. Writing and validating a non-JSON-producing Transform strategy is
-deferred to v0.9's real-consumer validation phase (fluxus-ncr), where a genuine use case
-will drive what gets built, rather than writing one now just to close a matrix cell.
+deferred to v0.9's real-consumer validation phase (pluggle-ncr), where a genuine use
+case will drive what gets built, rather than writing one now just to close a matrix
+cell.
 
 ### 📅 2026-08-05, Wednesday
 
 **06:48** | *[RESOLVE — v0.75]*
 **PostgreSQL storage backend confirmed via full manual test suite**
 
-Added `.env`-based configuration (`FLUXUS_STORE_ADDRESS`, `LOG_DIR`)
+Added `.env`-based configuration (`PLUGGLE`, `LOG_DIR`)
 to `settings.py`, replacing hardcoded storage addresses — settings now follow an
 "override via environment, sensible default otherwise"
 pattern throughout. Same pattern applied to `devtools/settings.py`.
 
-Pointed `FLUXUS_STORE_ADDRESS` at the Docker-hosted PostgreSQL container and re-ran all
+Pointed `PLUGGLE_STORE_ADDRESS` at the Docker-hosted PostgreSQL container and re-ran all
 31 manual test packages. All 31 produced the expected result (26 PASS/expected-FAIL
 matching prior SQLite runs) — no code changes were needed to `PayloadStoreSQLite`/
 `RegistryStoreSQLite`/`PipelineRunRecordsSQLite`/`FetchCacheStoreSQLite`, confirming the
@@ -658,7 +659,7 @@ standalone dialect_check table) was excluded after the table was manually droppe
 as a one-off manual verification rather than folded into `setup-test-env`, since
 devtools is a personal tool and doesn't need every path automated.
 
-**Open question surfaced but not yet resolved:** whether Fluxus should eventually take
+**Open question surfaced but not yet resolved:** whether Pluggle should eventually take
 advantage of PostgreSQL-specific features (JSONB columns, real concurrent-write support)
 rather than just being dialect-portable. Concluded this is a separate, larger concern
 (would require an async-capable Orchestrator to actually benefit from concurrent
@@ -770,7 +771,7 @@ uninstall is an intentional act, and
 this properly, but only becomes relevant in a hosted/SaaS scenario.
 
 **`postgres-playground` removed from the roadmap.** It was a personal PostgreSQL
-learning goal (PL/pgSQL triggers, RPC functions, RLS policies), not a Fluxus
+learning goal (PL/pgSQL triggers, RPC functions, RLS policies), not a Pluggle
 deliverable — a product roadmap should describe the product, not the developer's study
 plan.
 
@@ -804,7 +805,7 @@ Previously CLI constructed a `UnitOfWork` and injected it into
 `self.uow = UnitOfWork()` itself — CLI now only passes `input_args`. The original reason
 for injection (mockable in tests) wasn't actually exercised (Orchestrator has no unit
 tests), so the tradeoff favored simplicity. `UnitOfWork()` still reads
-`FLUXUS_STORE_ADDRESS` from
+`PLUGGLE_STORE_ADDRESS` from
 `.env`, so backend selection is unaffected by this change — it was never a CLI concern
 to begin with.
 

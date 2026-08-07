@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, text
 
-from fluxus.strategies.fetch.db_fetch_strategy import DBFetchStrategy
+from pluggle.strategies.fetch.db_fetch_strategy import DBFetchStrategy
 
 POSTGRES_URL = "postgresql://postgres:testpass@localhost:5432/postgres"
 

@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: fluxus-postgres-test
+    container_name: pluggle-postgres-test
     environment:
       POSTGRES_PASSWORD: testpass
     ports:

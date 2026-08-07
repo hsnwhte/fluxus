@@ -9,11 +9,11 @@ from devtools.settings import (
     DEV_TARGET_FILE_DIR,
 )
 from devtools.tools.dev_orm import DevSourceDataText, DevTargetDataText
-from fluxus.enums import ContentFormat, FluxusIOType
+from pluggle.enums import ContentFormat, PluggleIOType
 
 """
 Devtools test packages — pre-configured InputArgs kwargs sets for rapid
-manual pipeline testing via `fluxus-dev test --inject <key>`.
+manual pipeline testing via `pluggle-dev test --inject <key>`.
 
 This module is a living catalog of test scenarios, not an exhaustive
 suite. New packages should be added as new source/target combinations,
@@ -23,9 +23,9 @@ error cases, or edge cases become relevant to test manually.
 
 @dataclass
 class TestPackage:
-    source_type: FluxusIOType
+    source_type: PluggleIOType
     source_address: str
-    target_type: FluxusIOType
+    target_type: PluggleIOType
     target_address: str
     transform_strategy_uid: str
     source_table: str | None = None
@@ -35,9 +35,9 @@ class TestPackage:
 
 TEST_PACKAGES: dict[int, TestPackage] = {
     1: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "comments.json"),
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_json.json"),
         transform_strategy_uid="default",
         source_table=None,
@@ -45,9 +45,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     2: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "comments.json"),
-        target_type=FluxusIOType.DB,
+        target_type=PluggleIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
         transform_strategy_uid="99ea751b6d2a",
         source_table=None,
@@ -55,9 +55,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     3: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "comments.json"),
-        target_type=FluxusIOType.API,
+        target_type=PluggleIOType.API,
         target_address=str(DEV_TARGET_API_URL),
         transform_strategy_uid="99ea751b6d2a",
         source_table=None,
@@ -65,9 +65,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     4: TestPackage(
-        source_type=FluxusIOType.DB,
+        source_type=PluggleIOType.DB,
         source_address=str(DEV_SOURCE_DB_URL),
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_db.json"),
         transform_strategy_uid="default",
         source_table=DevSourceDataText.__tablename__,
@@ -75,9 +75,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     5: TestPackage(
-        source_type=FluxusIOType.DB,
+        source_type=PluggleIOType.DB,
         source_address=str(DEV_SOURCE_DB_URL),
-        target_type=FluxusIOType.DB,
+        target_type=PluggleIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
         transform_strategy_uid="default",
         source_table=DevSourceDataText.__tablename__,
@@ -85,9 +85,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     6: TestPackage(
-        source_type=FluxusIOType.DB,
+        source_type=PluggleIOType.DB,
         source_address=str(DEV_SOURCE_DB_URL),
-        target_type=FluxusIOType.API,
+        target_type=PluggleIOType.API,
         target_address=str(DEV_TARGET_API_URL),
         transform_strategy_uid="default",
         source_table=DevSourceDataText.__tablename__,
@@ -95,9 +95,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     7: TestPackage(
-        source_type=FluxusIOType.API,
+        source_type=PluggleIOType.API,
         source_address=str(DEV_SOURCE_API_URL),
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_api.json"),
         transform_strategy_uid="default",
         source_table=None,
@@ -105,9 +105,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     8: TestPackage(
-        source_type=FluxusIOType.API,
+        source_type=PluggleIOType.API,
         source_address=str(DEV_SOURCE_API_URL),
-        target_type=FluxusIOType.DB,
+        target_type=PluggleIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
         transform_strategy_uid="99ea751b6d2a",
         source_table=None,
@@ -115,9 +115,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     9: TestPackage(
-        source_type=FluxusIOType.API,
+        source_type=PluggleIOType.API,
         source_address=str(DEV_SOURCE_API_URL),
-        target_type=FluxusIOType.API,
+        target_type=PluggleIOType.API,
         target_address=str(DEV_TARGET_API_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -125,9 +125,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     10: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "cities.csv"),
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_csv.json"),
         transform_strategy_uid="default",
         source_table=None,
@@ -135,9 +135,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     11: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "cities.csv"),
-        target_type=FluxusIOType.DB,
+        target_type=PluggleIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -145,9 +145,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     12: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "cities.csv"),
-        target_type=FluxusIOType.API,
+        target_type=PluggleIOType.API,
         target_address=str(DEV_TARGET_API_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -155,9 +155,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     13: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "The World Wide Web project.htm"),
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_html.json"),
         transform_strategy_uid="default",
         source_table=None,
@@ -165,9 +165,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     14: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "The World Wide Web project.htm"),
-        target_type=FluxusIOType.DB,
+        target_type=PluggleIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
         transform_strategy_uid="99ea751b6d2a",
         source_table=None,
@@ -175,9 +175,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     15: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "The World Wide Web project.htm"),
-        target_type=FluxusIOType.API,
+        target_type=PluggleIOType.API,
         target_address=str(DEV_TARGET_API_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -185,9 +185,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     16: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "cd_catalog.xml"),
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_xml.json"),
         transform_strategy_uid="default",
         source_table=None,
@@ -195,9 +195,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     17: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "cd_catalog.xml"),
-        target_type=FluxusIOType.DB,
+        target_type=PluggleIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
         transform_strategy_uid="99ea751b6d2a",
         source_table=None,
@@ -205,9 +205,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     18: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "cd_catalog.xml"),
-        target_type=FluxusIOType.API,
+        target_type=PluggleIOType.API,
         target_address=str(DEV_TARGET_API_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -215,9 +215,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     19: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "sample-files.com-basic-text.docx"),
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_docx.json"),
         transform_strategy_uid="default",
         source_table=None,
@@ -225,9 +225,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     20: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "sample-files.com-basic-text.docx"),
-        target_type=FluxusIOType.DB,
+        target_type=PluggleIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -235,9 +235,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     21: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "sample-files.com-basic-text.docx"),
-        target_type=FluxusIOType.API,
+        target_type=PluggleIOType.API,
         target_address=str(DEV_TARGET_API_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -245,9 +245,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     22: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "Free_Test_Data_100KB_XLSX.xlsx"),
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_xlsx.json"),
         transform_strategy_uid="default",
         source_table=None,
@@ -255,9 +255,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     23: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "Free_Test_Data_100KB_XLSX.xlsx"),
-        target_type=FluxusIOType.DB,
+        target_type=PluggleIOType.DB,
         target_address=str(DEV_TARGET_DB_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -265,9 +265,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     24: TestPackage(
-        source_type=FluxusIOType.FILE,
+        source_type=PluggleIOType.FILE,
         source_address=str(DEV_SOURCE_FILE_DIR / "Free_Test_Data_100KB_XLSX.xlsx"),
-        target_type=FluxusIOType.API,
+        target_type=PluggleIOType.API,
         target_address=str(DEV_TARGET_API_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -275,9 +275,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     25: TestPackage(
-        source_type=FluxusIOType.API,
+        source_type=PluggleIOType.API,
         source_address="https://www.federalregister.gov/api/v1/documents.csv?per_page=5",
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_api_csv.json"),
         transform_strategy_uid="default",
         source_table=None,
@@ -285,9 +285,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     26: TestPackage(
-        source_type=FluxusIOType.DB,
+        source_type=PluggleIOType.DB,
         source_address="postgresql://postgres:testpass@localhost:5432/postgres",
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_postgres.json"),
         transform_strategy_uid="default",
         source_table="dialect_check",
@@ -295,9 +295,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     27: TestPackage(
-        source_type=FluxusIOType.API,
+        source_type=PluggleIOType.API,
         source_address="https://www.federalregister.gov/api/v1/documents.csv?per_page=5",
-        target_type=FluxusIOType.API,
+        target_type=PluggleIOType.API,
         target_address=str(DEV_TARGET_API_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -305,9 +305,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     28: TestPackage(
-        source_type=FluxusIOType.API,
+        source_type=PluggleIOType.API,
         source_address="https://www.nasa.gov/feed/",
-        target_type=FluxusIOType.API,
+        target_type=PluggleIOType.API,
         target_address=str(DEV_TARGET_API_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -315,9 +315,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     29: TestPackage(
-        source_type=FluxusIOType.API,
+        source_type=PluggleIOType.API,
         source_address="https://www.example.org/",
-        target_type=FluxusIOType.API,
+        target_type=PluggleIOType.API,
         target_address=str(DEV_TARGET_API_URL),
         transform_strategy_uid="default",
         source_table=None,
@@ -325,9 +325,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     30: TestPackage(
-        source_type=FluxusIOType.API,
+        source_type=PluggleIOType.API,
         source_address="https://www.nasa.gov/feed/",
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_api_xml.json"),
         transform_strategy_uid="default",
         source_table=None,
@@ -335,9 +335,9 @@ TEST_PACKAGES: dict[int, TestPackage] = {
         target_format=ContentFormat.JSON,
     ),
     31: TestPackage(
-        source_type=FluxusIOType.API,
+        source_type=PluggleIOType.API,
         source_address="https://www.example.org/",
-        target_type=FluxusIOType.FILE,
+        target_type=PluggleIOType.FILE,
         target_address=str(DEV_TARGET_FILE_DIR / "output_api_html.json"),
         transform_strategy_uid="default",
         source_table=None,

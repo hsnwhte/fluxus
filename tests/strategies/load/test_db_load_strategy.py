@@ -4,10 +4,10 @@ from pathlib import Path
 import pytest
 from sqlalchemy import Engine, create_engine, text
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.models.dto import TransformedData
-from fluxus.strategies.load.db_load_strategy import DBLoadStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.models.dto import TransformedData
+from pluggle.strategies.load.db_load_strategy import DBLoadStrategy
 
 
 @pytest.fixture

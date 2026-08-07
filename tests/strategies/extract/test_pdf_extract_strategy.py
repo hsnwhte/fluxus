@@ -4,10 +4,10 @@ from unittest.mock import patch
 import pypdf
 import pytest
 
-from fluxus.enums import ContentFormat
-from fluxus.exceptions import errors
-from fluxus.models.dto import TransformableData
-from fluxus.strategies.extract.pdf_extract_strategy import PdfExtractStrategy
+from pluggle.enums import ContentFormat
+from pluggle.exceptions import errors
+from pluggle.models.dto import TransformableData
+from pluggle.strategies.extract.pdf_extract_strategy import PdfExtractStrategy
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def test_extract_success(test_content: bytes):
 def test_extract_malformed():
     # noinspection PyUnresolvedReferences
     with patch(
-        "fluxus.strategies.extract.pdf_extract_strategy.pypdf.PdfReader",
+        "pluggle.strategies.extract.pdf_extract_strategy.pypdf.PdfReader",
         side_effect=pypdf.errors.PdfReadError,
     ):
         with pytest.raises(errors.ExtractSyntaxError):

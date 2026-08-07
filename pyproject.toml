@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fluxus"
+name = "pluggle"
 version = "0.8.0"
 description = "Generic, plugin-based ETL & data sync engine."
 requires-python = ">=3.14"
@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-fluxus = "fluxus.interfaces.cli.main:app"
+pluggle = "pluggle.interfaces.cli.main:app"
 
 [project.optional-dependencies]
 db = ["psycopg2-binary>=2.9"]
